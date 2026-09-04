@@ -212,6 +212,37 @@ p.contact-options {
   border-top: none;
 }
 
+/* =====================================================
+   INVALID FIELD
+
+   contact-form.ts has always put `.error` on the .input-item and on the field
+   itself, and set aria-invalid — but nothing anywhere styled it, so a sighted
+   visitor got Arrow naming the problem with no way to see WHICH box she meant.
+   Arrow says what to do; these say where.
+
+   The colour cue is deliberately not the whole signal. The border goes to the
+   accent AND a solid bar appears down the left edge, so the field still reads
+   as flagged without colour vision — and the bar is what carries it, since the
+   wrappers share their borders (each one drops its top edge to sit flush
+   against the one above) and a recoloured border alone is a thin, ambiguous
+   line between two fields.
+
+   :has() on the wrapper because the border lives there while the class lands
+   on the .input-item inside it. */
+.contact-form .input-wrapper:has(> .input-item.error) {
+  border-color: var(--color-accent);
+  box-shadow: inset 4px 0 0 0 var(--color-accent);
+}
+
+/* The placeholder IS the label here (real <label>s are display:none), so it is
+   the only text in an empty flagged field — tint it so the box does not read
+   as merely outlined. */
+.contact-form .input-item.error input::placeholder,
+.contact-form .input-item.error textarea::placeholder {
+  color: var(--color-accent);
+  opacity: var(--placeholder-opacity, 1);
+}
+
 /* Input item - GSAP handles all animations (height/width), no visual border */
 /* max-width: 100% caps GSAP inline pixel widths so form stays within viewport on resize */
 .contact-form .input-item {
