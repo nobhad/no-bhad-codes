@@ -90,14 +90,20 @@ were inside "rel**axe**d" and "m**axRe**quests". It is true now, and enforced.
 
 ### Not done
 
-- [ ] **The banner still overlaps content on mobile at rest.** Everything is
-      reachable by scrolling, and that is where it was left deliberately —
-      "don't worry about the scrolling behind the banner". The remaining
-      question is whether the copy should be shorter on a phone.
-- [ ] **Two lazy images in `projects.ts`** (lines ~2828 and ~2912, case-study
-      screenshots) still have no width/height. They are generated from
-      `portfolio.json`, which does not carry dimensions, so fixing it properly
-      means measuring the files at build time and putting them in the data.
+- [x] **The banner overlapping content on mobile is accepted as-is.**
+      Everything is reachable by scrolling and the space is reserved; confirmed
+      fine rather than left unfinished.
+- [x] **Two lazy images in `projects.ts` now carry width/height.**
+      `scripts/build-media-dimensions.mjs` reads the intrinsic size of all 14
+      images `portfolio.json` points at and writes
+      `src/generated/media-dimensions.ts`; the renderer looks each one up.
+      Dependency-free header parsing for PNG/GIF/WebP/JPEG rather than adding
+      sharp for fourteen files — cross-checked against PIL. Run
+      `npm run media:dimensions` when the portfolio media changes.
+- [ ] **Two dead `titleCard` paths.** `recycle-content` and `linktrees` still
+      use the old string form and point at `/projects/*-title.png`, which do
+      not exist. Nothing requests them — those two have no TV channel, so there
+      are no 404s — but the data is either wrong or waiting on artwork.
 - [ ] **`--consent-banner-height` shows up in the css-bundle-contract
       snapshot** as a var living on its fallback. That is correct — it is set
       at runtime by JS — but the test cannot tell the two cases apart.
