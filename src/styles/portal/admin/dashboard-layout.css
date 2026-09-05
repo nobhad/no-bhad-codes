@@ -100,6 +100,66 @@
   gap: var(--portal-section-gap);
 }
 
+/* On the dashboard the two columns are really a 2x2: Active Projects beside
+   Quick Actions, Upcoming Tasks beside Recent Activity. Two independent
+   flex columns let each card take its own height, so the right column's
+   boxes never lined up with the left's. The column wrappers dissolve
+   (display: contents) and the four panels become grid items on explicit
+   rows, so each row is as tall as its taller card and both cards fill it.
+   Scoped to .overview-linear: createSection.tsx reuses these class names
+   for detail pages whose columns are not paired. */
+.overview-linear .overview-grid {
+  align-items: stretch;
+}
+
+.overview-linear .overview-col-main,
+.overview-linear .overview-col-aside {
+  display: contents;
+}
+
+.overview-linear .overview-col-main > .panel {
+  grid-column: 1;
+}
+
+.overview-linear .overview-col-aside > .panel {
+  grid-column: 2;
+}
+
+.overview-linear .overview-col-main > .panel:nth-child(1),
+.overview-linear .overview-col-aside > .panel:nth-child(1) {
+  grid-row: 1;
+}
+
+.overview-linear .overview-col-main > .panel:nth-child(2),
+.overview-linear .overview-col-aside > .panel:nth-child(2) {
+  grid-row: 2;
+}
+
+/* Recent Activity takes the height Upcoming Tasks sets and scrolls inside
+   it. The list is positioned absolutely so its own length never grows the
+   row — otherwise the taller of the two lists would win and the left card
+   would stretch to match, which is the opposite of what is wanted. */
+.overview-linear .overview-col-aside > .panel:nth-child(2) {
+  min-height: 0;
+}
+
+.overview-linear .overview-col-aside > .panel:nth-child(2) .panel-body--compact {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+}
+
+.overview-linear .overview-col-aside > .panel:nth-child(2) .panel-body--compact > * {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: inherit;
+  box-sizing: border-box;
+}
+
 /* =====================================================
    PANEL CHILDREN (dashboard-specific)
    Base .panel definition in shared/portal-layout.css
@@ -364,6 +424,18 @@
 
   .overview-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* One column: the pairing is gone, so the panels stack in DOM order and
+     Recent Activity gets a height of its own again. */
+  .overview-linear .overview-col-main > .panel,
+  .overview-linear .overview-col-aside > .panel {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .overview-linear .overview-col-aside > .panel:nth-child(2) .panel-body--compact {
+    min-height: 320px;
   }
 }
 
