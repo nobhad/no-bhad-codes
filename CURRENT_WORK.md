@@ -129,8 +129,10 @@ with client PII tracked in the public repository.
 - [x] **Title cards for recycle-content and linktrees** — no longer gated
       on artwork. Text title cards are now the default: a card's lines are
       set in HTML over a background from the ordered `titleCardBackgrounds`
-      list in portfolio.json (add a line to add a background). Both are
-      channels 05 and 06 with music; composed images remain the exception.
+      list in portfolio.json (add a line to add a background). Both carry
+      text cards and channel music, but stay `isDocumented: false` by
+      decision until they are ready for the live site — flipping that one
+      flag makes them channels 05 and 06.
 
 ---
 

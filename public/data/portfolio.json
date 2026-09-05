@@ -360,7 +360,7 @@
       "featured": true,
       "heroImage": "",
       "screenshots": [],
-      "isDocumented": true,
+      "isDocumented": false,
       "titleCard": {
         "primary": ["RECYCLE", "CONTENT"],
         "primaryPt": 90,
@@ -400,7 +400,7 @@
       "featured": false,
       "heroImage": "",
       "screenshots": [],
-      "isDocumented": true,
+      "isDocumented": false,
       "titleCard": {
         "primary": ["LINK-IN-BIO", "PAGES"],
         "primaryPt": 90,
