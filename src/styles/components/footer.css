@@ -259,21 +259,6 @@ body[data-page="design-system"] .footer-curtain {
   color: var(--footer-curtain-text-muted);
 }
 
-/* On the narrowest phones the credit and the rights notice together wrap into
-   an awkward three lines with one or two orphaned words. Breaking before "All
-   rights reserved." puts the split where the sentence already divides, so the
-   line breaks read as intended rather than as run-out. The span is inline
-   above this width, so wider screens are untouched. */
-/* 410px, not the --xs-mobile 400px token: measured across real widths, the
-   line still wraps mid-phrase at 402 (iPhone 16) and only fits on one line
-   from 412 (Pixel 7) up. A 400px cut-off left exactly the phones between them
-   with the ragged break this rule exists to prevent. */
-@media (max-width: 410px) {
-  .footer-curtain__rights {
-    display: block;
-  }
-}
-
 /* ===============================================
    RESPONSIVE
    =============================================== */

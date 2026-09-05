@@ -57,7 +57,7 @@ export function getCopyrightYear(): number {
  * Get formatted copyright text
  */
 export function getCopyrightText(): string {
-  return `© ${getCopyrightYear()} ${BRANDING.COPYRIGHT_HOLDER}. All rights reserved.`;
+  return `© ${getCopyrightYear()} ${BRANDING.COPYRIGHT_HOLDER}.`;
 }
 
 /**
