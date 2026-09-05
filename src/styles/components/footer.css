@@ -40,7 +40,19 @@ body[data-page="design-system"] .footer-curtain {
    change freely without touching the JS.
    =============================================== */
 :root {
-  --footer-curtain-height: clamp(200px, 30vh, 320px);
+  /* The avatar's rendered height, and the single figure everything else in the
+     band is derived from. Hoisted out of .footer-curtain__brand so the band's
+     own height can be computed from it. */
+  --curtain-avatar-height: clamp(88px, 16vh, 150px);
+  /* The air around the mark. Matches the inner's horizontal padding, so the
+     brand has the same gap on all four sides — that is the whole point of it
+     being one token rather than three values that happen to agree today. */
+  --curtain-inset: calc(var(--container-padding) + var(--space-2));
+  /* Derived, not chosen: the band is exactly the mark plus its air. It used to
+     be clamp(200px, 30vh, 320px), which had no relationship to its contents —
+     at 800px tall that gave a 240px band holding a 128px mark, so the gap above
+     and below (50 and 62) disagreed with the 48 either side. */
+  --footer-curtain-height: calc(var(--curtain-avatar-height) + var(--curtain-inset) * 2);
   /* The raw gray scale, not the --color-dark / --color-light aliases: those
      flip with the theme, and the band is one fixed ink slab in both by
      design. Ink rather than true black, off-white rather than true white. */
@@ -148,12 +160,15 @@ body[data-page="design-system"] .footer-curtain {
      Horizontal padding tracks the header's --container-padding, plus a step,
      so the mark keeps the header's rhythm without sitting hard against the
      edge — the band has no other content to hold it off. */
-  padding: var(--space-3) calc(var(--container-padding) + var(--space-2)) var(--space-1-5);
+  padding: var(--curtain-inset);
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 1fr auto;
+  /* One row, not `1fr auto`. The copyright is positioned into the lower inset
+     instead of taking a row of its own, because a row would add its height to
+     the band and the band is now sized to the mark. */
+  grid-template-rows: 1fr;
   align-content: stretch;
-  gap: var(--space-1);
+  position: relative;
   will-change: transform;
 }
 
@@ -161,8 +176,8 @@ body[data-page="design-system"] .footer-curtain {
    bottom-aligning the three short lines to a tall silhouette reads as the
    type sinking. */
 .footer-curtain__brand {
-  /* Shared by the art and the negative margin that trims its dead edge. */
-  --curtain-avatar-height: clamp(88px, 16vh, 150px);
+  /* --curtain-avatar-height now lives on :root — see CURTAIN DIMENSIONS. The
+     band's height is computed from it, so it cannot be declared down here. */
   /* Centred in the slack the copyright row leaves it, and pushed to the
      right-hand edge of the band — the grid row is full-width, so without
      justify-self the mark would sit hard against the left. */
@@ -215,7 +230,14 @@ body[data-page="design-system"] .footer-curtain {
   /* Same face as the header logo (.nav-logo-row) so the two wordmarks match. */
   font-family: var(--font-family-acme);
   font-weight: 600;
-  font-size: clamp(1rem, 0.75rem + 1vw, 1.625rem);
+  /* Tied to the avatar, not to the viewport width. These were clamped on
+     different axes — the art on 16vh, the type on 1vw — so any window that was
+     not the shape they were tuned at pulled them out of proportion: a short
+     wide window shrank the silhouette while the type held, a tall narrow one
+     did the reverse. One ratio off one clamp keeps the lockup intact at every
+     size. 0.195 reproduces the pairing at 1280x800, where the old rules gave a
+     128px avatar and 24.8px type. */
+  font-size: calc(var(--curtain-avatar-height) * 0.195);
   line-height: 0.95;
   letter-spacing: 0.01em;
   text-transform: uppercase;
@@ -223,10 +245,16 @@ body[data-page="design-system"] .footer-curtain {
 }
 
 .footer-curtain__copy {
+  /* Absolute so it costs the band no height. It reads along the bottom edge,
+     inside the lower inset the mark is already holding open, rather than
+     pushing the band taller to sit in a row of its own. */
+  position: absolute;
+  left: var(--curtain-inset);
+  right: var(--curtain-inset);
+  bottom: var(--space-1-5);
   margin: 0;
   font-size: var(--font-size-xs);
   line-height: 1.4;
-  align-self: end;
   text-align: center;
   color: var(--footer-curtain-text-muted);
 }
