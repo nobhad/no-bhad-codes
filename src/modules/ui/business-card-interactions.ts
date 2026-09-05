@@ -20,6 +20,7 @@ import type { BusinessCardRenderer } from './business-card-renderer';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
 import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
+import { APP_CONSTANTS } from '../../config/constants';
 import { getDebugMode } from '../../core/env';
 
 export class BusinessCardInteractions extends BaseModule {
@@ -31,6 +32,10 @@ export class BusinessCardInteractions extends BaseModule {
   private isHovering = false;
   private isAnimating = false;
   private isEnabled = false;
+  // Keeps interactions in step with the intro; see watchIntro().
+  private introWatcher: MutationObserver | null = null;
+  private introFailsafe: number | null = null;
+  private introTimedOut = false;
   private currentRotationY = 0; // Track actual rotation value for directional flips
 
   // Idle animations (wiggle, flip, flip, repeat)
@@ -140,8 +145,8 @@ export class BusinessCardInteractions extends BaseModule {
       this.setupInteractions();
       this.checkReducedMotion();
 
-      // Enable interactions
-      this.enableInteractions();
+      // Enable interactions — but not before the intro has finished.
+      this.watchIntro();
 
       this.log('BusinessCardInteractions initialization completed');
     } catch (error) {
@@ -190,6 +195,74 @@ export class BusinessCardInteractions extends BaseModule {
    * ENABLE/DISABLE INTERACTIONS
    * ==========================================
    */
+  /**
+   * True until the intro is genuinely over.
+   *
+   * Keyed to `intro-finished` ALONE, deliberately. The obvious test — waiting
+   * for `intro-loading` to clear — leaves a live gap: that class comes off when
+   * the paw hands the card over, while `intro-finished` only lands once the
+   * overlay has finished fading. Clicking inside that gap is precisely the bug,
+   * and the card flipped mid-fade.
+   *
+   * It is also sufficient on its own. Every route that skips the intro sets
+   * `intro-finished` up front — the head script in index.html for a non-intro
+   * deep link, and the 10s failsafe in main-site.ts — and both replay paths in
+   * intro-animation.ts remove it before starting over.
+   */
+  private isIntroRunning(): boolean {
+    if (this.introTimedOut) {
+      return false;
+    }
+    return !document.documentElement.classList.contains('intro-finished');
+  }
+
+  /**
+   * Keep interactions in step with the intro, for as long as this module lives.
+   *
+   * The card is already in the DOM and on screen while the paw hands it over and
+   * the overlay fades. Binding the listeners at init made it clickable
+   * throughout, so a click mid-intro flipped the card during the fade. The idle
+   * timer had the same problem: it could start a wiggle or auto-flip over the
+   * top of the intro.
+   *
+   * This watches rather than waits once, because the intro can REPLAY — both
+   * replay paths in intro-animation.ts remove `intro-finished` and start over,
+   * and a one-shot wait would leave the card live for the whole second run.
+   */
+  private watchIntro(): void {
+    this.syncToIntro();
+
+    this.introWatcher = new MutationObserver(() => this.syncToIntro());
+    this.introWatcher.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    // A card that never becomes clickable is worse than one that becomes
+    // clickable early, so stop deferring if the intro never reports finishing.
+    this.introFailsafe = window.setTimeout(() => {
+      if (this.isIntroRunning()) {
+        this.warn('Intro never reported finished - enabling card interactions anyway');
+      }
+      this.introTimedOut = true;
+      this.syncToIntro();
+    }, APP_CONSTANTS.TIMERS.INTRO_OBSERVER_TIMEOUT);
+  }
+
+  /** Enable or disable interactions to match the intro's current state. */
+  private syncToIntro(): void {
+    const running = this.isIntroRunning();
+    if (running === !this.isEnabled) {
+      return;
+    }
+    if (running) {
+      this.log('Intro running - holding card interactions');
+      this.disableInteractions();
+    } else {
+      this.enableInteractions();
+    }
+  }
+
   enableInteractions() {
     if (!this.businessCard) {
       this.error('Cannot enable interactions - card element missing');
@@ -840,6 +913,16 @@ export class BusinessCardInteractions extends BaseModule {
    */
   protected override async onDestroy() {
     this.log('BusinessCardInteractions cleanup started');
+
+    // Stop tracking the intro
+    if (this.introWatcher) {
+      this.introWatcher.disconnect();
+      this.introWatcher = null;
+    }
+    if (this.introFailsafe !== null) {
+      window.clearTimeout(this.introFailsafe);
+      this.introFailsafe = null;
+    }
 
     // Stop idle timer
     this.stopIdleTimer();
