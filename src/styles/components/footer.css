@@ -52,8 +52,17 @@ body[data-page="design-system"] .footer-curtain {
      wordmark. */
   --curtain-avatar-width: calc(var(--curtain-avatar-height) * 0.809);
   --curtain-avatar-trim: calc(var(--curtain-avatar-height) * 0.107);
-  /* The diagonal step between the credit and the lockup, in both axes. */
-  --curtain-mark-gap: var(--space-3);
+  /* The diagonal step between the credit and the lockup, in both axes.
+     Small on purpose: the credit's 2.1 leading already puts ~9px of empty line
+     box below "BY", so the gap you SEE is this plus that. At --space-3 the two
+     halves of the mark read as unrelated. */
+  --curtain-mark-gap: var(--space-1);
+  /* Leading for the credit label only. Its two lines share the block's 1.4
+     with the year, which is right for a single line of running text and too
+     tight for a tracked two-line label — "MADE & DESIGNED" over "BY" read as
+     one clump. The band's height reads this, so opening it up does not need
+     the spacing touched. */
+  --curtain-credit-leading: 2.1;
   /* How far the year is pulled back up under the wordmark. Less than the
      avatar's overhang, so a gap survives — at --font-size-2xl a full
      --space-3 closed it to nothing. */
@@ -71,8 +80,8 @@ body[data-page="design-system"] .footer-curtain {
      around the art — less the negative margin that pulls the year back up
      under the wordmark. */
   --curtain-credit-height: calc(
-    var(--font-size-base) * 1.4 * 2 + var(--curtain-mark-gap) + var(--font-size-2xl) * 1.4 -
-      var(--curtain-year-lift)
+    var(--font-size-base) * var(--curtain-credit-leading) * 2 + var(--curtain-mark-gap) +
+      var(--font-size-2xl) * 1.4 - var(--curtain-year-lift)
   );
   --footer-curtain-height: calc(
     var(--curtain-avatar-height) + var(--curtain-credit-height) + var(--curtain-inset) * 2
@@ -322,6 +331,7 @@ body[data-page="design-system"] .footer-curtain {
   grid-column: 1;
   grid-row: 1;
   justify-self: start;
+  line-height: var(--curtain-credit-leading);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-widest);
 }
@@ -399,5 +409,40 @@ body[data-page="design-system"] .footer-curtain {
   .footer-curtain,
   .footer-curtain__inner {
     will-change: auto;
+  }
+}
+
+/* Below this width the diagonal does not fit. Credit + gap + lockup measures
+   ~382px against ~326px of usable band at 390px, so the mark overflowed its own
+   left inset by 34px and the credit ran off the edge — the right side kept its
+   inset, which is what made the left look ragged rather than obviously broken.
+   Stack them instead: same order, same gap, one column, right-aligned. */
+/* Centred once the band gets narrow. The mark is pushed to the right edge on
+   desktop because it is sharing the width with the page above it and the right
+   gutter is where the site keeps this kind of furniture. Below --tablet there
+   is nothing else on the band, so right-aligning it just banks every spare
+   pixel on the left — measured 221px of slack there against a 42px inset on
+   the right at 660px wide. */
+@media (--tablet-down) {
+  .footer-curtain__mark {
+    justify-self: center;
+  }
+}
+
+@media (--narrow-mobile) {
+  .footer-curtain__mark {
+    grid-template-columns: auto;
+  }
+
+  .footer-curtain__credit {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
+    text-align: right;
+  }
+
+  .footer-curtain__lockup {
+    grid-column: 1;
+    grid-row: 2;
   }
 }
