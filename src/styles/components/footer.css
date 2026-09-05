@@ -57,6 +57,11 @@ body[data-page="design-system"] .footer-curtain {
      box below "BY", so the gap you SEE is this plus that. At --space-3 the two
      halves of the mark read as unrelated. */
   --curtain-mark-gap: var(--space-0-5);
+  /* How far the credit label sits below the top of the mark. Padding rather
+     than a transform, so the band grows with it and the clearance above the
+     lockup is preserved — nudging it down visually would have run "BY" into
+     the avatar, which is only 19px below it. */
+  --curtain-credit-drop: var(--space-4);
   /* Leading for the credit label only. Its two lines share the block's 1.4
      with the year, which is right for a single line of running text and too
      tight for a tracked two-line label — "MADE & DESIGNED" over "BY" read as
@@ -80,7 +85,7 @@ body[data-page="design-system"] .footer-curtain {
      around the art — less the negative margin that pulls the year back up
      under the wordmark. */
   --curtain-credit-height: calc(
-    var(--font-size-base) * var(--curtain-credit-leading) * 2 -
+    var(--curtain-credit-drop) + var(--font-size-base) * var(--curtain-credit-leading) * 2 -
       (var(--curtain-credit-leading) - 1) * var(--font-size-base) / 2 +
       var(--curtain-mark-gap) + var(--font-size-2xl) * 1.4 - var(--curtain-year-lift)
   );
@@ -332,6 +337,7 @@ body[data-page="design-system"] .footer-curtain {
   grid-column: 1;
   grid-row: 1;
   justify-self: start;
+  padding-top: var(--curtain-credit-drop);
   line-height: var(--curtain-credit-leading);
   /* Trim the half-leading that hangs below "BY". The 2.1 above is there to part
      the two lines, but it also pads the outside of the block — so the gap you
