@@ -916,6 +916,35 @@ export class ProjectsModule extends BaseModule {
    * 'page-changed' (after) avoids the perceived audio lag where music
    * would keep playing through the entire camera pan before fading.
    */
+  /**
+   * Pause every video that the page being entered does not contain.
+   *
+   * The channel music has had a lifecycle since it was written; the <video>
+   * elements never did. A case study's walkthrough has controls and a
+   * soundtrack, so pressing play and then leaving — to contact, to the map, to
+   * anywhere — left it running off-screen with the audio going and no visible
+   * thing to stop. The browser puts a speaker on the tab and the visitor has to
+   * hunt for what is making the noise.
+   *
+   * Scoped by containment rather than by page id, so a video inside the tile
+   * being entered keeps playing: returning to a case study should not kill the
+   * walkthrough the reader is in the middle of.
+   */
+  private pauseOffscreenVideo(incomingPageId: string): void {
+    const incoming = document.querySelector<HTMLElement>(
+      `section[data-page="${incomingPageId}"]`
+    );
+    document.querySelectorAll<HTMLVideoElement>('video').forEach((video) => {
+      if (video.paused) {
+        return;
+      }
+      if (incoming && incoming.contains(video)) {
+        return;
+      }
+      video.pause();
+    });
+  }
+
   private wireChannelMusicLifecycle(): void {
     window.addEventListener('page-entering', ((event: Event) => {
       const detail = (event as CustomEvent<{ to?: string }>).detail;
@@ -923,6 +952,10 @@ export class ProjectsModule extends BaseModule {
       if (!to) {
         return;
       }
+      // Whatever the destination, nothing that is leaving the screen should
+      // still be making noise on it.
+      this.pauseOffscreenVideo(to);
+
       if (to !== 'projects') {
         // Not just stop — refuse. A tune-in timeline still running can call
         // playMusic several beats from now, long after the tile is gone.

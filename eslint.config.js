@@ -35,6 +35,7 @@ const commonGlobals = {
   TouchEvent: 'readonly',
   FocusEvent: 'readonly',
   HTMLButtonElement: 'readonly',
+  HTMLVideoElement: 'readonly',
   HTMLTableElement: 'readonly',
   HTMLTableRowElement: 'readonly',
   HTMLTableCellElement: 'readonly',
