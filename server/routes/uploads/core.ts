@@ -7,6 +7,7 @@
 
 import express, { Router } from 'express';
 import { existsSync } from 'fs';
+import { unlink } from 'fs/promises';
 import { logger } from '../../services/logger.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
@@ -68,6 +69,16 @@ router.post(
         error: dbError instanceof Error ? dbError : undefined,
         category: 'UPLOAD'
       });
+      // Without its row the file cannot be listed, shared or deleted, so a
+      // 201 here would report a success that left an orphan on disk. Remove
+      // the file and say what happened.
+      await unlink(req.file.path).catch(() => undefined);
+      return errorResponse(
+        res,
+        'File was uploaded but could not be recorded',
+        500,
+        ErrorCodes.INTERNAL_ERROR
+      );
     }
 
     sendCreated(
@@ -262,6 +273,16 @@ router.post(
         error: dbError instanceof Error ? dbError : undefined,
         category: 'UPLOAD'
       });
+      // Without its row the file cannot be listed, shared or deleted, so a
+      // 201 here would report a success that left an orphan on disk. Remove
+      // the file and say what happened.
+      await unlink(req.file.path).catch(() => undefined);
+      return errorResponse(
+        res,
+        'File was uploaded but could not be recorded',
+        500,
+        ErrorCodes.INTERNAL_ERROR
+      );
     }
 
     sendCreated(
