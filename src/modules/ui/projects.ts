@@ -959,6 +959,14 @@ export class ProjectsModule extends BaseModule {
     });
   }
 
+  /**
+   * Whether the projects tile is the one on screen. Kept here (rather than
+   * asked of the transition module) because the audio decisions below need
+   * it in handlers that fire with no page-transition context at all —
+   * visibilitychange and pagehide.
+   */
+  private onProjectsTile: boolean = /^#\/?projects(\/|$)/.test(window.location.hash);
+
   private wireChannelMusicLifecycle(): void {
     window.addEventListener('page-entering', ((event: Event) => {
       const detail = (event as CustomEvent<{ to?: string }>).detail;
@@ -969,6 +977,7 @@ export class ProjectsModule extends BaseModule {
       // Whatever the destination, nothing that is leaving the screen should
       // still be making noise on it.
       this.pauseOffscreenVideo(to);
+      this.onProjectsTile = to === 'projects';
 
       if (to !== 'projects') {
         // Not just stop — refuse. A tune-in timeline still running can call
@@ -977,26 +986,53 @@ export class ProjectsModule extends BaseModule {
         return;
       }
       tvSfx.resumePlayback();
-      // Returning to projects — restart music for the tuned channel
-      // only if the TV is on AND the user is on a project channel
-      // (channel 01 / guide has no track and leaves activeTuneInSlug
-      // null). Powered-off TV stays silent on return; the user has
-      // to POWER on themselves.
-      const tv = document.querySelector('.crt-tv');
-      if (!tv || tv.classList.contains('is-powered-off')) {
-        return;
-      }
-      const slug = this.activeTuneInSlug;
-      if (!slug) {
-        // Arriving on the guide rather than a channel: dead air, not silence.
-        void tvSfx.playGuideStatic();
-        return;
-      }
-      const url = CHANNEL_MUSIC[slug];
-      if (url) {
-        void tvSfx.playMusic(url);
-      }
+      this.restartTvAudio();
     }) as EventListener);
+
+    // A hidden tab is not a place to keep playing: silence on hide, and pick
+    // the channel back up when the tab is shown again, but only if the TV
+    // tile is still the one on screen. `suspendPlayback` is deliberately not
+    // used here — the tile has not been left, so nothing should be refused.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        tvSfx.stopMusic();
+        tvSfx.stopGuideStatic();
+        return;
+      }
+      if (this.onProjectsTile) {
+        this.restartTvAudio();
+      }
+    });
+
+    // Leaving the document altogether (a link out, a reload, the bfcache
+    // stashing the page) — no route goes through page-entering for these.
+    window.addEventListener('pagehide', () => {
+      tvSfx.stopMusic();
+      tvSfx.stopGuideStatic();
+    });
+  }
+
+  /**
+   * (Re)start whatever the TV should be playing for its current state:
+   * nothing if it is powered off, dead-air static on the guide, the channel's
+   * track on a project channel. The user has to POWER on themselves — a
+   * powered-off set stays silent on return.
+   */
+  private restartTvAudio(): void {
+    const tv = document.querySelector('.crt-tv');
+    if (!tv || tv.classList.contains('is-powered-off')) {
+      return;
+    }
+    const slug = this.activeTuneInSlug;
+    if (!slug) {
+      // Arriving on the guide rather than a channel: dead air, not silence.
+      void tvSfx.playGuideStatic();
+      return;
+    }
+    const url = CHANNEL_MUSIC[slug];
+    if (url) {
+      void tvSfx.playMusic(url);
+    }
   }
 
   /**
