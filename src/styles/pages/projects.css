@@ -1130,6 +1130,14 @@
   max-width: 100%;
 }
 
+/* The live address of a site that is not serving yet: shown, greyed, and not
+   a link (same rule as .project-link--pending on the detail page). */
+.crt-tv__panel-link--pending {
+  text-decoration: none;
+  opacity: 0.5;
+  cursor: default;
+}
+
 .crt-tv__panel-hint {
   margin: 0;
   font-size: 0.8em;

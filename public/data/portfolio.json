@@ -38,7 +38,7 @@
       "videos": [
         "/portfolio/nobhad-codes/videos/walkthrough-desktop-{theme}.webm"
       ],
-      "liveUrl": "https://nobhad.codes",
+      "liveUrl": "https://www.nobhad.codes",
       "repoUrl": "https://github.com/nobhad/no-bhad-codes",
       "docsUrl": "/design-system",
       "docsLabel": "Design System",
@@ -57,7 +57,7 @@
       "challenge": "Most portfolio templates feel generic and fail to demonstrate actual development skills. I needed a site that would stand out while proving I could build production-ready applications—not just pretty mockups.",
       "approach": "I built everything from scratch using vanilla TypeScript instead of React to demonstrate fundamental skills. I implemented a custom hash-based SPA router, a 2D spatial scroll-map navigation system (five tiles in a plus layout — intro, hero, about, projects, contact), GSAP-powered animations, and a full Express backend. The projects page is structured as a vintage TV with a channel guide; selecting a channel plays a Looney-Tunes-style title-card tune-in followed by the case study. The playful design draws inspiration from a mischievous coyote cartoon character — clever, resourceful, and a little unconventional.",
       "results": [
-        "Sub-2-second load times with optimized asset delivery",
+        "Lighthouse 100 for accessibility, best practices and SEO",
         "100% Lighthouse accessibility score",
         "Seamless page transitions without framework overhead",
         "Integrated client portal and admin dashboard"
@@ -83,8 +83,7 @@
           "Integrated client portal and admin dashboard"
         ],
         "results": [
-          "Sub-2-second load times",
-          "100% Lighthouse accessibility",
+          "Lighthouse 100 accessibility, best practices and SEO",
           "Seamless transitions, no framework overhead"
         ]
       }
@@ -102,7 +101,6 @@
         "React",
         "Zustand",
         "React Router",
-        "Tailwind CSS",
         "Radix UI",
         "Lucide",
         "Vite",
@@ -117,7 +115,6 @@
         "Chart.js",
         "Multer",
         "nodemailer",
-        "node-cron",
         "Stripe",
         "Sentry",
         "Vitest",
@@ -130,7 +127,6 @@
         "React",
         "Zustand",
         "React Router",
-        "Tailwind CSS",
         "Radix UI",
         "Lucide",
         "Vite",
@@ -145,7 +141,6 @@
         "Chart.js",
         "Multer",
         "nodemailer",
-        "node-cron",
         "Stripe",
         "Sentry",
         "Vitest",
@@ -163,7 +158,7 @@
       "videos": [
         "/portfolio/the-backend/videos/walkthrough-admin-desktop-{theme}.webm"
       ],
-      "liveUrl": "https://nobhad.codes/#/portal",
+      "liveUrl": "https://www.nobhad.codes/#/portal",
       "repoUrl": "https://github.com/nobhad/no-bhad-codes",
       "docsUrl": "/design-system",
       "docsLabel": "Design System",
@@ -187,13 +182,13 @@
         "Complete audit trail of all client communications"
       ],
       "keyFeatures": [
-        "Magic link client invitations (no password setup required)",
+        "Emailed client invitations with one-time set-password links",
         "Real-time messaging with emoji support",
         "Drag-and-drop file uploads with preview",
         "PDF invoice generation with line items",
         "Lead pipeline with Kanban view",
         "Analytics dashboard with Chart.js visualizations",
-        "Scheduled tasks with node-cron",
+        "In-process scheduler for reminders, escalations and email retries",
         "Multi-step approval workflows"
       ],
       "tv": {
@@ -201,7 +196,7 @@
         "challenge": "Juggling emails, spreadsheets, Dropbox, and invoicing apps. Clients had no visibility into project progress; context was lost across disconnected tools.",
         "approach": "Dual-portal architecture: admin dashboard for me, client portal for transparency. Secure auth, real-time messaging, automated PDF invoices, and a Kanban lead pipeline. SQLite for portability with a migration system for schema evolution.",
         "keyFeatures": [
-          "Magic link client invitations",
+          "Emailed client invitations with one-time links",
           "Real-time messaging with file uploads",
           "Automated PDF invoice generation",
           "Lead pipeline Kanban + analytics"
@@ -218,7 +213,7 @@
       "title": "Hedgewitch Horticulture",
       "slug": "hedgewitch-horticulture",
       "tagline": "A hand-illustrated, walkable native garden for a sustainable garden studio",
-      "description": "A fully custom, hand-illustrated website for Hedgewitch Horticulture, a sustainable garden design and maintenance studio serving Greater Boston. I replaced their Squarespace with a performance-optimized Astro build and an earthy, handcrafted visual identity. At its center is an interactive walkable garden where native plants are drawn to scale and grouped into the ecological communities they actually form in the wild.",
+      "description": "A fully custom, hand-illustrated website for Hedgewitch Horticulture, a sustainable garden design and maintenance studio serving Greater Boston. It replaces their Squarespace site with a performance-optimized Astro build, launching September 2026, and an earthy, handcrafted visual identity. At its center is an interactive walkable garden where native plants are drawn to scale and grouped into the ecological communities they actually form in the wild.",
       "category": "websites",
       "role": "Full Stack Developer & Designer",
       "tools": [
@@ -262,21 +257,21 @@
         "secondary": ["BUSINESS WEBSITE"],
         "secondaryPt": 38
       },
-      "duration": "6 months",
+      "duration": "8 months",
       "challenge": "Their Squarespace site couldn't capture the earthy, witchy character of the brand, and off-the-shelf templates flatten a studio whose whole philosophy is that plants belong together in living communities. They needed something handcrafted and ecologically literate: organic in feel, easy to maintain, and fast on mobile for clients browsing from the garden.",
       "approach": "I designed the entire visual system from scratch, with no theme or template: custom corner frames, wavy SVG text paths, and GSAP scroll-driven character reveals. The centerpiece is a walkable native-garden page. I researched native New England flora and the pollinators each species supports, then hand-illustrated every plant and pollinator in Adobe Illustrator and Photoshop and rendered them true-to-scale, grouped by real plant communities. Around it I built a static Astro site with a filterable gallery and lightbox, an Astro Content Collections blog, and a CMS I designed and built myself — twelve admin screens with a rich-text editor and image uploads — so the studio edits every page, post and gallery item without a platform subscription.",
       "results": [
         "Bespoke, hand-illustrated design system with zero templates",
         "Interactive to-scale native garden built from original ecological research",
         "A CMS designed and built from scratch — 12 admin screens covering posts, pages, gallery, messages and settings",
-        "64 static pages across 29 routes, every one client-editable without a platform subscription",
-        "WCAG AA accessibility throughout"
+        "Sixty-plus static pages, every one client-editable without a platform subscription",
+        "Zero axe-core violations on every public page; Lighthouse accessibility 100"
       ],
       "deepDive": {
         "heading": "Inside the CMS",
         "body": [
           "The studio needed to run the site themselves without paying for a platform, so the CMS is part of the build rather than a service bolted onto it. There is no database. Every edit is a git commit: the admin talks to Netlify's Git Gateway, which proxies the GitHub Contents API using the editor's own Netlify Identity token, so content lands in the repository as Markdown and images, beside the code that renders it.",
-          "Writing happens in a TipTap editor that shows formatted text rather than Markdown syntax, but stores Markdown underneath. The posts that already existed and the Astro Content Collections pipeline that renders them never had to change to accommodate the editor.",
+          "Writing happens in a TipTap editor that shows formatted text rather than Markdown syntax, but stores Markdown underneath. The Astro Content Collections pipeline that renders posts never had to change to accommodate the editor: it reads the same Markdown files the CMS writes.",
           "Saving and publishing are deliberately separate. Editing commits carry [skip ci] so a long session doesn't queue a Netlify build on every save; publishing is the explicit act that rebuilds the site. Auth refreshes itself too — tokens go through gotrue's user.jwt(), so an admin left open past the hour keeps working instead of failing on a stale hour-old JWT."
         ],
         "bullets": [
@@ -311,8 +306,8 @@
         ],
         "results": [
           "Bespoke hand-illustrated design, no templates",
-          "64 pages, all client-editable, no platform fees",
-          "WCAG AA accessibility throughout"
+          "60+ pages, all client-editable, no platform fees",
+          "Zero axe violations, Lighthouse accessibility 100"
         ]
       },
       "videos": ["/portfolio/hedgewitch-horticulture/videos/site-desktop.webm"]
@@ -322,7 +317,7 @@
       "title": "Recycle Content",
       "slug": "recycle-content",
       "tagline": "Content recycling for creators",
-      "description": "A tool for content creators and the agencies that manage them. Recycle content to subscribers who haven't purchased yet using SKU management and automatic buyer exclusion lists. Features a browser extension for data capture and multi-tenant architecture for agency-level operations.",
+      "description": "A message-recycling and analytics platform for OnlyFans creators and the agencies that manage them. Resend mass messages to subscribers who never bought, with SKU management and automatic buyer-exclusion lists so nobody is offered content twice. A browser extension captures the data; multi-tenant isolation supports agency-level operations.",
       "category": "applications",
       "role": "Full Stack Developer & Designer",
       "tools": [
@@ -367,7 +362,7 @@
       "screenshots": [],
       "isDocumented": false,
       "titleCard": "/projects/recycle-content-title.png",
-      "duration": "7 months",
+      "duration": "12 months",
       "challenge": "Content creators on subscription platforms struggle to maximize revenue from their back catalog. Manually tracking which subscribers have purchased which content is tedious and error-prone, leading to missed sales opportunities or awkward duplicate offers.",
       "approach": "Building a SaaS platform with browser extension integration to automatically capture purchase data. The system tracks SKUs, maintains buyer exclusion lists, and enables targeted re-marketing to subscribers who haven't purchased specific content. Multi-tenant architecture supports agencies managing multiple creators.",
       "results": [
@@ -386,15 +381,15 @@
     },
     {
       "id": "linktrees",
-      "title": "Linktrees",
+      "title": "Link-in-Bio Pages",
       "slug": "linktrees",
-      "tagline": "Custom link-in-bio pages",
-      "description": "Custom-designed link-in-bio pages for social media profiles. Features animated backgrounds, theme customization, and analytics integration.",
+      "tagline": "A custom link-in-bio site for a creator",
+      "description": "A custom link-in-bio site for actress, singer and cosplayer Dare Taylor, built in Next.js and deployed on Vercel. Adult-content links pass through age-verification buffer pages so her social profiles stay clear of moderation, and every link lives in a single config file she edits herself on GitHub.",
       "category": "websites",
       "role": "Full Stack Developer & Designer",
-      "tools": ["HTML", "CSS", "JavaScript", "GSAP"],
+      "tools": ["Next.js", "React", "TypeScript", "Vercel"],
       "year": 2025,
-      "technologies": ["HTML", "CSS", "JavaScript", "GSAP"],
+      "technologies": ["Next.js", "React", "TypeScript", "Vercel"],
       "date": "2025-08-28",
       "status": "completed",
       "featured": false,
@@ -402,21 +397,22 @@
       "screenshots": [],
       "isDocumented": false,
       "titleCard": "/projects/linktrees-title.png",
-      "duration": "1 week each",
-      "challenge": "Standard Linktree pages look generic and don't reflect personal brand. Creators wanted unique link-in-bio pages that stood out from the sea of identical templates while remaining mobile-friendly and fast-loading.",
-      "approach": "Designed custom themed pages with GSAP-powered animated backgrounds. Each page is hand-crafted with unique color schemes, typography, and micro-interactions. Kept the codebase lightweight (no frameworks) for optimal mobile performance.",
+      "duration": "7 weeks",
+      "challenge": "Standard Linktree pages look generic, and direct links to adult-content platforms get creator profiles flagged on social media. The client needed a page that reflected her brand, loaded fast on mobile, and kept her accounts safe.",
+      "approach": "A small Next.js site with one file — src/lib/links.ts — as the only thing to edit, buffer pages that warn before any adult-content destination, and Vercel auto-deploys from GitHub so a link change is a commit rather than a support request. Handed over with a maintenance guide and an ownership-transfer guide.",
       "results": [
-        "Multiple custom linktree pages delivered",
-        "Sub-second load times on mobile",
-        "Positive client feedback on unique designs"
+        "Live at daretaylor.com on the client’s own domain",
+        "Client edits every link from one file on GitHub; the site redeploys in minutes",
+        "Age-verification buffer pages sit in front of every adult-content link"
       ],
       "keyFeatures": [
-        "Animated gradient backgrounds",
-        "Custom theme per client",
-        "Mobile-first responsive design",
-        "Smooth hover animations",
-        "Lightweight vanilla JS implementation"
-      ]
+        "Age-verification buffer pages before adult-content links",
+        "Single-file link configuration",
+        "Mobile-first responsive layout",
+        "Automatic deployments from GitHub via Vercel",
+        "Handoff docs: maintenance and ownership-transfer guides"
+      ],
+      "liveUrl": "https://daretaylor.com"
     }
   ],
   "categories": [

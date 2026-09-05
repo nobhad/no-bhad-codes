@@ -158,6 +158,18 @@ interface PortfolioData {
 // Minimum documented projects required to show project list
 const MIN_DOCUMENTED_PROJECTS = 2;
 
+/**
+ * A project's live URL is only a link once the site actually serves at that
+ * address. Until then the address is still shown — it is the real destination —
+ * but inert, in all three places it appears (detail links row, detail title,
+ * TV outro panel). A click that lands on whatever the domain served before
+ * misrepresents the work: hedgewitchhorticulture.com still answers with the
+ * client's old Squarespace site until cutover.
+ */
+function isLaunched(project: PortfolioProject): boolean {
+  return project.status === 'live' || project.status === 'completed';
+}
+
 // Token in a media path (heroImage / videos) that the detail view swaps for
 // a theme name at render time. The media deliberately shows the OPPOSITE of
 // the viewer's current theme (a dark-mode viewer sees the site rendered in
@@ -450,8 +462,12 @@ export class ProjectsModule extends BaseModule {
       return;
     }
 
+    // Only documented projects have a case study. The two undocumented
+    // entries in portfolio.json (recycle-content, linktrees) are data-only
+    // until they have title cards, so a deep link to them is a 404, not a
+    // half-rendered page with an empty hero.
     const project = this.portfolioData.projects.find((p) => p.slug === slug);
-    if (!project) {
+    if (!project || !project.isDocumented) {
       this.warn(`Project not found: ${slug}`);
       // Navigate to branded 404 for unknown project slugs
       window.location.hash = '#/404';
@@ -931,9 +947,7 @@ export class ProjectsModule extends BaseModule {
    * walkthrough the reader is in the middle of.
    */
   private pauseOffscreenVideo(incomingPageId: string): void {
-    const incoming = document.querySelector<HTMLElement>(
-      `section[data-page="${incomingPageId}"]`
-    );
+    const incoming = document.querySelector<HTMLElement>(`section[data-page="${incomingPageId}"]`);
     document.querySelectorAll<HTMLVideoElement>('video').forEach((video) => {
       if (video.paused) {
         return;
@@ -1900,18 +1914,19 @@ export class ProjectsModule extends BaseModule {
     // affordance; live/test URL secondary; hint about channel-changing
     // tertiary so the user knows they can keep browsing.
     //
-    // A live URL wins whenever there is one. This used to require status to be
-    // 'live' or 'completed', which mislabelled any launched site still carrying
-    // ongoing work: Hedgewitch is 'in-progress' because of add-ons, so a
-    // visitor was sent to hedgewitch.netlify.app under a "Test:" label while
-    // the real hedgewitchhorticulture.com sat unused in the same record. The
-    // test URL is the fallback for something that genuinely has nowhere else
-    // to point, not the default for anything unfinished.
-    const primaryUrl = project.liveUrl || project.testUrl;
-    const primaryLabel = project.liveUrl ? 'Live' : 'Test';
-    const liveLink = primaryUrl
-      ? `<a class="crt-tv__panel-link" href="${escapeAttr(primaryUrl)}" target="_blank" rel="noopener">${primaryLabel}: ${escapeHtml(primaryUrl)}</a>`
-      : '';
+    // The live URL is the destination once the site serves there; until
+    // then it is shown greyed and inert (same rule as the detail page — see
+    // isLaunched). A project with only a test build links to that instead.
+    const launchedNow = isLaunched(project);
+    let liveLink = '';
+    if (project.liveUrl && launchedNow) {
+      liveLink = `<a class="crt-tv__panel-link" href="${escapeAttr(project.liveUrl)}" target="_blank" rel="noopener">Live: ${escapeHtml(project.liveUrl)}</a>`;
+    } else if (project.liveUrl) {
+      const when = project.launchDate ? this.formatLaunchDate(project.launchDate) : 'soon';
+      liveLink = `<span class="crt-tv__panel-link crt-tv__panel-link--pending" role="note" aria-label="Live site ${escapeAttr(project.liveUrl)}, launching ${escapeAttr(when)}">Live: ${escapeHtml(project.liveUrl)} · launching ${escapeHtml(when)}</span>`;
+    } else if (project.testUrl) {
+      liveLink = `<a class="crt-tv__panel-link" href="${escapeAttr(project.testUrl)}" target="_blank" rel="noopener">Test: ${escapeHtml(project.testUrl)}</a>`;
+    }
     panels.push(`
       <article class="crt-tv__panel crt-tv__panel--outro" data-panel-key="outro">
         <a class="crt-tv__panel-cta" href="#/projects/${escapeAttr(project.slug)}">View full case study →</a>
@@ -2628,12 +2643,18 @@ export class ProjectsModule extends BaseModule {
       breadcrumbCurrent.textContent = project.title;
     }
 
-    // Update title — wrap in anchor when a live or test URL exists so the
-    // title itself is the primary CTA (opens in a new tab). External icon
-    // appears after the text as a visual affordance.
+    // Update title — wrap in anchor when the site is reachable so the title
+    // itself is the primary CTA (opens in a new tab). A live URL that is not
+    // serving yet leaves the title as plain text: the links row below already
+    // shows it greyed with the launch date, and the title must not be a
+    // clickable route to it (same rule as isLaunched everywhere else).
     const titleEl = this.projectDetailSection.querySelector('#project-title');
     if (titleEl) {
-      const titleHref = project.liveUrl || project.testUrl;
+      const titleHref = project.liveUrl
+        ? isLaunched(project)
+          ? project.liveUrl
+          : null
+        : project.testUrl;
       if (titleHref) {
         titleEl.innerHTML = `<a href="${escapeAttr(titleHref)}" target="_blank" rel="noopener noreferrer" class="project-title-link">${escapeHtml(project.title)}<span class="sr-only"> (opens in new tab)</span></a>`;
       } else {
@@ -2725,7 +2746,7 @@ export class ProjectsModule extends BaseModule {
       // greyed and inert, because a dead link to a domain that is not serving
       // yet is worse than no link. Projects with only a test build still show
       // the test build.
-      const launched = project.status === 'live' || project.status === 'completed';
+      const launched = isLaunched(project);
       const launchWhen = project.launchDate ? this.formatLaunchDate(project.launchDate) : 'soon';
       if (launched && project.liveUrl) {
         links.push(
