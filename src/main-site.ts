@@ -25,6 +25,24 @@ if (import.meta.env?.PROD) {
   injectSpeedInsights();
 }
 
+// Service worker (production only). public/sw.js is network-first for
+// /api and /data JSON, cache-first for hashed static assets, and serves
+// /offline.html when a navigation fails. The portal shell served from the
+// API host registers the same file (server/views/partials/head.ejs), so
+// registering it here too means every visitor gets the same behaviour
+// rather than only those who have opened the portal.
+if (import.meta.env?.PROD && 'serviceWorker' in navigator && location.hostname !== 'localhost') {
+  window.addEventListener(
+    'load',
+    () => {
+      navigator.serviceWorker.register('/sw.js').catch((error: unknown) => {
+        logger.warn('Service worker registration failed', error);
+      });
+    },
+    { once: true }
+  );
+}
+
 // Failsafe: Ensure page content is visible after 10 seconds
 // This catches cases where intro animation fails or takes too long
 if (typeof window !== 'undefined') {
