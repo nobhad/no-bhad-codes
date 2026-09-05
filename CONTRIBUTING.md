@@ -364,7 +364,7 @@ Brief description of changes
 - [x] Redis caching integration — `server/services/cache-service.ts`
 - [x] CI/CD pipeline — `.github/workflows/ci.yml` (lint, typecheck, unit, integration, build)
 - [ ] Docker containerization
-- [ ] Automated security scanning in CI (`audit-ci.json` exists but is not wired into the workflow)
+- [ ] Automated security scanning in CI (`npm audit` is not yet wired into the workflow)
 
 ## 🤝 Community
 

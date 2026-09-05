@@ -210,3 +210,7 @@ src/react/styles/tailwind-generated.css
 
 # Playwright MCP scratch output (page snapshots, ~84MB)
 .playwright-mcp/
+
+# Local-only working material (never commit)
+screenshots/
+_to_delete/
