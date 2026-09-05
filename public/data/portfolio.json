@@ -57,7 +57,7 @@
       "challenge": "Most portfolio templates feel generic and fail to demonstrate actual development skills. I needed a site that would stand out while proving I could build production-ready applications—not just pretty mockups.",
       "approach": "I built everything from scratch using vanilla TypeScript instead of React to demonstrate fundamental skills. I implemented a custom hash-based SPA router, a 2D spatial scroll-map navigation system (five tiles in a plus layout — intro, hero, about, projects, contact), GSAP-powered animations, and a full Express backend. The projects page is structured as a vintage TV with a channel guide; selecting a channel plays a Looney-Tunes-style title-card tune-in followed by the case study. The playful design draws inspiration from a mischievous coyote cartoon character — clever, resourceful, and a little unconventional.",
       "results": [
-        "Lighthouse 100 for accessibility, best practices and SEO",
+        "Lighthouse (mobile) on the home page: performance 95, accessibility 100, best practices 100, SEO 100",
         "100% Lighthouse accessibility score",
         "Seamless page transitions without framework overhead",
         "Integrated client portal and admin dashboard"
@@ -83,7 +83,7 @@
           "Integrated client portal and admin dashboard"
         ],
         "results": [
-          "Lighthouse 100 accessibility, best practices and SEO",
+          "Lighthouse 95 / 100 / 100 / 100 on mobile",
           "Seamless transitions, no framework overhead"
         ]
       }
@@ -182,7 +182,7 @@
         "Complete audit trail of all client communications"
       ],
       "keyFeatures": [
-        "Emailed client invitations with one-time set-password links",
+        "Emailed set-password invitations and passwordless magic-link sign-in",
         "Real-time messaging with emoji support",
         "Drag-and-drop file uploads with preview",
         "PDF invoice generation with line items",
@@ -196,7 +196,7 @@
         "challenge": "Juggling emails, spreadsheets, Dropbox, and invoicing apps. Clients had no visibility into project progress; context was lost across disconnected tools.",
         "approach": "Dual-portal architecture: admin dashboard for me, client portal for transparency. Secure auth, real-time messaging, automated PDF invoices, and a Kanban lead pipeline. SQLite for portability with a migration system for schema evolution.",
         "keyFeatures": [
-          "Emailed client invitations with one-time links",
+          "Set-password invitations and magic-link sign-in",
           "Real-time messaging with file uploads",
           "Automated PDF invoice generation",
           "Lead pipeline Kanban + analytics"
