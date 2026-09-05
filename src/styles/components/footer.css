@@ -57,6 +57,11 @@ body[data-page="design-system"] .footer-curtain {
      box below "BY", so the gap you SEE is this plus that. At --space-3 the two
      halves of the mark read as unrelated. */
   --curtain-mark-gap: var(--space-1);
+  /* Pulls the credit block down toward the lockup on the Y axis.
+     `gap` cannot go below zero and most of the space between them is not the
+     gap anyway — it is the empty line box the 2.1 leading leaves under "BY".
+     A negative bottom margin is the only lever that reaches it. */
+  --curtain-credit-pull: var(--space-2);
   /* Leading for the credit label only. Its two lines share the block's 1.4
      with the year, which is right for a single line of running text and too
      tight for a tracked two-line label — "MADE & DESIGNED" over "BY" read as
@@ -80,8 +85,8 @@ body[data-page="design-system"] .footer-curtain {
      around the art — less the negative margin that pulls the year back up
      under the wordmark. */
   --curtain-credit-height: calc(
-    var(--font-size-base) * var(--curtain-credit-leading) * 2 + var(--curtain-mark-gap) +
-      var(--font-size-2xl) * 1.4 - var(--curtain-year-lift)
+    var(--font-size-base) * var(--curtain-credit-leading) * 2 - var(--curtain-credit-pull) +
+      var(--curtain-mark-gap) + var(--font-size-2xl) * 1.4 - var(--curtain-year-lift)
   );
   --footer-curtain-height: calc(
     var(--curtain-avatar-height) + var(--curtain-credit-height) + var(--curtain-inset) * 2
@@ -332,6 +337,7 @@ body[data-page="design-system"] .footer-curtain {
   grid-row: 1;
   justify-self: start;
   line-height: var(--curtain-credit-leading);
+  margin-bottom: calc(var(--curtain-credit-pull) * -1);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-widest);
 }
