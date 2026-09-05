@@ -2,6 +2,128 @@
 
 ---
 
+## Full-site sweep: truth, function, performance, cleanup — 2026-09-05
+
+**Status:** DONE — committed, one open list below
+**Priority:** —
+
+Asked for: every claim on the site and in the docs true or made true, every
+surface wired and working, the site as fast as it can be, and the code
+cleaned up. Baseline before any change: typecheck/lint/unit/integration all
+green, one failing Chromium e2e, Lighthouse (mobile) home 78 / projects 64
+with CLS 0.29, 54 doc references to files that no longer exist, `uploads/`
+with client PII tracked in the public repository.
+
+### Portfolio truth (portfolio.json, checked against each project's repo)
+
+- [x] **Hedgewitch.** hedgewitchhorticulture.com still serves the client's
+      Squarespace; the build is on Netlify with `noindex`. Copy no longer
+      says the Squarespace was replaced; "64 pages" is "sixty-plus" (62
+      today); "the posts that already existed" is gone (`src/content/blog`
+      has none on main); "WCAG AA throughout" became what was measured —
+      zero axe violations, Lighthouse accessibility 100; duration 6 → 8
+      months. Per Noelle's decision the domain stays as the Live link but
+      is now inert in all three places it appears (detail links row, detail
+      title, TV outro) via one `isLaunched()`; before this the title and
+      the outro linked straight to the Squarespace site.
+- [x] **The Backend.** "Magic link invitations (no password setup)" was
+      false — invites land on set-password; the passwordless
+      `/api/auth/magic-link` sign-in that does exist is credited instead.
+      "node-cron" scheduler → in-process timers (the package was unused).
+      Tailwind removed from the tool list (see cleanup).
+- [x] **nobhad-codes.** "Sub-2-second load times" replaced with the
+      measured Lighthouse line (mobile, home: 95 / 100 / 100 / 100).
+- [x] **linktrees.** One site shipped (daretaylor.com), Next.js on Vercel,
+      no GSAP, one client — rewritten from the real repo.
+- [x] **recycle-content.** 7 months → 12 (repo runs 2025-09 → 2026-08);
+      every feature claim verified.
+- [x] Deep links to the two undocumented entries now 404 like any unknown
+      slug instead of rendering an empty case study.
+
+### Function
+
+- [x] **Audit log constraint (production bug).** Migration 012 limited
+      `audit_logs.action` to 15 values; the app logs ~40. Every such insert
+      failed and, because the logger throws by design, invite, set-password
+      and client delete answered 500 after doing their work, with no audit
+      row. Migration 143 rebuilds the table without the vocabulary CHECKs
+      (rows and hash chain preserved; verify endpoint passes). Found by an
+      end-to-end portal smoke: admin login → create client → invite → token
+      → set-password → client login → inquiry thread → SSE → invoice PDF →
+      admin ops endpoints → delete. 28/30 after the fix; the two left are
+      below.
+- [x] Uploads that failed to record their row returned 201 with a null id;
+      now the orphan is removed and it is a 500.
+- [x] `.404-section` is not a valid selector: every visit to the branded
+      404 threw. Page ids are `CSS.escape`d in the three places that build
+      section selectors.
+- [x] Business card: static ARIA in the markup so it is a button from first
+      paint; handlers still wait for the intro. The failing e2e passes.
+- [x] Channel music stops in a hidden tab and on pagehide.
+- [x] Service worker registered on the main site (only the portal shell
+      had been registering it, at scope `/`).
+- [x] One canonical host: `www`, everywhere (canonical, OG, JSON-LD,
+      robots, sitemap). Sitemap lists the two real documents.
+- [x] Portal sidebar footer reserves the consent banner's height — the
+      banner sat over Sign Out on a first visit.
+- [x] `admin-flow` / `portal-flow` e2e rewritten for the React portal (they
+      targeted the vanilla portal's ids); they sign in through the portal
+      page, which is the only path that seeds the session the app restores.
+
+### Performance (Lighthouse mobile, vite preview)
+
+| page | before | after |
+|---|---|---|
+| home | perf 78, LCP 4.9s, CLS 0 | **perf 95**, FCP 2.3s, LCP 2.4s, CLS 0 |
+| projects | perf 64, LCP 4.7s, **CLS 0.29** | perf 80, FCP 2.0s, LCP 5.0s, **CLS 0.001** |
+
+- [x] 21 `-mobile.webp` TV layers downsized 2481→1200px (861 KB → 316 KB);
+      width/height on every cabinet layer; frame `fetchpriority=high`.
+- [x] The projects CLS was the consent banner lifting the footer curtain by
+      365px behind `main`; the curtain is hidden until the reveal starts.
+- [x] `portfolio.json` fetched once, not two or three times.
+- [x] Projects deep links preload the data and the right cabinet file (from
+      a script placed after the viewport meta — before it, the media query
+      reads a 980px layout viewport).
+
+### Cleanup
+
+- [x] Tailwind removed (zero utilities ever used), three dead shadcn files,
+      nine unused packages, lint-staged config nothing ran.
+- [x] `npm run lint` and Prettier now cover `.tsx` — 130 portal files had
+      never been linted or formatted (525 curly fixes, four dead bindings).
+- [x] `uploads/` (client PII), `dist/`, `screenshots/`, `_to_delete/`,
+      mockups and stale root files untracked; history left as-is by decision.
+- [x] Docs regenerated from the code: README, CONFIGURATION (27 declared
+      but unconsumed variables labelled as such), `.env.example`,
+      DEPLOYMENT (Vercel + Railway, not nginx), hooks README, PORTFOLIO,
+      Tailwind references, dead paths; roadmap and HANDOFF archived.
+      `docs:validate` and `lint:md` run in CI.
+
+### Open
+
+- [ ] **Projects deep-link LCP stays ~5s in Lighthouse's simulation.** The
+      TV is built by JS after the module graph loads; it paints at ~260ms
+      unthrottled. Painting it at FCP means shipping the cabinet shell in
+      `index.html` — a separate change.
+- [ ] **`/api/uploads/single` cannot succeed** — it inserts with
+      `project_id: null` into a NOT NULL column. Nothing in the UI calls it
+      (the Files manager uses `/multiple`, which resolves the client's
+      project); either make `files.project_id` nullable (11 tables reference
+      `files`) or remove the endpoint.
+- [ ] `about-photo` GIF (105 KB) would be half the size as a video; needs
+      reduced-motion handling, left alone.
+- [ ] 27 config keys `environment.ts` validates and nothing reads — remove
+      them together with their `.env.example` entries when convenient.
+- [ ] `server/routes/two-factor.ts` exists but is not mounted.
+- [ ] `puppeteer` advisories need a major bump (capture script only).
+- [ ] Hedgewitch launch: flipping `status` to `live` is what makes the
+      domain clickable again — nothing else to change.
+- [ ] Title cards for recycle-content and linktrees are still the gate to
+      giving them a channel.
+
+---
+
 ## SQLITE_BUSY in the integration job — 2026-09-05
 
 **Status:** DONE — committed
