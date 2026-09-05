@@ -7,3 +7,6 @@
 
 # style: format the repo with Prettier (561 files)
 6c317abc00c6376a57d65fdb22e3d3bfbd04c77f
+
+# style(react): lint and format the portal too (131 files)
+b089f0cd1e132ca2f1ccbb1375d622606974ecc4
