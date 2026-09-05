@@ -119,8 +119,11 @@ with client PII tracked in the public repository.
 - [ ] `puppeteer` advisories need a major bump (capture script only).
 - [ ] Hedgewitch launch: flipping `status` to `live` is what makes the
       domain clickable again — nothing else to change.
-- [ ] Title cards for recycle-content and linktrees are still the gate to
-      giving them a channel.
+- [x] **Title cards for recycle-content and linktrees** — no longer gated
+      on artwork. Text title cards are now the default: a card's lines are
+      set in HTML over a background from the ordered `titleCardBackgrounds`
+      list in portfolio.json (add a line to add a background). Both are
+      channels 05 and 06 with music; composed images remain the exception.
 
 ---
 

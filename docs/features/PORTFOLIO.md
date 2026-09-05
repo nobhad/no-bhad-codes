@@ -120,9 +120,34 @@ rewrote what did not hold; do the same for a new one before it ships.
 | `videos` | string[] | Walkthrough videos; `{theme}` in any media path is swapped for `light`/`dark` |
 | `yearDisplay` | string | Overrides `year` in the meta list (e.g. a range) |
 | `deepDive` | object | Optional second write-up under the case study: `heading`, `body[]`, `bullets[]`, `media` |
-| `titleCard` | object or string | TV title-card data — see "Title card structure" below. A bare string is a placeholder for a card not yet made (the runtime ignores it) |
+| `titleCard` | object | TV title-card data — see "Title card structure" below. Text by default; `composed` is optional |
 
 #### Title card structure
+
+The default card is **text**: the project's lines set in HTML inside the
+screen aperture, over a background from the `titleCardBackgrounds`
+rotation. A new project needs only this:
+
+```json
+"titleCard": {
+  "primary":  ["PRIMARY", "TEXT"],
+  "primaryPt": 90,
+  "secondary": ["SECONDARY TEXT"],
+  "secondaryPt": 38
+}
+```
+
+- `primary` / `secondary` — one entry per line. The renderer wraps the
+  primary phrase in curly quotes (the Looney-Tunes title idiom the composed
+  cards use), so do not type quotes into the JSON.
+- `primaryPt` / `secondaryPt` — design points; CSS scales them with the TV
+  (100pt is about 13% of the screen width per em, matching the composed
+  cards). 90 / 38 is the house size.
+- Background and text colour come from the rotation (below). A card may set
+  its own `bg` and `color` to opt out of it.
+
+A card may instead carry a **composed** image with the text baked in — the
+three original channels do — plus its own `bg`:
 
 ```json
 "titleCard": {
@@ -136,17 +161,28 @@ rewrote what did not hold; do the same for a new one before it ships.
 }
 ```
 
-- `composed` — the full title card with text baked into the image,
-  shown during the tune-in animation's title-card hold stage.
-- `bg` — the bg-only version (no text), shown beneath the case-study
-  panels after the title fades out.
-- `color` — designer-supplied hex used as `--tunein-color` on the
-  tune-in panels (CSS reads it from there). A contrast veil is
-  computed automatically from the color's luma so paragraphs read
-  against the bg image.
-- `primary` / `secondary` / `primaryPt` / `secondaryPt` — per-card text
-  spec for future HTML-overlay rendering (currently informational —
-  the composed image is what renders).
+- `composed` — shown during the tune-in's title hold, then fades to `bg`.
+- `bg` — the text-free version, beneath the case-study panels.
+- `color` — the text colour and the panels' `--tunein-color`; a contrast
+  veil is computed from it automatically.
+
+#### Background rotation (`titleCardBackgrounds`)
+
+Top-level in `portfolio.json`, an ordered list of text-free backgrounds and
+the text colour that reads on each:
+
+```json
+"titleCardBackgrounds": [
+  { "bg": "/images/tv/title-cards/no-bhad-codes_bg.webp", "color": "#000000" },
+  { "bg": "/images/tv/title-cards/the-backend_bg.webp",   "color": "#ffffff" },
+  { "bg": "/images/tv/title-cards/hedgewitch_bg.webp",    "color": "#ffffff" }
+]
+```
+
+Text cards take these in order, in channel order: the first text card gets
+the first entry, the second the second, wrapping round when the list runs
+out. To add a background, export it (desktop and `-mobile` variants, see
+"Media requirements") and add a line here; nothing else changes.
 
 #### Case-study fields
 

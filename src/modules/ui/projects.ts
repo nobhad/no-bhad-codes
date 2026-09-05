@@ -40,7 +40,9 @@ const escapeAttr = escapeHtml;
 const CHANNEL_MUSIC: Readonly<Record<string, string>> = {
   'nobhad-codes': '/audio/the-broken-hearted-sparrow.mp3',
   'the-backend': '/audio/anvil-chorus.mp3',
-  'hedgewitch-horticulture': '/audio/roses-at-twilight.mp3'
+  'hedgewitch-horticulture': '/audio/roses-at-twilight.mp3',
+  'recycle-content': '/audio/otello-selections.mp3',
+  linktrees: '/audio/the-dream-of-the-rarebit-fiend.mp3'
 };
 
 function contrastVeil(hex: string): string {
@@ -63,26 +65,63 @@ const logger = createLogger('ProjectsModule');
 
 /**
  * Structured title-card data drives the TV "tune-in" sequence.
- * Lines in primary/secondary are rendered as separate <span>s so each
- * line can break independently (no <br> in JSON / no whitespace hacks).
- * Pt sizes are the design-spec point sizes from the source artwork; CSS
- * scales them via container queries so they shrink with the TV.
+ *
+ * The default card is TEXT: `primary` and `secondary` lines rendered as HTML
+ * inside the screen aperture, over a background taken from
+ * `titleCardBackgrounds` in portfolio.json. Text cards take those backgrounds
+ * in rotation, in channel order — the first text card gets the first entry,
+ * the next gets the next, wrapping round — so a new project needs only its two
+ * lines, and a new background needs only a new entry in that list.
+ *
+ * A card may instead carry `composed` (an image with the text baked in) and
+ * its own `bg`; the three original channels do. That is the exception, kept
+ * for hand-set typography, not the rule.
+ *
+ * Lines are rendered as separate <span>s so each line can break independently
+ * (no <br> in JSON / no whitespace hacks). Pt sizes are the design-spec point
+ * sizes from the source artwork; CSS scales them via container queries so they
+ * shrink with the TV.
  */
 interface TitleCardData {
   // Composed title card with text baked in — shown first, then fades to bg.
-  composed: string;
-  // Background-only version of the title card (no text) — shown beneath
-  // panels for the rest of the case-study sequence.
+  // Absent on a text card.
+  composed?: string;
+  // Background-only version (no text) — shown beneath the panels for the rest
+  // of the case-study sequence. Absent on a text card: one is assigned from
+  // the rotation.
+  bg?: string;
+  // Text colour, also the panels' --tunein-color. Absent on a text card: the
+  // rotation entry's colour is used, since it is the bg that decides contrast.
+  color?: string;
+  primary: string[];
+  primaryPt: number;
+  secondary: string[];
+  secondaryPt: number;
+}
+
+/** One entry of portfolio.json's `titleCardBackgrounds` rotation. */
+interface TitleCardBackground {
   bg: string;
-  // Per-card text color & layout spec, currently unused by the runtime
-  // (composed image carries the rendered text). Kept in JSON for the
-  // future HTML-overlay path so we can swap rendering modes later.
+  color: string;
+}
+
+/** A card with every gap filled: what the tune-in actually plays. */
+interface ResolvedTitleCard {
+  composed: string | null;
+  bg: string;
   color: string;
   primary: string[];
   primaryPt: number;
   secondary: string[];
   secondaryPt: number;
 }
+
+// Used when portfolio.json carries no rotation at all, so a text card still
+// has something behind it and a readable colour.
+const FALLBACK_TITLE_CARD_BACKGROUND: TitleCardBackground = {
+  bg: '/images/tv/title-card-desktop.webp',
+  color: '#ffffff'
+};
 
 interface PortfolioProject {
   id: string;
@@ -114,20 +153,10 @@ interface PortfolioProject {
   launchDate?: string;
   isDocumented: boolean;
   /**
-   * A TV title card, in one of two shapes.
-   *
-   * TitleCardData is a real card: a composed image with the text baked in, a
-   * text-free background behind the panels, and the type spec that produced
-   * it. That is what the TV plays.
-   *
-   * A bare string is a PLACEHOLDER for a card that has not been made yet —
-   * recycle-content and linktrees each name the file they are waiting for. The
-   * runtime ignores it on purpose (both readers below take the object form or
-   * nothing), so the project simply has no channel until the artwork lands and
-   * the string becomes an object. Nothing requests the path, so nothing 404s.
-   * Do not "fix" these by deleting them; they are the to-do list.
+   * The TV title card — see TitleCardData. A documented project without one
+   * has no channel to play, so the guide sends it straight to its detail page.
    */
-  titleCard?: string | TitleCardData;
+  titleCard?: TitleCardData;
   // Optional second write-up rendered below the case study, for one part of
   // the build that deserves its own section rather than a feature bullet.
   // `media` is a video or an image — a walkthrough where there is motion
@@ -153,6 +182,9 @@ interface PortfolioProject {
 
 interface PortfolioData {
   projects: PortfolioProject[];
+  // Ordered rotation of text-free backgrounds for text title cards. Add an
+  // entry to add a background; order is the order they are handed out.
+  titleCardBackgrounds?: TitleCardBackground[];
   categories: Array<{ id: string; name: string; count: number }>;
 }
 
@@ -696,6 +728,14 @@ export class ProjectsModule extends BaseModule {
               </svg>
             </div>
             <div class="crt-tv__channel-list" data-channel-list></div>
+            <!-- Text title card. The default card: the project's primary and
+                 secondary lines set in the screen aperture over a rotation
+                 background, in place of a composed image. Populated and faded
+                 by playTuneInSequence; empty and invisible between channels. -->
+            <div class="crt-tv__title-text" data-title-text aria-hidden="true">
+              <p class="crt-tv__title-primary" data-title-primary></p>
+              <p class="crt-tv__title-secondary" data-title-secondary></p>
+            </div>
             <!-- Tune-in overlay — populated and animated on channel select.
                  Hidden until playTuneInSequence runs. The composed title
                  card is rendered via .crt-tv__image (existing element);
@@ -1152,7 +1192,7 @@ export class ProjectsModule extends BaseModule {
    */
   private preloadTitleCards(): void {
     for (const project of this.portfolioData?.projects ?? []) {
-      const card = typeof project.titleCard === 'object' ? project.titleCard : null;
+      const card = this.resolveTitleCard(project);
       if (!card) {
         continue;
       }
@@ -1164,6 +1204,70 @@ export class ProjectsModule extends BaseModule {
         img.src = this.cardSrc(path);
       }
     }
+  }
+
+  /**
+   * Fill a project's title card from the background rotation.
+   *
+   * Cards that name their own `bg` keep it. The rest are text cards, and take
+   * `titleCardBackgrounds` in channel order: the Nth text card among the
+   * documented projects gets entry N modulo the list length. Counting only
+   * text cards (rather than all channels) means the rotation starts at the
+   * first entry for the first project that needs one, however many composed
+   * cards sit ahead of it, and stays stable when a composed card is added.
+   */
+  private resolveTitleCard(project: PortfolioProject): ResolvedTitleCard | null {
+    const card = project.titleCard;
+    if (!card || !this.portfolioData) {
+      return null;
+    }
+    const rotation = this.portfolioData.titleCardBackgrounds?.length
+      ? this.portfolioData.titleCardBackgrounds
+      : [FALLBACK_TITLE_CARD_BACKGROUND];
+    let fromRotation: TitleCardBackground | null = null;
+    if (!card.bg) {
+      const textCards = this.portfolioData.projects.filter(
+        (p) => p.isDocumented && p.titleCard && !p.titleCard.bg
+      );
+      const index = Math.max(0, textCards.indexOf(project));
+      fromRotation = rotation[index % rotation.length];
+    }
+    return {
+      composed: card.composed ?? null,
+      bg: card.bg ?? fromRotation!.bg,
+      color: card.color ?? fromRotation?.color ?? FALLBACK_TITLE_CARD_BACKGROUND.color,
+      primary: card.primary,
+      primaryPt: card.primaryPt,
+      secondary: card.secondary,
+      secondaryPt: card.secondaryPt
+    };
+  }
+
+  /**
+   * Write a text card's lines into the title-text layer. The primary line
+   * carries the quotation marks the composed cards were lettered with — the
+   * Looney-Tunes-title idiom the whole TV borrows — around the first and last
+   * line, so a two-line title reads as one quoted phrase.
+   */
+  private populateTitleText(layer: HTMLElement, card: ResolvedTitleCard): void {
+    const primaryEl = layer.querySelector<HTMLElement>('[data-title-primary]');
+    const secondaryEl = layer.querySelector<HTMLElement>('[data-title-secondary]');
+    const line = (text: string): string =>
+      `<span class="crt-tv__title-line">${escapeHtml(text)}</span>`;
+    if (primaryEl) {
+      const lines = card.primary.map((text, i) => {
+        const open = i === 0 ? '\u201c' : '';
+        const close = i === card.primary.length - 1 ? '\u201d' : '';
+        return line(`${open}${text}${close}`);
+      });
+      primaryEl.innerHTML = lines.join('');
+    }
+    if (secondaryEl) {
+      secondaryEl.innerHTML = card.secondary.map(line).join('');
+    }
+    layer.style.setProperty('--card-color', card.color);
+    layer.style.setProperty('--card-primary-pt', String(card.primaryPt));
+    layer.style.setProperty('--card-secondary-pt', String(card.secondaryPt));
   }
 
   private preloadChannelDisplays(): void {
@@ -1668,6 +1772,7 @@ export class ProjectsModule extends BaseModule {
     const tunein = document.querySelector('[data-tunein]') as HTMLElement | null;
     const panelsEl = document.querySelector('[data-panels]') as HTMLElement | null;
     const composedImg = document.querySelector('.crt-tv__image') as HTMLImageElement | null;
+    const titleText = document.querySelector('[data-title-text]') as HTMLElement | null;
 
     // Fall back to plain navigation if the TV elements aren't present
     // (mobile, or anything that strips the centered TV layout).
@@ -1684,10 +1789,9 @@ export class ProjectsModule extends BaseModule {
       return;
     }
 
-    // The object form is a card the TV can play. A string is a placeholder for
-    // artwork that does not exist yet (see the Project type), so it falls
-    // through to the detail page like a project with no card at all.
-    const card = typeof project.titleCard === 'object' ? project.titleCard : null;
+    // A project with no card at all has no channel to play; it falls through
+    // to its detail page.
+    const card = this.resolveTitleCard(project);
     if (!card) {
       window.location.hash = `#/projects/${slug}`;
       return;
@@ -1734,7 +1838,18 @@ export class ProjectsModule extends BaseModule {
     gsap.set(tunein, { opacity: 1 });
     gsap.set(panelsEl, { opacity: 0 });
     gsap.set(composedImg, { opacity: 0 });
-    this.setCardSrc(composedImg, card.composed);
+    // The title is either the composed image or the text layer — whichever
+    // this card has. The other stays invisible for the whole sequence.
+    let titleEl: HTMLElement = composedImg;
+    if (card.composed) {
+      this.setCardSrc(composedImg, card.composed);
+    } else if (titleText) {
+      this.populateTitleText(titleText, card);
+      titleEl = titleText;
+    }
+    if (titleText) {
+      gsap.set(titleText, { opacity: 0 });
+    }
 
     // Build the entrance timeline.
     this.tuneInTimeline = gsap.timeline({
@@ -1792,14 +1907,14 @@ export class ProjectsModule extends BaseModule {
     tl.to({}, { duration: TV_BG_FLASH_S }, '>');
 
     // 5) Composed title card fades in over the bg.
-    tl.to(composedImg, { opacity: 1, duration: 0.3, ease: 'power2.out' }, '>');
+    tl.to(titleEl, { opacity: 1, duration: 0.3, ease: 'power2.out' }, '>');
 
     // 6) Hold the title card so the user reads it before fading to bg.
     tl.to({}, { duration: TV_TITLE_HOLD_S }, '>');
 
     // 4) Crossfade composed → bg-only (composed fades out, bg already
     //    sits underneath it from step 1).
-    tl.to(composedImg, { opacity: 0, duration: TV_DOCK_DURATION_S, ease: 'power2.inOut' }, '>');
+    tl.to(titleEl, { opacity: 0, duration: TV_DOCK_DURATION_S, ease: 'power2.inOut' }, '>');
 
     // 5) Beat between title-card text fading out and first section text
     //    fading in — distinct text states, not a crossfade.
@@ -2333,6 +2448,10 @@ export class ProjectsModule extends BaseModule {
     }
     if (composedImg) {
       gsap.set(composedImg, { opacity: 0, clearProps: 'transform' });
+    }
+    const titleText = document.querySelector('[data-title-text]') as HTMLElement | null;
+    if (titleText) {
+      gsap.set(titleText, { opacity: 0, clearProps: 'transform' });
     }
     if (panelsEl) {
       gsap.set(panelsEl, { opacity: 0, clearProps: 'transform' });

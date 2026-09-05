@@ -360,8 +360,13 @@
       "featured": true,
       "heroImage": "",
       "screenshots": [],
-      "isDocumented": false,
-      "titleCard": "/projects/recycle-content-title.png",
+      "isDocumented": true,
+      "titleCard": {
+        "primary": ["RECYCLE", "CONTENT"],
+        "primaryPt": 90,
+        "secondary": ["CREATOR ANALYTICS PLATFORM"],
+        "secondaryPt": 38
+      },
       "duration": "12 months",
       "challenge": "Content creators on subscription platforms struggle to maximize revenue from their back catalog. Manually tracking which subscribers have purchased which content is tedious and error-prone, leading to missed sales opportunities or awkward duplicate offers.",
       "approach": "Building a SaaS platform with browser extension integration to automatically capture purchase data. The system tracks SKUs, maintains buyer exclusion lists, and enables targeted re-marketing to subscribers who haven't purchased specific content. Multi-tenant architecture supports agencies managing multiple creators.",
@@ -395,8 +400,13 @@
       "featured": false,
       "heroImage": "",
       "screenshots": [],
-      "isDocumented": false,
-      "titleCard": "/projects/linktrees-title.png",
+      "isDocumented": true,
+      "titleCard": {
+        "primary": ["LINK-IN-BIO", "PAGES"],
+        "primaryPt": 90,
+        "secondary": ["CREATOR LINK SITE"],
+        "secondaryPt": 38
+      },
       "duration": "7 weeks",
       "challenge": "Standard Linktree pages look generic, and direct links to adult-content platforms get creator profiles flagged on social media. The client needed a page that reflected her brand, loaded fast on mobile, and kept her accounts safe.",
       "approach": "A small Next.js site with one file — src/lib/links.ts — as the only thing to edit, buffer pages that warn before any adult-content destination, and Vercel auto-deploys from GitHub so a link change is a commit rather than a support request. Handed over with a maintenance guide and an ownership-transfer guide.",
@@ -413,6 +423,20 @@
         "Handoff docs: maintenance and ownership-transfer guides"
       ],
       "liveUrl": "https://daretaylor.com"
+    }
+  ],
+  "titleCardBackgrounds": [
+    {
+      "bg": "/images/tv/title-cards/no-bhad-codes_bg.webp",
+      "color": "#000000"
+    },
+    {
+      "bg": "/images/tv/title-cards/the-backend_bg.webp",
+      "color": "#ffffff"
+    },
+    {
+      "bg": "/images/tv/title-cards/hedgewitch_bg.webp",
+      "color": "#ffffff"
     }
   ],
   "categories": [

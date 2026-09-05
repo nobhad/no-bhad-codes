@@ -798,6 +798,56 @@
   pointer-events: none;
 }
 
+/* Text title card — the default card. Lives in the screen aperture (the
+   container every cqw resolves against) so the lines centre on the same
+   rectangle the composed cards were lettered in. Sizes come from the card's
+   design-point spec: 100pt on the artwork is about 13% of the aperture's
+   width per em, which is what the composed cards measure. No z-index: DOM
+   order puts it after the channel list and before the tune-in panels, static,
+   scanlines and glare, which is exactly where the composed image reads from. */
+.crt-tv__title-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4cqw;
+  padding: 4cqw 6cqw;
+  text-align: center;
+  color: var(--card-color, #fff);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.crt-tv__title-primary,
+.crt-tv__title-secondary {
+  margin: 0;
+  font-family: var(--font-family-acme, sans-serif);
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.crt-tv__title-primary {
+  font-size: calc(var(--card-primary-pt, 90) * 0.13cqw);
+  line-height: 0.98;
+  letter-spacing: 0.01em;
+  /* The composed cards carry a soft dark halo so light type survives a light
+     patch of the bg; same here, scaled with the type. */
+  text-shadow: 0 0.03em 0.12em rgba(0, 0, 0, 0.35);
+}
+
+.crt-tv__title-secondary {
+  font-size: calc(var(--card-secondary-pt, 38) * 0.13cqw);
+  line-height: 1.15;
+  letter-spacing: 0.14em;
+  text-shadow: 0 0.03em 0.1em rgba(0, 0, 0, 0.3);
+}
+
+.crt-tv__title-line {
+  display: block;
+}
+
 /* Scanlines overlay for CRT effect */
 .crt-tv__scanlines {
   position: absolute;
