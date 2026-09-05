@@ -480,7 +480,7 @@ export class PageTransitionModule extends BaseModule {
     pageConfigs.forEach((config) => {
       const element =
         document.getElementById(config.id) ||
-        document.querySelector(`.${config.id}-section`) ||
+        document.querySelector(`.${CSS.escape(config.id)}-section`) ||
         document.querySelector(`section#${config.id}`);
 
       if (element) {

@@ -295,7 +295,7 @@ export class NavigationModule extends BaseModule {
                     const targetId = href.replace('#/', '').replace('#', '');
                     const targetElement =
                       document.getElementById(targetId) ||
-                      document.querySelector(`.${targetId}-section`);
+                      document.querySelector(`.${CSS.escape(targetId)}-section`);
                     if (targetElement) {
                       targetElement.scrollIntoView({ behavior: 'smooth' });
                     }

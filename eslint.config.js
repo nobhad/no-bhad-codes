@@ -30,6 +30,7 @@ const commonGlobals = {
   EventTarget: 'readonly',
   Event: 'readonly',
   CustomEvent: 'readonly',
+  CSS: 'readonly',
   MouseEvent: 'readonly',
   KeyboardEvent: 'readonly',
   TouchEvent: 'readonly',

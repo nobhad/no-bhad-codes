@@ -303,8 +303,8 @@ export class RouterService extends BaseService {
     // Try multiple selector strategies to find the section
     const section =
       document.getElementById(sectionId) ||
-      document.querySelector(`.${sectionId}-section`) ||
-      document.querySelector(`section.${sectionId}-section`) ||
+      document.querySelector(`.${CSS.escape(sectionId)}-section`) ||
+      document.querySelector(`section.${CSS.escape(sectionId)}-section`) ||
       document.querySelector(`[data-section="${sectionId}"]`);
 
     if (!section) {
