@@ -52,9 +52,13 @@ body[data-page="design-system"] .footer-curtain {
      be clamp(200px, 30vh, 320px), which had no relationship to its contents —
      at 800px tall that gave a 240px band holding a 128px mark, so the gap above
      and below (50 and 62) disagreed with the 48 either side. */
-  /* One line above the lockup and one below it, each --font-size-base, plus
-     the gap the mark's column puts between them and the art. */
-  --curtain-credit-height: calc(var(--font-size-base) * 1.4 * 2 + var(--space-1) * 2);
+  /* The credit label above the lockup at --font-size-base, the year below it a
+     step up at --font-size-lg, and the gaps the mark's column puts around the
+     art — less the negative margin that pulls the year back up under it. */
+  --curtain-credit-height: calc(
+    var(--font-size-base) * 1.4 + var(--font-size-lg) * 1.4 + var(--space-1) * 2 -
+      var(--space-3)
+  );
   --footer-curtain-height: calc(
     var(--curtain-avatar-height) + var(--curtain-credit-height) + var(--curtain-inset) * 2
   );
@@ -292,6 +296,17 @@ body[data-page="design-system"] .footer-curtain {
 .footer-curtain__year {
   align-self: flex-end;
   text-align: right;
+  /* A step up from the credit label, and tucked close under the wordmark: it
+     belongs to the mark above it, not to the band it sits in. The mark's own
+     gap holds the credit off the lockup, so this pulls back against it rather
+     than getting a smaller gap of its own — one value to change, not two. */
+  font-size: var(--font-size-lg);
+  /* Pulled up under the WORDMARK, not the lockup. The avatar hangs lower than
+     the three lines of type beside it, so left in flow the year sits a full
+     28px below "codes" — attached to the art rather than to the name. This
+     lifts it back into that slack; it clears the avatar horizontally, being
+     right-aligned to the wordmark. */
+  margin-top: calc(var(--space-3) * -1);
 }
 
 /* ===============================================
