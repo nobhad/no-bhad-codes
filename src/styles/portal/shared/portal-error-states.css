@@ -141,7 +141,11 @@
   outline-offset: var(--focus-ring-offset-sm);
 }
 
-/* React portal mount point */
+/* React portal mount point. The font and colour used to come from the
+   Tailwind entry sheet (globals.css, removed 2026-09); they live here now. */
 .react-portal-mount {
   min-height: var(--space-12);
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+  background: transparent;
 }

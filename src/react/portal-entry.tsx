@@ -5,4 +5,3 @@
  */
 
 // Import pre-generated Tailwind CSS for React components
-import './styles/tailwind-generated.css';

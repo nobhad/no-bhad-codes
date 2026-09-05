@@ -87,10 +87,6 @@ jobs:
       # Chromium, so the runner needs real Chrome.
       - run: npx playwright install --with-deps chrome
 
-      # Only the portal entries import the generated sheet, and it is
-      # gitignored — build it once so a missing import cannot fail a page.
-      - run: npm run tailwind:build
-
       # Front end only: these tests read rendered pages and never post.
       - run: npm run test:e2e:a11y
         env:

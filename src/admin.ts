@@ -8,7 +8,6 @@
  */
 
 // Import pre-generated Tailwind CSS for React components
-import './react/styles/tailwind-generated.css';
 
 // Import admin CSS bundle
 import './styles/bundles/admin.css';

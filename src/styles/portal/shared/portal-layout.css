@@ -1453,7 +1453,7 @@ td {
 
 /* Ring (focus outline) */
 .ring-2 {
-  box-shadow: 0 0 0 var(--focus-ring-width-thick) var(--ring);
+  box-shadow: 0 0 0 var(--focus-ring-width-thick) var(--color-text-primary);
 }
 .ring-white {
   --ring: var(--color-border-primary);

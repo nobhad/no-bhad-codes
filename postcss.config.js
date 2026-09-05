@@ -1,9 +1,9 @@
 /**
  * PostCSS Configuration
  *
- * NOTE: Tailwind is removed from global PostCSS to avoid conflicts
- * with existing @layer directives. React components use the existing
- * portal CSS classes and CSS variables instead.
+ * Applied by Vite to every stylesheet: custom media queries from the
+ * breakpoint system, then vendor prefixes. Tailwind was removed in 2026-09;
+ * no utility class had ever been written.
  */
 export default {
   plugins: {
