@@ -8,13 +8,17 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { introFinished } from './support/site';
 
 test.describe('Business Card', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     // Wait for business card to be rendered
     await page.waitForSelector('#business-card');
-    await page.waitForTimeout(1000); // Wait for intro animation
+    // The card's handlers only bind once the intro has faded out
+    // (business-card-interactions.ts keys on `intro-finished`), so every
+    // interaction test has to wait for that, not for a fixed delay.
+    await introFinished(page);
   });
 
   test('should display business card on homepage', async ({ page }) => {
