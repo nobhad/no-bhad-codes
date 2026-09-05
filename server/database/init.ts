@@ -76,6 +76,27 @@ interface PooledConnection {
   id: string;
 }
 
+/**
+ * How long a connection waits for a held write lock before giving up with
+ * SQLITE_BUSY. WAL lets readers run alongside a writer, but still allows only
+ * one writer at a time — so pool slots contending for the write lock is
+ * ordinary, expected behaviour, and waiting is the correct response to it.
+ *
+ * node-sqlite3 defaults this to 1000ms. A loaded CI runner clears that
+ * routinely, and the loser then failed the request outright: that is what the
+ * intermittent "SQLITE_BUSY: database is locked" runs were. A fast local
+ * machine serializes the same writes inside a second and never sees it.
+ *
+ * Kept under the 10s connection-acquire ceiling in getConnection(), so a real
+ * deadlock still surfaces as a timeout rather than stalling here.
+ */
+const DEFAULT_BUSY_TIMEOUT_MS = 5000;
+
+function resolveBusyTimeoutMs(): number {
+  const configured = parseInt(process.env.DB_BUSY_TIMEOUT_MS ?? '', 10);
+  return Number.isFinite(configured) && configured > 0 ? configured : DEFAULT_BUSY_TIMEOUT_MS;
+}
+
 class DatabaseConnectionPool implements Database {
   private connections: PooledConnection[] = [];
   private maxConnections: number;
@@ -122,6 +143,9 @@ class DatabaseConnectionPool implements Database {
         // as an uncaught exception. Resolving from the last statement's
         // callback is what actually guarantees they are applied.
         const pragmas = [
+          // First, because every pragma below it can itself need the write
+          // lock — journal_mode above all — and they should wait for it too.
+          `PRAGMA busy_timeout = ${resolveBusyTimeoutMs()}`,
           'PRAGMA foreign_keys = ON',
           'PRAGMA journal_mode = WAL',
           'PRAGMA synchronous = NORMAL',

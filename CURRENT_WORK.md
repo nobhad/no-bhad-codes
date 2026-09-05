@@ -2,6 +2,69 @@
 
 ---
 
+## SQLITE_BUSY in the integration job — 2026-09-05
+
+**Status:** DONE — committed
+**Priority:** —
+
+### The failure was real but stale
+
+- [x] **CI is green and has been since 2026-08-28.** The integration job passed
+      on both card commits and on every run since. The belief that it was
+      "currently failing" was wrong; the last red integration run was
+      `fix(pages): masthead meets the header` on 2026-08-27, where 6 of 10 files
+      failed with `SQLITE_BUSY: database is locked` and three uncaught
+      exceptions carrying `{ errno: 5, code: 'SQLITE_BUSY' }`.
+- [x] **It was never going to stay fixed on its own.** Nothing had addressed the
+      cause — the suite passes locally and on a warm runner by luck of timing.
+
+### Root cause
+
+- [x] **The pool never set `PRAGMA busy_timeout`, so it inherited
+      node-sqlite3's 1000ms default.** Measured directly: a fresh connection
+      reports `{ timeout: 1000 }`, and a write against a lock held longer than
+      that throws `SQLITE_BUSY` at 1037ms instead of waiting.
+- [x] **Five connections against one file makes that contention routine.**
+      `initializeDatabase()` opens up to `DB_MAX_CONNECTIONS` (default 5)
+      against the same SQLite file. WAL lets readers run alongside a writer but
+      still permits only one writer, so pool slots queue behind each other by
+      design. Waiting is the correct response; failing outright is not.
+- [x] **Why only CI.** A loaded two-core runner holds the write lock past a
+      second — with `synchronous = NORMAL` and WAL checkpointing in the mix —
+      where a fast local machine serializes the same writes well inside it.
+      Every failing test in that run died at ~10s, the `testTimeout`, because
+      the rejection surfaced as an uncaught exception rather than a query error.
+
+### The fix
+
+- [x] **`PRAGMA busy_timeout` is now the first pragma on every pooled
+      connection.** First deliberately: the pragmas below it can themselves need
+      the write lock — `journal_mode = WAL` above all — and they should wait for
+      it too.
+- [x] **Default 5000ms, overridable with `DB_BUSY_TIMEOUT_MS`.** Named constant
+      `DEFAULT_BUSY_TIMEOUT_MS`, not an inline number. Kept under the 10s
+      connection-acquire ceiling in `getConnection()` so a genuine deadlock
+      still surfaces as a timeout rather than stalling in the busy handler.
+- [x] **Regression test that fails for the right reason.**
+      `tests/integration/db-pool-concurrency.test.ts` holds a transaction on one
+      pool connection and writes from another. Against the unfixed pool it
+      reproduces the CI error exactly — `SQLITE_BUSY: database is locked`,
+      `{ errno: 5, code: 'SQLITE_BUSY' }`. The hold is 2500ms on purpose: an
+      earlier 500ms version passed against the unfixed pool, because under
+      node-sqlite3's 1000ms default every writer already waits and succeeds.
+- [x] **Verified.** Integration 63/63 across 11 files, unit 4362 passed, lint
+      and typecheck clean.
+
+### Related, not touched
+
+- [ ] **`hookTimeout` was raised to 30s on 2026-09-04** (`dfd9438f`) for a
+      different symptom — a cold-runner `setupTestDb()` overrunning 10s and
+      reporting itself as twenty `Cannot read properties of undefined (reading
+      'cleanup')` failures. That change stands on its own; it did not and could
+      not fix the lock contention.
+
+---
+
 ## Business card back, and the card during the intro — 2026-09-05
 
 **Status:** DONE — pushed
