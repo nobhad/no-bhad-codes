@@ -921,7 +921,12 @@ export class PageTransitionModule extends BaseModule {
       return;
     }
     this.curtainTravel = travel;
-    this.setCurtainProgress(travel / CURTAIN_TRAVEL_PX);
+    // A delta worth the whole travel is not a gesture, it is a command: the ↓
+    // key or the compass cue asking for the band, with no ongoing input to
+    // track. The wheel and the swipe arrive as many small deltas instead, and
+    // those have to stay glued to the finger.
+    const commanded = Math.abs(delta) >= CURTAIN_TRAVEL_PX;
+    this.setCurtainProgress(travel / CURTAIN_TRAVEL_PX, commanded);
     this.scheduleCurtainSettle(delta > 0 ? 1 : 0);
   }
 
@@ -944,16 +949,24 @@ export class PageTransitionModule extends BaseModule {
       const end =
         moved >= CURTAIN_COMMIT_PROGRESS ? this.curtainSettleTarget : 1 - this.curtainSettleTarget;
       this.curtainTravel = end * CURTAIN_TRAVEL_PX;
-      this.setCurtainProgress(end);
+      this.setCurtainProgress(end, true);
     }, CURTAIN_SETTLE_MS);
   }
 
-  private setCurtainProgress(progress: number): void {
+  /**
+   * @param commanded true when the move is a single instruction (a key, the
+   * compass cue, the settle) rather than a gesture being tracked. The curtain
+   * eases these over a longer, gentler curve — there is no input to keep up
+   * with, so the only job is to look like a curtain being drawn.
+   */
+  private setCurtainProgress(progress: number, commanded = false): void {
     if (progress === this.curtainProgress) {
       return;
     }
     this.curtainProgress = progress;
-    window.dispatchEvent(new CustomEvent('footer-curtain:set-progress', { detail: { progress } }));
+    window.dispatchEvent(
+      new CustomEvent('footer-curtain:set-progress', { detail: { progress, commanded } })
+    );
     // The ↓ cue is lit off this value — see updateCompass.
     this.updateCompass();
   }

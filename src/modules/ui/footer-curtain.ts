@@ -55,6 +55,23 @@ const PROGRESS_EPSILON = 0.002;
 const CURTAIN_SCRUB_DURATION = 0.4;
 
 /**
+ * Seconds for a COMMANDED move — the ↓ key, the compass cue, the settle at the
+ * end of a gesture.
+ *
+ * Longer and gentler than the scrub, because the two are different motions
+ * wearing the same name. A scrub is chasing a finger and has to stay glued to
+ * it; 0.4s of power3.out is right there, since it starts at full speed and the
+ * input is already moving. A key press has no gesture to keep up with — the
+ * band travels its whole length from a standing start — and that same curve
+ * reads as a snap: instant off the mark, then slammed to a stop.
+ *
+ * power2.inOut eases both ends, so it looks like a curtain being drawn rather
+ * than dropped.
+ */
+const CURTAIN_COMMAND_DURATION = 0.7;
+const CURTAIN_COMMAND_EASE = 'power2.inOut';
+
+/**
  * Slop (px) for "this scroller is at its end".
  *
  * Scroll heights are fractional: a container that is visually at the bottom
@@ -79,6 +96,12 @@ export class FooterCurtainModule extends BaseModule {
 
   private timeline: gsap.core.Timeline | null = null;
   private scrubTween: gsap.core.Tween | null = null;
+  /**
+   * Whether the move in flight was commanded rather than gestured. Set from the
+   * event detail and read by the tween, so a key press and a swipe can ease
+   * differently without either needing to know about the other.
+   */
+  private commandedMove = false;
   /** Tween target for the scrub — GSAP eases this, the timeline follows it. */
   private readonly scrubState = { value: 0 };
 
@@ -376,8 +399,9 @@ export class FooterCurtainModule extends BaseModule {
       this.retractForOverlay();
       return;
     }
-    const detail = (event as CustomEvent<{ progress?: number }>).detail;
+    const detail = (event as CustomEvent<{ progress?: number; commanded?: boolean }>).detail;
     const next = clamp01(typeof detail?.progress === 'number' ? detail.progress : 0);
+    this.commandedMove = detail?.commanded === true;
 
     const wasDriving = this.externalDrive;
     this.externalDrive = next > 0;
@@ -570,8 +594,8 @@ export class FooterCurtainModule extends BaseModule {
     const timeline = this.timeline;
     this.scrubTween = gsap.to(this.scrubState, {
       value: target,
-      duration: CURTAIN_SCRUB_DURATION,
-      ease: 'power3.out',
+      duration: this.commandedMove ? CURTAIN_COMMAND_DURATION : CURTAIN_SCRUB_DURATION,
+      ease: this.commandedMove ? CURTAIN_COMMAND_EASE : 'power3.out',
       overwrite: true,
       onUpdate: () => {
         timeline.progress(this.scrubState.value);
