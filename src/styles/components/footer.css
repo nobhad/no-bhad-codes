@@ -52,15 +52,11 @@ body[data-page="design-system"] .footer-curtain {
      be clamp(200px, 30vh, 320px), which had no relationship to its contents —
      at 800px tall that gave a 240px band holding a 128px mark, so the gap above
      and below (50 and 62) disagreed with the 48 either side. */
-  /* The credit line at --font-size-base, the year under it a step down at
-     --font-size-sm, and the gap between them. Two different sizes, so this
-     cannot be one multiplied by two. */
-  --curtain-credit-height: calc(
-    var(--font-size-base) * 1.4 + var(--font-size-sm) * 1.4 + var(--space-0-5)
-  );
+  /* One line above the lockup and one below it, each --font-size-base, plus
+     the gap the mark's column puts between them and the art. */
+  --curtain-credit-height: calc(var(--font-size-base) * 1.4 * 2 + var(--space-1) * 2);
   --footer-curtain-height: calc(
-    var(--curtain-avatar-height) + var(--space-1) + var(--curtain-credit-height) +
-      var(--curtain-inset) * 2
+    var(--curtain-avatar-height) + var(--curtain-credit-height) + var(--curtain-inset) * 2
   );
   /* The raw gray scale, not the --color-dark / --color-light aliases: those
      flip with the theme, and the band is one fixed ink slab in both by
@@ -271,24 +267,31 @@ body[data-page="design-system"] .footer-curtain {
    the year under it. In flow rather than absolute — at two lines it no longer
    fits the slack the wordmark leaves beside the avatar, and the band is sized
    to hold it (see --footer-curtain-height). */
-.footer-curtain__copy {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--space-0-5);
+/* The credit heads the mark and the year closes it, so the block reads top to
+   bottom: who made it, the thing itself, when. Shared type; only their
+   alignment inside the column differs. */
+.footer-curtain__credit,
+.footer-curtain__year {
   margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   line-height: 1.4;
-  text-align: right;
   white-space: nowrap;
   color: var(--footer-curtain-text-muted);
 }
 
-/* The credit is the line that says something; the year is a footnote to it.
-   A step up in size makes that hierarchy rather than leaving two identical
-   lines for the reader to work out. */
+/* Small-caps meta label, the treatment the site already uses for eyebrows and
+   round labels: uppercase, tracked out, and NOT bolder — a heavier label reads
+   as a heading, and this is a caption. Pinned to the left of the column so it
+   sits over the avatar rather than over the wordmark. */
 .footer-curtain__credit {
-  font-size: var(--font-size-base);
+  align-self: flex-start;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-widest);
+}
+
+.footer-curtain__year {
+  align-self: flex-end;
+  text-align: right;
 }
 
 /* ===============================================

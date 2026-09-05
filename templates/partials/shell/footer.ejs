@@ -5,6 +5,12 @@
       <div class="footer-curtain" data-footer-curtain aria-hidden="true">
         <div class="footer-curtain__inner" data-footer-curtain-inner>
           <div class="footer-curtain__mark">
+            <!-- Both of these sit beside the link, never inside it. Inside the
+                 <a> they would join its visible label while the aria-label
+                 stayed "No Bhad Codes home" — a WCAG 2.5.3 mismatch — and
+                 neither would be announced at all, since aria-label replaces
+                 the content it wraps. Neither is a link to the homepage. -->
+            <p class="footer-curtain__credit">Made &amp; Designed by</p>
             <a class="footer-curtain__brand" href="/" aria-label="No Bhad Codes home">
               <img
                 class="footer-curtain__avatar"
@@ -17,16 +23,7 @@
               />
               <p class="footer-curtain__wordmark">no bhad codes</p>
             </a>
-            <!-- Beside the link, not inside it. Visually it sits under the
-                 wordmark either way, but inside the <a> it would join the
-                 link's visible label while the aria-label stayed "No Bhad
-                 Codes home" — a WCAG 2.5.3 mismatch, and the year would never
-                 be announced, since aria-label replaces the content it wraps.
-                 It is also just not a link to the homepage. -->
-            <p class="footer-curtain__copy">
-              <span class="footer-curtain__credit">Made &amp; Designed</span>
-              <span class="footer-curtain__year">&copy; <span class="js-copyright-year"></span></span>
-            </p>
+            <p class="footer-curtain__year">&copy; <span class="js-copyright-year"></span></p>
           </div>
 
         </div>
