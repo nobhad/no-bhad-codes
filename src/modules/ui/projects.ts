@@ -1244,6 +1244,44 @@ export class ProjectsModule extends BaseModule {
   }
 
   /**
+   * Draw (or clear) a text title card over the detail page's hero image. The
+   * overlay sits on the same rectangle the TV's screen aperture occupies on
+   * the card artwork, and is its own size container, so the type scales with
+   * the figure exactly as it scales with the TV.
+   */
+  private setHeroTitleText(heroImg: HTMLImageElement, card: ResolvedTitleCard | null): void {
+    const figure = heroImg.parentElement;
+    if (!figure) {
+      return;
+    }
+    let frame = figure.querySelector<HTMLElement>('[data-hero-card]');
+    if (!card) {
+      frame?.remove();
+      return;
+    }
+    if (!frame) {
+      // Two elements on purpose: the frame is the size container the type
+      // measures against, and the layer inside it keeps the TV's padding and
+      // gap (also in cqw). One element doing both would pad itself against
+      // the viewport and hand its children a content box a third the width.
+      frame = document.createElement('div');
+      frame.className = 'worksub-hero-card';
+      frame.setAttribute('data-hero-card', '');
+      frame.setAttribute('aria-hidden', 'true');
+      frame.innerHTML =
+        '<div class="crt-tv__title-text">' +
+        '<p class="crt-tv__title-primary" data-title-primary></p>' +
+        '<p class="crt-tv__title-secondary" data-title-secondary></p>' +
+        '</div>';
+      figure.appendChild(frame);
+    }
+    const layer = frame.querySelector<HTMLElement>('.crt-tv__title-text');
+    if (layer) {
+      this.populateTitleText(layer, card);
+    }
+  }
+
+  /**
    * Write a text card's lines into the title-text layer. The primary line
    * carries the quotation marks the composed cards were lettered with — the
    * Looney-Tunes-title idiom the whole TV borrows — around the first and last
@@ -2787,10 +2825,25 @@ export class ProjectsModule extends BaseModule {
         }
       } else {
         heroImg.onerror = null;
-        heroImg.src = HERO_PLACEHOLDER_SRC;
-        heroImg.alt = `${project.title} - image coming soon`;
-        heroImg.classList.add('placeholder');
         delete heroImg.dataset.themedSrc;
+        // No media yet: the title card stands in until there is some. The
+        // composed image when the card has one; otherwise its background with
+        // the same text overlay the TV draws, so the page opens on the card
+        // the channel showed rather than a grey box.
+        const card = this.resolveTitleCard(project);
+        if (card) {
+          heroImg.src = card.composed ?? card.bg;
+          heroImg.alt = `${project.title} title card`;
+          heroImg.classList.remove('placeholder');
+        } else {
+          heroImg.src = HERO_PLACEHOLDER_SRC;
+          heroImg.alt = `${project.title} - image coming soon`;
+          heroImg.classList.add('placeholder');
+        }
+        this.setHeroTitleText(heroImg, card && !card.composed ? card : null);
+      }
+      if (heroSrc) {
+        this.setHeroTitleText(heroImg, null);
       }
     }
 

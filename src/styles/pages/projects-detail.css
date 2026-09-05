@@ -273,6 +273,8 @@
 
 .worksub-header figure {
   margin: 0;
+  /* Anchors the title-card overlay drawn over a media-less hero. */
+  position: relative;
   /* No forced ratio: these heroes are full browser-window captures, so
      the box takes its height from the image and shows all of it. */
   overflow: hidden;
@@ -345,6 +347,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* A project with no media yet opens on its title card: the card's background
+   as the hero image and the same text layer the TV draws, placed on the
+   rectangle the screen aperture occupies on the artwork (see .crt-tv__screen).
+   The overlay is its own size container so the cqw type sizes in
+   pages/projects.css resolve against it, not the TV. */
+.worksub-hero-card {
+  position: absolute;
+  top: 8.737%;
+  left: 6.421%;
+  width: 73.018%;
+  height: 70.311%;
+  container-type: size;
+  pointer-events: none;
+}
+
+.worksub-hero-card .crt-tv__title-text {
+  opacity: 1;
 }
 
 /* header-img entrance/exit handled by GSAP in projects.ts */
