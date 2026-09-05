@@ -52,7 +52,16 @@ body[data-page="design-system"] .footer-curtain {
      be clamp(200px, 30vh, 320px), which had no relationship to its contents —
      at 800px tall that gave a 240px band holding a 128px mark, so the gap above
      and below (50 and 62) disagreed with the 48 either side. */
-  --footer-curtain-height: calc(var(--curtain-avatar-height) + var(--curtain-inset) * 2);
+  /* The credit line at --font-size-base, the year under it a step down at
+     --font-size-sm, and the gap between them. Two different sizes, so this
+     cannot be one multiplied by two. */
+  --curtain-credit-height: calc(
+    var(--font-size-base) * 1.4 + var(--font-size-sm) * 1.4 + var(--space-0-5)
+  );
+  --footer-curtain-height: calc(
+    var(--curtain-avatar-height) + var(--space-1) + var(--curtain-credit-height) +
+      var(--curtain-inset) * 2
+  );
   /* The raw gray scale, not the --color-dark / --color-light aliases: those
      flip with the theme, and the band is one fixed ink slab in both by
      design. Ink rather than true black, off-white rather than true white. */
@@ -185,7 +194,10 @@ body[data-page="design-system"] .footer-curtain {
 .footer-curtain__mark {
   align-self: center;
   justify-self: end;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
   min-width: 0;
 }
 
@@ -255,18 +267,28 @@ body[data-page="design-system"] .footer-curtain {
   color: var(--footer-curtain-text);
 }
 
+/* Two lines, right edges flush with the wordmark above them: the credit, then
+   the year under it. In flow rather than absolute — at two lines it no longer
+   fits the slack the wordmark leaves beside the avatar, and the band is sized
+   to hold it (see --footer-curtain-height). */
 .footer-curtain__copy {
-  /* Bottom-right of the lockup: under the wordmark, right edge flush with it,
-     sitting in the slack the wordmark leaves against the taller avatar. */
-  position: absolute;
-  right: 0;
-  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-0-5);
   margin: 0;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   line-height: 1.4;
   text-align: right;
   white-space: nowrap;
   color: var(--footer-curtain-text-muted);
+}
+
+/* The credit is the line that says something; the year is a footnote to it.
+   A step up in size makes that hierarchy rather than leaving two identical
+   lines for the reader to work out. */
+.footer-curtain__credit {
+  font-size: var(--font-size-base);
 }
 
 /* ===============================================
