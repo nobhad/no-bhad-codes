@@ -43,6 +43,33 @@
       })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- After the viewport meta on purpose: the media query below reads the
+         layout viewport, which is 980px wide until that tag has been parsed. -->
+    <script>
+      (function () {
+        var pageId = document.documentElement.getAttribute('data-initial-page');
+        // Deep links to the projects tile paint the TV last: the module is
+        // lazy, it fetches portfolio.json, then the markup it renders asks
+        // for the cabinet art — three round trips after the scripts. The
+        // cabinet is that page's largest paint, so start both requests now.
+        if (pageId === 'projects' || pageId === 'project-detail') {
+          var preload = function (href, as) {
+            var link = document.createElement('link');
+            link.rel = 'preload';
+            link.as = as;
+            link.href = href;
+            if (as === 'fetch') link.crossOrigin = 'anonymous';
+            if (as === 'image') link.fetchPriority = 'high';
+            document.head.appendChild(link);
+          };
+          preload('/data/portfolio.json', 'fetch');
+          if (pageId === 'projects') {
+            var narrow = window.matchMedia('(max-width: 479px)').matches;
+            preload(narrow ? '/images/tv/chassis-mobile.webp' : '/images/tv/chassis.webp', 'image');
+          }
+        }
+      })();
+    </script>
     <meta name="theme-color" content="#e0e0e0" />
     <title>No Bhad Codes - Professional Web Development</title>
 
@@ -851,6 +878,8 @@
                   src="/images/project-placeholder.svg"
                   alt="Project image loading"
                   class="worksub-hero-img placeholder"
+                  width="1200"
+                  height="700"
                 />
               </figure>
               <div class="worksub-header-info">

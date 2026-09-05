@@ -58,6 +58,16 @@ if (typeof window !== 'undefined') {
 
 // Import and initialize application
 import { app } from './core/app';
+
+// A projects deep link needs two lazy chunks the app only asks for once it has
+// booted: the transition module and the TV. Start them now, in parallel with
+// boot, so the cabinet is not waiting on a chain of round trips. Vite serves
+// the same chunk to this import and to the app's later one.
+const initialPage = document.documentElement.getAttribute('data-initial-page');
+if (initialPage === 'projects' || initialPage === 'project-detail') {
+  void import('./modules/animation/page-transition');
+  void import('./modules/ui/projects');
+}
 import { initPortalDropdown } from './features/main-site/portal-dropdown';
 import { PortalLoginOnMainSite } from './features/main-site/portal-login';
 

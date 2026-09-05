@@ -57,6 +57,7 @@ function contrastVeil(hex: string): string {
 }
 import { createLogger } from '../../utils/logger';
 import { mediaSizeAttrs } from '../../generated/media-dimensions';
+import { fetchPortfolioJson } from '../../services/portfolio-data';
 
 const logger = createLogger('ProjectsModule');
 
@@ -509,7 +510,7 @@ export class ProjectsModule extends BaseModule {
    */
   private async loadPortfolioData(): Promise<void> {
     try {
-      const response = await fetch('/data/portfolio.json');
+      const response = await fetchPortfolioJson();
       if (!response.ok) {
         throw new Error(`Failed to load portfolio data: ${response.status}`);
       }
@@ -665,7 +666,7 @@ export class ProjectsModule extends BaseModule {
                desktop <img> keeps the base-on/base-off pair the power toggle
                swaps between. -->
           <picture class="crt-tv__screen-bg-picture">
-            <img class="crt-tv__screen-bg" src="/images/tv/base-on.webp" alt="" data-screen-bg />
+            <img class="crt-tv__screen-bg" src="/images/tv/base-on.webp" alt="" data-screen-bg width="2850" height="2186" />
           </picture>
           <!-- Composed title-card (text baked in) sits at the same full
                TV-frame canvas as the bg below. Lives outside .crt-tv__screen
@@ -678,7 +679,7 @@ export class ProjectsModule extends BaseModule {
                (cardSrc) rather than by a <picture> source: a <source> wins
                over the src attribute unconditionally, which pinned every
                channel to one card on mobile. -->
-          <img class="crt-tv__image" src="" alt="Project preview" />
+          <img class="crt-tv__image" src="" alt="Project preview" width="2850" height="2186" />
           <div class="crt-tv__screen">
             <!-- Mute indicator — top-right of the screen aperture, only
                  visible when volume is at 0 AND the TV is powered on.
@@ -708,24 +709,27 @@ export class ProjectsModule extends BaseModule {
             <div class="crt-tv__glare"></div>
           </div>
           <!-- Two cabinets, one set. The desktop chassis is landscape
-               (1426x1093) with its controls in a column down the right; the
-               mobile one is near-square (1240x1270) with the controls, readout
+               (2850x2186) with its controls in a column down the right; the
+               mobile one is near-square (1200x1229, exported at 2481x2541 and
+               downsized: it renders at ~380px wide) with the controls, readout
                and speakers in a band UNDER the screen, which is the only way
                a CRT and its controls both fit a portrait phone. <picture>
                swaps them at the breakpoint; --tv-aspect is re-read on each
-               load so the wrapper's width math follows. -->
+               load so the wrapper's width math follows. The width/height
+               attributes on every layer reserve the box before the file
+               arrives; CSS still sizes them. -->
           <!-- Screen glass — the "Screen Above Title Card" layer from the
                .ai, its own file so it can sit where Illustrator has it:
                above the title card, below the cabinet. Mobile only; the
                desktop set keeps its CSS .crt-tv__glare. -->
           <picture class="crt-tv__screen-glass-picture">
-            <source media="(max-width: 479px)" srcset="/images/tv/screen-glass-mobile.webp" />
+            <source media="(max-width: 479px)" srcset="/images/tv/screen-glass-mobile.webp" width="1200" height="1229" />
             <img class="crt-tv__screen-glass" src="/images/tv/screen-glass.webp"
-                 alt="" aria-hidden="true" />
+                 alt="" aria-hidden="true" width="2850" height="2186" />
           </picture>
           <picture class="crt-tv__frame-picture">
-            <source media="(max-width: 479px)" srcset="/images/tv/chassis-mobile.webp" />
-            <img class="crt-tv__frame" src="/images/tv/chassis.webp" alt="Vintage Television" />
+            <source media="(max-width: 479px)" srcset="/images/tv/chassis-mobile.webp" width="1200" height="1229" />
+            <img class="crt-tv__frame" src="/images/tv/chassis.webp" alt="Vintage Television" width="2850" height="2186" fetchpriority="high" />
           </picture>
           <!-- LED channel display — overlays the TV's "88" digital readout
                area (positioned via CSS at coords measured against the
@@ -734,7 +738,9 @@ export class ProjectsModule extends BaseModule {
           <img class="crt-tv__channel-display"
                data-channel-display
                src="/images/tv/led/01.webp"
-               alt="" />
+               alt=""
+               width="2850"
+               height="2186" />
           <!-- Invisible button overlays positioned over the TV frame's
                POWER / CHANNEL ▼▲ / VOLUME ▼▲ controls. Coords measured
                from tv/chassis.webp via flood-fill of the dark button

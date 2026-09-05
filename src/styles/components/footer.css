@@ -30,6 +30,22 @@ body[data-page="design-system"] .footer-curtain {
   height: auto;
   min-height: var(--footer-curtain-height);
   transform: none;
+  visibility: visible;
+}
+
+/* Behind the page, the band is covered and contributes nothing — except a
+   layout shift: the consent banner lifts it by its own height when it
+   appears, and Lighthouse scored that 365px jump as CLS 0.29 on the projects
+   page even though nothing visible moved. Hidden until the reveal starts
+   (FooterCurtainModule toggles .footer--curtain-open past a hair of progress),
+   it has no rendered box to shift. The standalone pages above keep it in
+   flow and visible. */
+.footer-curtain {
+  visibility: hidden;
+}
+
+.footer--curtain-open .footer-curtain {
+  visibility: visible;
 }
 
 /* ===============================================
@@ -347,9 +363,7 @@ body[data-page="design-system"] .footer-curtain {
      year belongs to the type, so it starts where the type starts. Indented past
      the art by exactly what the art occupies: its width, less the transparent
      strip the avatar's negative margin already claws back, plus the gap. */
-  margin-left: calc(
-    var(--curtain-avatar-width) - var(--curtain-avatar-trim) + var(--space-2)
-  );
+  margin-left: calc(var(--curtain-avatar-width) - var(--curtain-avatar-trim) + var(--space-2));
   text-align: left;
   /* A step up from the credit label, and tucked close under the wordmark: it
      belongs to the mark above it, not to the band it sits in. The mark's own

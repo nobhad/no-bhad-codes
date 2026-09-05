@@ -10,6 +10,7 @@
 
 import { BaseService } from './base-service';
 import { createLogger } from '../utils/logger';
+import { fetchPortfolioJson } from './portfolio-data';
 
 const logger = createLogger('DataService');
 
@@ -103,7 +104,7 @@ export class DataService extends BaseService {
   private async loadData(): Promise<void> {
     try {
       this.log('Loading portfolio data...');
-      const response = await fetch('/data/portfolio.json');
+      const response = await fetchPortfolioJson();
 
       if (!response.ok) {
         this.warn(`Failed to load portfolio.json (${response.status}), using fallback data`);
