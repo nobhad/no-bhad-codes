@@ -66,6 +66,11 @@
 /* Sidebar Footer - pushed to bottom via margin-top: auto.
    Bottom padding provides visual balance below Sign Out button. */
 .sidebar-footer {
+  /* The consent banner is fixed to the bottom of the viewport and, until it
+     is answered, sat over Sign Out. consent-banner.ts publishes its rendered
+     height into --consent-banner-height; reserving it here keeps the footer
+     (and the button) above the banner. 0 once the banner is gone. */
+  padding-bottom: var(--consent-banner-height, 0px);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
