@@ -4,61 +4,49 @@
  * ===============================================
  * @file tests/e2e/admin-flow.spec.ts
  *
- * Admin login and view project flow.
+ * Logs in through the portal page on the marketing site — the path a real
+ * visitor takes — and checks the React admin dashboard comes up wired: the
+ * server-rendered shell accepts the cookie, the app restores the session it
+ * stored at login, and the dashboard data request succeeds.
  *
- * Prerequisites:
- * - ADMIN_PASSWORD must be set in .env (backend)
- * - E2E_ADMIN_PASSWORD must match ADMIN_PASSWORD (for test to run)
- * - Use `npm run dev:full` so both frontend and backend run
- *
- * To run: E2E_ADMIN_PASSWORD=your_admin_password npx playwright test admin-flow
+ * Needs the API running (npm run dev:server) and:
+ *   E2E_ADMIN_EMAIL     (defaults to ADMIN_EMAIL)
+ *   E2E_ADMIN_PASSWORD
+ * Skips otherwise. Each test signs in once; the login limiter allows only a
+ * handful of attempts per window, so keep the count here small.
  */
 
 import { test, expect } from '@playwright/test';
+import { introFinished } from './support/site';
 
+const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL || process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD;
 
 test.describe('Admin Flow', () => {
-  test.skip(!ADMIN_PASSWORD, 'E2E_ADMIN_PASSWORD not set - skipping admin flow tests');
+  test.skip(!ADMIN_EMAIL || !ADMIN_PASSWORD, 'E2E_ADMIN_PASSWORD not set - skipping admin flow');
 
-  test('login and view projects', async ({ page }) => {
-    // 1. Navigate to admin page
-    await page.goto('/admin');
-    await page.waitForLoadState('networkidle');
+  test('signs in on the portal page and lands on the admin dashboard', async ({ page }) => {
+    const dashboardData = page.waitForResponse(
+      (res) => res.url().includes('/api/admin/dashboard') && res.request().method() === 'GET'
+    );
 
-    // 2. Wait for login form and sign in
-    await expect(page.locator('#admin-login-form')).toBeVisible();
-    await page.fill('#admin-password', ADMIN_PASSWORD!);
-    await page.click('.auth-submit');
+    await page.goto('/#/portal');
+    await introFinished(page);
+    await page.fill('#portal-page-email', ADMIN_EMAIL!);
+    await page.fill('#portal-page-password', ADMIN_PASSWORD!);
+    await page.click('#portal-page-login-form button[type="submit"]');
 
-    // 3. Wait for dashboard to appear (auth gate hidden, dashboard visible)
-    await expect(page.locator('#admin-dashboard')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('#auth-gate')).toBeHidden();
+    // The shell is served by the API host; a rejected cookie bounces back to
+    // the login hash instead.
+    await page.waitForURL(/\/dashboard/, { timeout: 15000 });
+    expect(page.url()).not.toContain('#/portal');
 
-    // 4. Click Projects tab
-    await page.click('#btn-projects');
-    await expect(page.locator('#tab-projects')).toBeVisible();
+    const sidebar = page.getByRole('navigation').filter({ hasText: 'Sign Out' });
+    await expect(sidebar).toBeVisible({ timeout: 15000 });
+    for (const item of ['Dashboard', 'Work', 'CRM', 'Documents', 'Settings']) {
+      await expect(sidebar.getByText(item, { exact: true }).first()).toBeVisible();
+    }
 
-    // 5. Wait for projects content (table or empty state)
-    await expect(page.locator('#tab-projects')).toBeVisible();
-    await expect(page.locator('#projects-table-body, .empty-state, .loading-row')).toBeVisible({
-      timeout: 10000
-    });
-
-    // 6. Projects section loaded - wait for loading to complete
-    await expect(page.getByText('Loading projects...')).not.toBeVisible({ timeout: 15000 });
-  });
-
-  test('login and view dashboard overview', async ({ page }) => {
-    await page.goto('/admin');
-    await page.waitForLoadState('networkidle');
-
-    await expect(page.locator('#admin-login-form')).toBeVisible();
-    await page.fill('#admin-password', ADMIN_PASSWORD!);
-    await page.click('.auth-submit');
-
-    await expect(page.locator('#admin-dashboard')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('#tab-overview')).toBeVisible();
-    await expect(page.locator('.quick-stats')).toBeVisible();
+    expect((await dashboardData).status()).toBe(200);
   });
 });

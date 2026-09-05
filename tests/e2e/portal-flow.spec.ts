@@ -4,83 +4,64 @@
  * ===============================================
  * @file tests/e2e/portal-flow.spec.ts
  *
- * Client portal login and dashboard flow.
+ * Signs a client in through the portal page on the marketing site and checks
+ * the React client portal comes up wired: shell served, session restored,
+ * the client's dashboard request answered, sign-out working.
  *
- * Prerequisites:
- * - Demo user exists (demo@example.com / demo123 from seed migration 024)
- * - E2E_CLIENT_EMAIL and E2E_CLIENT_PASSWORD must be set (or uses demo defaults)
- * - Use `npm run dev:full` so both frontend and backend run
- *
- * To run: E2E_CLIENT_EMAIL=demo@example.com E2E_CLIENT_PASSWORD=demo123 npx playwright test portal-flow
+ * Needs the API running (npm run dev:server) and a client with a password:
+ *   E2E_CLIENT_EMAIL
+ *   E2E_CLIENT_PASSWORD
+ * Skips otherwise. A client is created by inviting one from the admin
+ * dashboard and following the set-password link.
  */
 
 import { test, expect } from '@playwright/test';
+import { introFinished } from './support/site';
 
-const CLIENT_EMAIL = process.env.E2E_CLIENT_EMAIL || 'demo@example.com';
-const CLIENT_PASSWORD = process.env.E2E_CLIENT_PASSWORD || 'demo123';
+const CLIENT_EMAIL = process.env.E2E_CLIENT_EMAIL;
+const CLIENT_PASSWORD = process.env.E2E_CLIENT_PASSWORD;
 
 test.describe('Client Portal Flow', () => {
-  test('login via API and view dashboard', async ({ page }) => {
-    // 1. Login via API to set HttpOnly cookie (use page context so cookies are shared)
-    const loginRes = await page.request.post('/api/auth/login', {
-      data: { email: CLIENT_EMAIL, password: CLIENT_PASSWORD },
-      failOnStatusCode: false
-    });
+  test.skip(
+    !CLIENT_EMAIL || !CLIENT_PASSWORD,
+    'E2E_CLIENT_EMAIL / E2E_CLIENT_PASSWORD not set - skipping portal flow'
+  );
 
-    // ok() and status() are METHODS on Playwright's APIResponse. Read as
-    // properties they are function references — always truthy — so `!loginRes.ok`
-    // was never true and this skip never fired. The test then ran on against a
-    // portal that had bounced to the login screen and failed on a missing
-    // selector, reporting "portal nav is broken" when the real story was
-    // "there is no demo user in this database".
-    if (!loginRes.ok()) {
-      test.skip(
-        true,
-        `Login failed (${loginRes.status()}) - ensure demo user exists and credentials match`
-      );
+  test('signs in on the portal page, sees the client dashboard, signs out', async ({ page }) => {
+    const dashboardData = page.waitForResponse(
+      (res) => res.url().includes('/api/clients/me/dashboard') && res.request().method() === 'GET'
+    );
+
+    await page.goto('/#/portal');
+    await introFinished(page);
+    await page.fill('#portal-page-email', CLIENT_EMAIL!);
+    await page.fill('#portal-page-password', CLIENT_PASSWORD!);
+    await page.click('#portal-page-login-form button[type="submit"]');
+
+    await page.waitForURL(/\/dashboard/, { timeout: 15000 });
+    expect(page.url()).not.toContain('#/portal');
+
+    const sidebar = page.getByRole('navigation').filter({ hasText: 'Sign Out' });
+    await expect(sidebar).toBeVisible({ timeout: 15000 });
+    for (const item of ['Dashboard', 'Messages', 'Files', 'Payments', 'Settings']) {
+      await expect(sidebar.getByText(item, { exact: true }).first()).toBeVisible();
     }
+    // A client never sees the admin groupings.
+    await expect(sidebar.getByText('CRM', { exact: true })).toHaveCount(0);
 
-    const loginData = await loginRes.json();
-    if (!loginData.success || !loginData.data?.user) {
-      test.skip(
-        true,
-        'Login returned unsuccessful - check E2E_CLIENT_EMAIL and E2E_CLIENT_PASSWORD'
-      );
+    expect((await dashboardData).status()).toBe(200);
+
+    // A first visit shows the cookie banner over the bottom of the viewport.
+    // Answer it the way a person would before reaching for the footer.
+    const decline = page.getByRole('button', { name: /decline/i });
+    if (await decline.isVisible().catch(() => false)) {
+      await decline.click();
     }
-
-    // 2. Navigate to portal (cookie will be sent)
-    await page.goto('/client/portal');
-    await page.waitForLoadState('networkidle');
-
-    // 3. Dashboard should be visible
-    await expect(page.locator('.portal')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('#dashboard-content')).toBeVisible();
-    await expect(page.locator('#tab-dashboard')).toBeVisible();
-
-    // 4. Dashboard tab content
-    await expect(page.locator('.portal-project-cards, .quick-stats, #client-name')).toBeVisible();
-  });
-
-  test('portal dashboard shows welcome and navigation', async ({ page }) => {
-    const loginRes = await page.request.post('/api/auth/login', {
-      data: { email: CLIENT_EMAIL, password: CLIENT_PASSWORD },
-      failOnStatusCode: false
-    });
-
-    if (!loginRes.ok()) {
-      test.skip(true, `Login failed (${loginRes.status()}) - ensure demo user exists`);
-    }
-
-    await page.goto('/client/portal');
-    await page.waitForLoadState('networkidle');
-
-    // IDs come from PortalSidebar.tsx (`btn-${item.id}`) over the nav config in
-    // server/config/navigation.ts. The client portal has no 'invoices' tab —
-    // CLIENT_TAB_IDS calls it 'payment-schedule'; 'invoices' is admin-only.
-    await expect(page.locator('#sidebar')).toBeVisible();
-    await expect(page.locator('#btn-dashboard')).toBeVisible();
-    await expect(page.locator('#btn-files')).toBeVisible();
-    await expect(page.locator('#btn-payment-schedule')).toBeVisible();
-    await expect(page.locator('#btn-logout')).toBeVisible();
+    const signOut = page.getByRole('button', { name: /sign out/i });
+    await signOut.scrollIntoViewIfNeeded();
+    await signOut.click();
+    await page.waitForURL(/#\/portal|\/$/, { timeout: 15000 });
+    const validate = await page.request.get('/api/auth/validate', { failOnStatusCode: false });
+    expect(validate.status()).toBe(401);
   });
 });
