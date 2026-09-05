@@ -2,6 +2,63 @@
 
 ---
 
+## Business card back, and the card during the intro — 2026-09-05
+
+**Status:** DONE — pushed
+**Priority:** —
+
+### Card back
+
+- [x] **Re-imported the card back from the latest Illustrator export.**
+      `npm run card:back`. The export now carries all three type layers again
+      (`Creative_Web_Development`, `By_Noelle_Bhaduri`, `By_Noelle_Bhaduri-2`),
+      so the card ships as exported and `refit-card-back.mjs` is unchanged.
+- [x] **Backed out an interim change that drew the type from the font.** An
+      earlier export contained only the outline and the dog, so the lettering
+      was traced from `Acme-Regular.ttf` and fitted to measured ink boxes. That
+      is no longer needed and the scripts are deleted. Worth knowing if it ever
+      comes back: `<text font-family="Acme">` does NOT work here, because the
+      back is loaded as `<img src="...svg">` — an isolated document that the
+      page's `@font-face` never reaches. The card FRONT is outlined paths for
+      exactly that reason.
+
+### The card was clickable during the intro
+
+- [x] **Interactions no longer go live until the intro is over.**
+      `business-card-interactions.ts` bound its listeners at module init, about
+      a second in, so clicking mid-intro flipped the card during the fade. The
+      idle timer had the same reach: it could start a wiggle or auto-flip over
+      the top of the intro.
+- [x] **Keyed to `intro-finished` alone, deliberately.** Waiting for
+      `intro-loading` to clear looks equivalent and is not: that class comes off
+      when the paw hands the card over, while `intro-finished` only lands once
+      the overlay has faded. The gap between the two IS the window being clicked
+      in. Every route that skips the intro sets `intro-finished` up front, so it
+      is sufficient on its own.
+- [x] **Watches rather than waits once.** Both replay paths in
+      `intro-animation.ts` remove `intro-finished` and start over; a one-shot
+      wait would leave the card live for the whole second run.
+- [x] **Verified in Chrome.** 38 clicks across the 3.98s intro produce zero
+      rotation, and a click afterwards still flips. The same test against the
+      pre-fix code reports a deviation of 2 — a full flip — so it fails for the
+      right reason rather than passing vacuously.
+
+### Open
+
+- [ ] **Music reportedly keeps playing on other pages — not reproduced.**
+      Got the music going and left Projects by hash change, the menu overlay,
+      arrow-key nav and into a case study: all four stop it correctly. Wheel
+      scrolling and the footer curtain never actually navigated or opened under
+      automation, so those two are untested rather than clean. Browser
+      back/forward is the route never exercised and the likeliest to bypass the
+      `page-entering` handler in `projects.ts` that does the stopping. Needs the
+      destination page and how it was reached.
+- [ ] **Nothing in the audio path listens for `visibilitychange`,** so the
+      channel music also keeps playing in a hidden tab. Separate from the report
+      above, and untouched.
+
+---
+
 ## Accessibility sweep, contact form, cookie banner — 2026-09-04
 
 **Status:** DONE — on main, unpushed
