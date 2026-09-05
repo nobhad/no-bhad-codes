@@ -44,6 +44,20 @@ body[data-page="design-system"] .footer-curtain {
      band is derived from. Hoisted out of .footer-curtain__brand so the band's
      own height can be computed from it. */
   --curtain-avatar-height: clamp(88px, 16vh, 150px);
+  /* The art is a 288x356 viewBox, so its width is a fixed fraction of its
+     height, and ~38 of those 356 units past the silhouette's right edge are
+     transparent. Named here rather than inlined because two rules need them:
+     the avatar claws the dead strip back with a negative margin, and the year
+     has to know the art's true footprint to line its left edge up with the
+     wordmark. */
+  --curtain-avatar-width: calc(var(--curtain-avatar-height) * 0.809);
+  --curtain-avatar-trim: calc(var(--curtain-avatar-height) * 0.107);
+  /* The diagonal step between the credit and the lockup, in both axes. */
+  --curtain-mark-gap: var(--space-3);
+  /* How far the year is pulled back up under the wordmark. Less than the
+     avatar's overhang, so a gap survives — at --font-size-2xl a full
+     --space-3 closed it to nothing. */
+  --curtain-year-lift: calc(var(--space-2) + var(--space-0-5));
   /* The air around the mark. Matches the inner's horizontal padding, so the
      brand has the same gap on all four sides — that is the whole point of it
      being one token rather than three values that happen to agree today. */
@@ -52,12 +66,13 @@ body[data-page="design-system"] .footer-curtain {
      be clamp(200px, 30vh, 320px), which had no relationship to its contents —
      at 800px tall that gave a 240px band holding a 128px mark, so the gap above
      and below (50 and 62) disagreed with the 48 either side. */
-  /* The credit label above the lockup at --font-size-base, the year below it a
-     step up at --font-size-lg, and the gaps the mark's column puts around the
-     art — less the negative margin that pulls the year back up under it. */
+  /* TWO lines of credit label above the lockup at --font-size-base, the year
+     below it a step up at --font-size-lg, and the gaps the mark's column puts
+     around the art — less the negative margin that pulls the year back up
+     under the wordmark. */
   --curtain-credit-height: calc(
-    var(--font-size-base) * 1.4 + var(--font-size-lg) * 1.4 + var(--space-1) * 2 -
-      var(--space-3)
+    var(--font-size-base) * 1.4 * 2 + var(--curtain-mark-gap) + var(--font-size-2xl) * 1.4 -
+      var(--curtain-year-lift)
   );
   --footer-curtain-height: calc(
     var(--curtain-avatar-height) + var(--curtain-credit-height) + var(--curtain-inset) * 2
@@ -191,14 +206,30 @@ body[data-page="design-system"] .footer-curtain {
    out 48 above and 23 below. The wordmark is three short lines centred against
    a much taller silhouette, so there is ~28px of slack below it inside the
    lockup already; the credit goes THERE, out of flow, and costs no height. */
+/* Two cells on a diagonal: the credit top-left, the lockup bottom-right, and
+   the two empty cells between them doing the spacing. One `gap` governs both
+   axes, so the air to the left of the mark and the air above it are the same
+   figure by construction — they cannot drift apart the way they would if the
+   horizontal offset were a margin and the vertical one a gap.
+   Stacked in a single column the credit ran across the full width of the
+   lockup, sitting over the avatar and the wordmark at once. */
 .footer-curtain__mark {
   align-self: center;
   justify-self: end;
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: var(--curtain-mark-gap);
+  min-width: 0;
+}
+
+/* Shrink-wraps to the lockup, so the year below it can be indented past the
+   art and land on the wordmark's left edge regardless of the credit's width. */
+.footer-curtain__lockup {
+  grid-column: 2;
+  grid-row: 2;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: var(--space-1);
-  min-width: 0;
+  align-items: flex-start;
 }
 
 .footer-curtain__brand {
@@ -238,7 +269,7 @@ body[data-page="design-system"] .footer-curtain {
      second gap's worth of air before the wordmark. Pull that dead strip
      back (38/356 of the rendered height) so `gap` above is the whole of
      the space between the ear and the type. */
-  margin-right: calc(var(--curtain-avatar-height) * -0.107);
+  margin-right: calc(var(--curtain-avatar-trim) * -1);
   filter: invert(0.878);
 }
 
@@ -288,25 +319,33 @@ body[data-page="design-system"] .footer-curtain {
    as a heading, and this is a caption. Pinned to the left of the column so it
    sits over the avatar rather than over the wordmark. */
 .footer-curtain__credit {
-  align-self: flex-start;
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-widest);
 }
 
 .footer-curtain__year {
-  align-self: flex-end;
-  text-align: right;
+  /* Left edge flush with the wordmark rather than the mark's right edge — the
+     year belongs to the type, so it starts where the type starts. Indented past
+     the art by exactly what the art occupies: its width, less the transparent
+     strip the avatar's negative margin already claws back, plus the gap. */
+  margin-left: calc(
+    var(--curtain-avatar-width) - var(--curtain-avatar-trim) + var(--space-2)
+  );
+  text-align: left;
   /* A step up from the credit label, and tucked close under the wordmark: it
      belongs to the mark above it, not to the band it sits in. The mark's own
      gap holds the credit off the lockup, so this pulls back against it rather
      than getting a smaller gap of its own — one value to change, not two. */
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-2xl);
   /* Pulled up under the WORDMARK, not the lockup. The avatar hangs lower than
      the three lines of type beside it, so left in flow the year sits a full
      28px below "codes" — attached to the art rather than to the name. This
      lifts it back into that slack; it clears the avatar horizontally, being
      right-aligned to the wordmark. */
-  margin-top: calc(var(--space-3) * -1);
+  margin-top: calc(var(--curtain-year-lift) * -1);
 }
 
 /* ===============================================

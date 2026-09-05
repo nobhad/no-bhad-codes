@@ -10,20 +10,27 @@
                  stayed "No Bhad Codes home" — a WCAG 2.5.3 mismatch — and
                  neither would be announced at all, since aria-label replaces
                  the content it wraps. Neither is a link to the homepage. -->
-            <p class="footer-curtain__credit">Made &amp; Designed by</p>
-            <a class="footer-curtain__brand" href="/" aria-label="No Bhad Codes home">
-              <img
-                class="footer-curtain__avatar"
-                src="/images/avatar.svg"
-                alt=""
-                width="288"
-                height="356"
-                loading="lazy"
-                decoding="async"
-              />
-              <p class="footer-curtain__wordmark">no bhad codes</p>
-            </a>
-            <p class="footer-curtain__year">&copy; <span class="js-copyright-year"></span></p>
+            <p class="footer-curtain__credit">Made &amp; Designed<br />by</p>
+            <!-- The lockup and the year share a box that shrink-wraps to the
+                 lockup, so the year's indent lines it up with the wordmark no
+                 matter how wide the credit above grows. Aligning it inside the
+                 mark instead only worked while the lockup happened to be the
+                 widest thing there. -->
+            <div class="footer-curtain__lockup">
+              <a class="footer-curtain__brand" href="/" aria-label="No Bhad Codes home">
+                <img
+                  class="footer-curtain__avatar"
+                  src="/images/avatar.svg"
+                  alt=""
+                  width="288"
+                  height="356"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <p class="footer-curtain__wordmark">no bhad codes</p>
+              </a>
+              <p class="footer-curtain__year">&copy; <span class="js-copyright-year"></span></p>
+            </div>
           </div>
 
         </div>
