@@ -20,7 +20,17 @@
 
 import * as React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageSquare, CheckCheck, Smile, X, Check, Paperclip, Download, File as FileIcon, Send } from 'lucide-react';
+import {
+  MessageSquare,
+  CheckCheck,
+  Smile,
+  X,
+  Check,
+  Paperclip,
+  Download,
+  File as FileIcon,
+  Send
+} from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { LoadingState, EmptyState } from '@react/factories/StateDisplay';
@@ -87,7 +97,9 @@ export interface MessageThreadProps {
 
 function formatMessageTime(date: string): string {
   const d = new Date(date);
-  if (isNaN(d.getTime())) return '';
+  if (isNaN(d.getTime())) {
+    return '';
+  }
   const now = new Date();
   const isToday = d.toDateString() === now.toDateString();
   if (isToday) {
@@ -105,8 +117,12 @@ function formatDateSeparator(date: string): string {
   const d = new Date(date);
   const now = new Date();
   const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
+  if (diffDays === 0) {
+    return 'Today';
+  }
+  if (diffDays === 1) {
+    return 'Yesterday';
+  }
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
@@ -120,7 +136,9 @@ function isSameDay(a: string, b: string): boolean {
 
 /** Renders file attachments on a message bubble */
 function AttachmentList({ attachments }: { attachments: MessageAttachment[] }) {
-  if (attachments.length === 0) return null;
+  if (attachments.length === 0) {
+    return null;
+  }
   return (
     <div className="msgtab-attachments">
       {attachments.map((att) => {
@@ -214,28 +232,38 @@ export function MessageThread({
 
   // Close reaction picker on outside click
   useEffect(() => {
-    if (pickerOpenId === null) return;
+    if (pickerOpenId === null) {
+      return;
+    }
     const handleClick = () => setPickerOpenId(null);
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
   }, [pickerOpenId]);
 
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const valid = files.filter((file) => {
-      if (file.size > maxAttachmentSize) {
-        showNotification?.(`${file.name} exceeds ${formatFileSize(maxAttachmentSize)} limit`, 'error');
-        return false;
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || []);
+      const valid = files.filter((file) => {
+        if (file.size > maxAttachmentSize) {
+          showNotification?.(
+            `${file.name} exceeds ${formatFileSize(maxAttachmentSize)} limit`,
+            'error'
+          );
+          return false;
+        }
+        if (!allowedFileTypes.includes(file.type)) {
+          showNotification?.(`${file.name} has an unsupported file type`, 'error');
+          return false;
+        }
+        return true;
+      });
+      setPendingFiles((prev) => [...prev, ...valid]);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
-      if (!allowedFileTypes.includes(file.type)) {
-        showNotification?.(`${file.name} has an unsupported file type`, 'error');
-        return false;
-      }
-      return true;
-    });
-    setPendingFiles((prev) => [...prev, ...valid]);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  }, [maxAttachmentSize, allowedFileTypes, showNotification]);
+    },
+    [maxAttachmentSize, allowedFileTypes, showNotification]
+  );
 
   const handleRemoveFile = useCallback((index: number) => {
     setPendingFiles((prev) => prev.filter((_, i) => i !== index));
@@ -243,8 +271,12 @@ export function MessageThread({
 
   const handleSend = useCallback(async () => {
     const content = draft.trim();
-    if (!content && pendingFiles.length === 0) return;
-    if (isSending) return;
+    if (!content && pendingFiles.length === 0) {
+      return;
+    }
+    if (isSending) {
+      return;
+    }
     setIsSending(true);
     const success = await onSend(content, pendingFiles.length > 0 ? pendingFiles : undefined);
     setIsSending(false);
@@ -279,7 +311,9 @@ export function MessageThread({
   }, []);
 
   const handleSaveEdit = useCallback(async () => {
-    if (editingId === null || !editContent.trim() || !onEdit) return;
+    if (editingId === null || !editContent.trim() || !onEdit) {
+      return;
+    }
     setIsSavingEdit(true);
     const success = await onEdit(editingId, editContent.trim());
     setIsSavingEdit(false);
@@ -294,7 +328,9 @@ export function MessageThread({
   const handleReaction = useCallback(
     async (messageId: number, emoji: string) => {
       setPickerOpenId(null);
-      if (!onReact) return;
+      if (!onReact) {
+        return;
+      }
       const success = await onReact(messageId, emoji);
       if (!success) {
         showNotification?.('Failed to add reaction', 'error');
@@ -303,14 +339,19 @@ export function MessageThread({
     [onReact, showNotification]
   );
 
-  const handleBubbleTouchStart = useCallback((messageId: number) => {
-    longPressActivated.current = false;
-    if (!onReact) return;
-    longPressTimer.current = setTimeout(() => {
-      longPressActivated.current = true;
-      setPickerOpenId(messageId);
-    }, 500);
-  }, [onReact]);
+  const handleBubbleTouchStart = useCallback(
+    (messageId: number) => {
+      longPressActivated.current = false;
+      if (!onReact) {
+        return;
+      }
+      longPressTimer.current = setTimeout(() => {
+        longPressActivated.current = true;
+        setPickerOpenId(messageId);
+      }, 500);
+    },
+    [onReact]
+  );
 
   const handleBubbleTouchEnd = useCallback(() => {
     if (longPressTimer.current) {
@@ -319,15 +360,18 @@ export function MessageThread({
     }
   }, []);
 
-  const handleBubbleClick = useCallback((message: ThreadMessage) => {
-    if (longPressActivated.current) {
-      longPressActivated.current = false;
-      return;
-    }
-    if (message.isOwn && onEdit) {
-      handleStartEdit(message);
-    }
-  }, [handleStartEdit, onEdit]);
+  const handleBubbleClick = useCallback(
+    (message: ThreadMessage) => {
+      if (longPressActivated.current) {
+        longPressActivated.current = false;
+        return;
+      }
+      if (message.isOwn && onEdit) {
+        handleStartEdit(message);
+      }
+    },
+    [handleStartEdit, onEdit]
+  );
 
   return (
     <div className={cn('msgtab-container', className)}>
@@ -346,16 +390,16 @@ export function MessageThread({
               {messages.map((message, index) => {
                 const prevMessage = index > 0 ? messages[index - 1] : null;
                 const nextMessage = index < messages.length - 1 ? messages[index + 1] : null;
-                const showDateSep = !prevMessage || !isSameDay(prevMessage.timestamp, message.timestamp);
+                const showDateSep =
+                  !prevMessage || !isSameDay(prevMessage.timestamp, message.timestamp);
                 const isContinuation =
-                !showDateSep &&
-                prevMessage &&
-                prevMessage.isOwn === message.isOwn;
+                  !showDateSep && prevMessage && prevMessage.isOwn === message.isOwn;
 
                 // Avatar shows on the LAST message in a group (aligned with bottom)
-                const isLastInGroup = !nextMessage ||
-                !isSameDay(message.timestamp, nextMessage.timestamp) ||
-                nextMessage.isOwn !== message.isOwn;
+                const isLastInGroup =
+                  !nextMessage ||
+                  !isSameDay(message.timestamp, nextMessage.timestamp) ||
+                  nextMessage.isOwn !== message.isOwn;
 
                 const isEditing = editingId === message.id;
 
@@ -387,20 +431,17 @@ export function MessageThread({
                             className={cn(
                               'msgtab-avatar',
                               message.isOwn
-                                ? (ownAvatarLabel ? 'is-client' : 'is-admin')
+                                ? ownAvatarLabel
+                                  ? 'is-client'
+                                  : 'is-admin'
                                 : 'is-client'
                             )}
                             aria-hidden="true"
                           >
-                            {message.isOwn
-                              ? (ownAvatarLabel || null)
-                              : (message.avatarLabel || null)
-                            }
+                            {message.isOwn ? ownAvatarLabel || null : message.avatarLabel || null}
                           </div>
                           {!message.isOwn && (
-                            <span className="msgtab-sender">
-                              {message.senderName ?? 'Client'}
-                            </span>
+                            <span className="msgtab-sender">{message.senderName ?? 'Client'}</span>
                           )}
                         </div>
                       ) : (
@@ -409,7 +450,6 @@ export function MessageThread({
 
                       {/* Content wrap */}
                       <div className={cn('msgtab-content-wrap', message.isOwn && 'is-admin')}>
-
                         {/* Bubble row: [inline actions] + [bubble-group] */}
                         <div className="msgtab-bubble-row">
                           {/* Inline hover actions — always in flow, hidden until hover */}
@@ -422,14 +462,19 @@ export function MessageThread({
                                     aria-label="Add reaction"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      setPickerOpenId(pickerOpenId === message.id ? null : message.id);
+                                      setPickerOpenId(
+                                        pickerOpenId === message.id ? null : message.id
+                                      );
                                     }}
                                   >
                                     <Smile className="icon-sm" />
                                   </button>
                                   {/* Reaction picker — anchored above the Smile button */}
                                   <div
-                                    className={cn('reaction-picker', pickerOpenId !== message.id && 'hidden')}
+                                    className={cn(
+                                      'reaction-picker',
+                                      pickerOpenId !== message.id && 'hidden'
+                                    )}
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     {QUICK_EMOJIS.map((emoji) => (
@@ -455,7 +500,9 @@ export function MessageThread({
                                   value={editContent}
                                   onChange={(e) => setEditContent(e.target.value)}
                                   onKeyDown={(e) => {
-                                    if (e.key === KEYS.ESCAPE) handleCancelEdit();
+                                    if (e.key === KEYS.ESCAPE) {
+                                      handleCancelEdit();
+                                    }
                                     if ((e.metaKey || e.ctrlKey) && e.key === KEYS.ENTER) {
                                       e.preventDefault();
                                       handleSaveEdit();
@@ -486,14 +533,20 @@ export function MessageThread({
                               </div>
                             ) : (
                               <div
-                                className={cn('msgtab-bubble', message.isOwn ? 'is-admin' : 'is-client', message.isOwn && onEdit && 'is-editable')}
+                                className={cn(
+                                  'msgtab-bubble',
+                                  message.isOwn ? 'is-admin' : 'is-client',
+                                  message.isOwn && onEdit && 'is-editable'
+                                )}
                                 onClick={() => handleBubbleClick(message)}
                                 onTouchStart={() => handleBubbleTouchStart(message.id)}
                                 onTouchEnd={handleBubbleTouchEnd}
                                 onTouchCancel={handleBubbleTouchEnd}
                                 onContextMenu={(e) => e.preventDefault()}
                                 role={message.isOwn && onEdit ? 'button' : undefined}
-                                aria-label={message.isOwn && onEdit ? 'Click to edit message' : undefined}
+                                aria-label={
+                                  message.isOwn && onEdit ? 'Click to edit message' : undefined
+                                }
                               >
                                 <p className="msgtab-content">{message.content}</p>
                                 {message.attachments && message.attachments.length > 0 && (
@@ -507,9 +560,7 @@ export function MessageThread({
                         {/* Footer: below bubble-row so Smile aligns with bubble only */}
                         {!isEditing && (
                           <div className={cn('msgtab-footer', message.isOwn && 'is-admin')}>
-                            {message.isEdited && (
-                              <span className="message-edited">(edited)</span>
-                            )}
+                            {message.isEdited && <span className="message-edited">(edited)</span>}
                             <span className="msgtab-time">
                               {formatMessageTime(message.timestamp)}
                             </span>
@@ -617,11 +668,11 @@ export function MessageThread({
                 loading={isSending}
               >
                 <Send className="icon-xs" />
-              Send Message
+                Send Message
               </PortalButton>
             </div>
             <div className="msgtab-compose-hint">
-            Press <kbd className="badge msgtab-kbd">Cmd+Enter</kbd> to send
+              Press <kbd className="badge msgtab-kbd">Cmd+Enter</kbd> to send
             </div>
           </div>
         </div>

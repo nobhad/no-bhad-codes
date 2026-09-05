@@ -35,7 +35,9 @@ export const BRAND_LABELS: Record<string, string> = {
  * Resolve a Stripe card brand key to its display label.
  */
 export function getBrandLabel(brand: string | null | undefined): string {
-  if (!brand) return 'Card';
+  if (!brand) {
+    return 'Card';
+  }
   return BRAND_LABELS[brand.toLowerCase()] ?? brand;
 }
 
@@ -46,7 +48,9 @@ export function formatExpiration(
   month: number | null | undefined,
   year: number | null | undefined
 ): string {
-  if (month === null || month === undefined || year === null || year === undefined) return '--';
+  if (month === null || month === undefined || year === null || year === undefined) {
+    return '--';
+  }
   const paddedMonth = String(month).padStart(2, '0');
   const shortYear = String(year).slice(-2);
   return `${paddedMonth}/${shortYear}`;
@@ -84,12 +88,9 @@ export function PaymentCardDisplay({
 }: PaymentCardDisplayProps) {
   return (
     <span className={cn('payment-card-display', className)}>
-      <span className="font-semibold">{getBrandLabel(brand)}</span>
-      {' '}ending in {lastFour ?? '----'}
+      <span className="font-semibold">{getBrandLabel(brand)}</span> ending in {lastFour ?? '----'}
       {showExpiry && (
-        <span className="text-muted text-sm">
-          {' '}(exp {formatExpiration(expMonth, expYear)})
-        </span>
+        <span className="text-muted text-sm"> (exp {formatExpiration(expMonth, expYear)})</span>
       )}
     </span>
   );

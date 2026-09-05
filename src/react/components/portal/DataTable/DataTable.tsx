@@ -39,11 +39,7 @@ import { formatErrorMessage } from '@/utils/error-utils';
 /**
  * Default filter function - searches all string fields
  */
-function defaultFilterFn<T>(
-  item: T,
-  filters: Record<string, string[]>,
-  search: string
-): boolean {
+function defaultFilterFn<T>(item: T, filters: Record<string, string[]>, search: string): boolean {
   // Search filter
   if (search) {
     const searchLower = search.toLowerCase();
@@ -51,15 +47,21 @@ function defaultFilterFn<T>(
     const matchesSearch = values.some(
       (v) => typeof v === 'string' && v.toLowerCase().includes(searchLower)
     );
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   // Apply all active filters (each value is string[]; treat single-element as equality check)
   for (const [key, values] of Object.entries(filters)) {
     const active = values.filter((v) => v && v !== 'all');
-    if (active.length === 0) continue;
+    if (active.length === 0) {
+      continue;
+    }
     const itemValue = String((item as Record<string, unknown>)[key] ?? '');
-    if (!active.includes(itemValue)) return false;
+    if (!active.includes(itemValue)) {
+      return false;
+    }
   }
 
   return true;
@@ -186,7 +188,9 @@ export function DataTable<T extends { id: number }>({
 
   // Handle bulk delete
   const handleBulkDelete = useCallback(async () => {
-    if (selection.selectedCount === 0 || !onBulkDelete) return;
+    if (selection.selectedCount === 0 || !onBulkDelete) {
+      return;
+    }
 
     const ids = selection.selectedItems.map((item) => item.id);
 
@@ -237,15 +241,14 @@ export function DataTable<T extends { id: number }>({
         sortable: column.sortable,
         sortKey: column.sortKey || column.key,
         headerClassName: column.headerClassName,
-        sortDirection:
-          sort?.column === (column.sortKey || column.key) ? sort.direction : null
+        sortDirection: sort?.column === (column.sortKey || column.key) ? sort.direction : null
       })),
     [columns, sort]
   );
 
   // Render cell content
   const renderCellContent = useCallback(
-    (item: T, column: typeof columns[0], index: number) => {
+    (item: T, column: (typeof columns)[0], index: number) => {
       // Custom render function from column config
       if (column.render) {
         return column.render(item, index);
@@ -270,10 +273,7 @@ export function DataTable<T extends { id: number }>({
         <div className="data-table-stats">
           {stats.map((stat) => (
             <span key={stat.key} className="data-table-stat-item">
-              {stat.label}:{' '}
-              <strong className="data-table-stat-value">
-                {stat.value}
-              </strong>
+              {stat.label}: <strong className="data-table-stat-value">{stat.value}</strong>
             </span>
           ))}
         </div>
@@ -331,7 +331,13 @@ export function DataTable<T extends { id: number }>({
         )}
 
         {/* Refresh */}
-        <PortalButton variant="ghost" size="sm" onClick={onRefetch} loading={isLoading} aria-label="Refresh data">
+        <PortalButton
+          variant="ghost"
+          size="sm"
+          onClick={onRefetch}
+          loading={isLoading}
+          aria-label="Refresh data"
+        >
           <RefreshCw className="icon-md" />
         </PortalButton>
       </div>
@@ -378,11 +384,7 @@ export function DataTable<T extends { id: number }>({
                 key={header.key}
                 sortable={header.sortable}
                 sortDirection={header.sortDirection}
-                onClick={
-                  header.sortable
-                    ? () => handleToggleSort(header.sortKey)
-                    : undefined
-                }
+                onClick={header.sortable ? () => handleToggleSort(header.sortKey) : undefined}
                 className={header.headerClassName}
               >
                 {header.label}
@@ -390,9 +392,7 @@ export function DataTable<T extends { id: number }>({
             ))}
 
             {/* Actions column */}
-            {rowActions.length > 0 && (
-              <PortalTableHead>Actions</PortalTableHead>
-            )}
+            {rowActions.length > 0 && <PortalTableHead>Actions</PortalTableHead>}
           </PortalTableRow>
         </PortalTableHeader>
 
@@ -411,9 +411,7 @@ export function DataTable<T extends { id: number }>({
                 key={item.id}
                 clickable={!!onRowClick}
                 onClick={() => handleRowClick(item)}
-                className={cn(
-                  selection.isSelected(item) && 'data-table-row-selected'
-                )}
+                className={cn(selection.isSelected(item) && 'data-table-row-selected')}
               >
                 {/* Checkbox */}
                 <PortalTableCell onClick={(e) => e.stopPropagation()}>
@@ -427,10 +425,7 @@ export function DataTable<T extends { id: number }>({
 
                 {/* Data cells */}
                 {columns.map((column) => (
-                  <PortalTableCell
-                    key={column.key}
-                    className={column.cellClassName}
-                  >
+                  <PortalTableCell key={column.key} className={column.cellClassName}>
                     {renderCellContent(item, column, index)}
                   </PortalTableCell>
                 ))}
@@ -441,7 +436,9 @@ export function DataTable<T extends { id: number }>({
                     <div className="data-table-row-actions">
                       {rowActions.map((action) => {
                         const show = action.show ? action.show(item) : true;
-                        if (!show) return null;
+                        if (!show) {
+                          return null;
+                        }
 
                         const loading = action.loading ? action.loading(item) : false;
 
@@ -471,13 +468,13 @@ export function DataTable<T extends { id: number }>({
       {!isLoading && filteredData.length > 0 && (
         <div className="portal-card data-table-pagination">
           <div className="data-table-pagination-layout">
-            <div className="data-table-pagination-info">
-              {pagination.pageInfo}
-            </div>
+            <div className="data-table-pagination-info">{pagination.pageInfo}</div>
 
             <div className="data-table-pagination-controls">
               <div className="data-table-page-size">
-                <label className="field-label" htmlFor="data-table-page-size">Show</label>
+                <label className="field-label" htmlFor="data-table-page-size">
+                  Show
+                </label>
                 <FormDropdown
                   id="data-table-page-size"
                   value={String(pagination.pageSize)}
@@ -513,9 +510,7 @@ export function DataTable<T extends { id: number }>({
                 </button>
 
                 <div className="data-table-page-indicator">
-                  <span className="badge">
-                    {pagination.page}
-                  </span>
+                  <span className="badge">{pagination.page}</span>
                   <span className="text-secondary">of {pagination.totalPages}</span>
                 </div>
 

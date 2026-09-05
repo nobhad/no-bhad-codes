@@ -28,31 +28,28 @@ export interface PortalContractsProps extends PortalViewProps {
 
 const filterContract = createFilterFn<PortalContract>(['projectName']);
 
-export function PortalContracts({
-  getAuthToken,
-  onNavigate
-}: PortalContractsProps) {
+export function PortalContracts({ getAuthToken, onNavigate }: PortalContractsProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const listRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_DEFAULT);
 
-  const { data: contracts, isLoading, error, refetch } = usePortalData<PortalContract[]>({
+  const {
+    data: contracts,
+    isLoading,
+    error,
+    refetch
+  } = usePortalData<PortalContract[]>({
     getAuthToken,
     url: API_ENDPOINTS.CONTRACTS_MY,
     transform: (raw) => (raw as PortalContractsResponse).contracts || []
   });
   const items = useMemo(() => contracts ?? [], [contracts]);
 
-  const {
-    filterValues,
-    setFilter,
-    search,
-    setSearch,
-    applyFilters
-  } = useTableFilters<PortalContract>({
-    storageKey: 'portal_contracts',
-    filters: PORTAL_CONTRACTS_FILTER_CONFIG,
-    filterFn: filterContract
-  });
+  const { filterValues, setFilter, search, setSearch, applyFilters } =
+    useTableFilters<PortalContract>({
+      storageKey: 'portal_contracts',
+      filters: PORTAL_CONTRACTS_FILTER_CONFIG,
+      filterFn: filterContract
+    });
 
   const filteredContracts = useMemo(() => applyFilters(items), [applyFilters, items]);
 
@@ -66,7 +63,9 @@ export function PortalContracts({
   }, []);
 
   const handleSignModalClose = useCallback((open: boolean) => {
-    if (!open) setSigningContract(null);
+    if (!open) {
+      setSigningContract(null);
+    }
   }, []);
 
   const handleSigned = useCallback(() => {

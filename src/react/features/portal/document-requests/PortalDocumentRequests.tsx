@@ -32,12 +32,23 @@ interface DocumentRequestSummary {
  * Calculate summary statistics from requests - single pass
  */
 function calculateSummary(requests: DocumentRequest[]): DocumentRequestSummary {
-  const summary: DocumentRequestSummary = { total: requests.length, pending: 0, submitted: 0, approved: 0, rejected: 0 };
+  const summary: DocumentRequestSummary = {
+    total: requests.length,
+    pending: 0,
+    submitted: 0,
+    approved: 0,
+    rejected: 0
+  };
   for (const r of requests) {
-    if (r.status === 'requested' || r.status === 'viewed') summary.pending++;
-    else if (r.status === 'uploaded' || r.status === 'under_review') summary.submitted++;
-    else if (r.status === 'approved') summary.approved++;
-    else if (r.status === 'rejected') summary.rejected++;
+    if (r.status === 'requested' || r.status === 'viewed') {
+      summary.pending++;
+    } else if (r.status === 'uploaded' || r.status === 'under_review') {
+      summary.submitted++;
+    } else if (r.status === 'approved') {
+      summary.approved++;
+    } else if (r.status === 'rejected') {
+      summary.rejected++;
+    }
   }
   return summary;
 }
@@ -53,14 +64,17 @@ function filterDocRequest(
   if (search) {
     const s = search.toLowerCase();
     const matchesSearch =
-      request.title?.toLowerCase().includes(s) ||
-      request.description?.toLowerCase().includes(s);
-    if (!matchesSearch) return false;
+      request.title?.toLowerCase().includes(s) || request.description?.toLowerCase().includes(s);
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(request.status)) return false;
+    if (!statusFilter.includes(request.status)) {
+      return false;
+    }
   }
 
   return true;
@@ -74,7 +88,12 @@ export function PortalDocumentRequests({
   showNotification
 }: PortalDocumentRequestsProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const { data: requests, isLoading, error, refetch } = usePortalData<DocumentRequest[]>({
+  const {
+    data: requests,
+    isLoading,
+    error,
+    refetch
+  } = usePortalData<DocumentRequest[]>({
     getAuthToken,
     url: API_ENDPOINTS.DOCUMENT_REQUESTS_MY,
     transform: (raw) => (raw as { requests?: DocumentRequest[] }).requests || []
@@ -83,17 +102,12 @@ export function PortalDocumentRequests({
   const summary = useMemo(() => calculateSummary(items), [items]);
 
   // Table filters
-  const {
-    filterValues,
-    setFilter,
-    search,
-    setSearch,
-    applyFilters
-  } = useTableFilters<DocumentRequest>({
-    storageKey: 'portal_document_requests',
-    filters: PORTAL_DOCREQUESTS_FILTER_CONFIG,
-    filterFn: filterDocRequest
-  });
+  const { filterValues, setFilter, search, setSearch, applyFilters } =
+    useTableFilters<DocumentRequest>({
+      storageKey: 'portal_document_requests',
+      filters: PORTAL_DOCREQUESTS_FILTER_CONFIG,
+      filterFn: filterDocRequest
+    });
 
   const filteredRequests = useMemo(() => applyFilters(items), [applyFilters, items]);
 
@@ -105,30 +119,45 @@ export function PortalDocumentRequests({
 
   // Separate requests by action needed - single pass instead of 3 separate filters
   const { actionNeeded, inReview, completed } = useMemo(() => {
-    const groups: { actionNeeded: DocumentRequest[]; inReview: DocumentRequest[]; completed: DocumentRequest[] } = {
+    const groups: {
+      actionNeeded: DocumentRequest[];
+      inReview: DocumentRequest[];
+      completed: DocumentRequest[];
+    } = {
       actionNeeded: [],
       inReview: [],
       completed: []
     };
     for (const r of filteredRequests) {
-      if (r.status === 'requested' || r.status === 'viewed' || r.status === 'rejected') groups.actionNeeded.push(r);
-      else if (r.status === 'uploaded' || r.status === 'under_review') groups.inReview.push(r);
-      else if (r.status === 'approved') groups.completed.push(r);
+      if (r.status === 'requested' || r.status === 'viewed' || r.status === 'rejected') {
+        groups.actionNeeded.push(r);
+      } else if (r.status === 'uploaded' || r.status === 'under_review') {
+        groups.inReview.push(r);
+      } else if (r.status === 'approved') {
+        groups.completed.push(r);
+      }
     }
     return groups;
   }, [filteredRequests]);
 
   return (
-    <TableLayout nested
+    <TableLayout
+      nested
       containerRef={containerRef}
       title="DOCUMENT REQUESTS"
       stats={
-        <TableStats items={[
-          { value: summary.total, label: 'total' },
-          { value: summary.pending + summary.rejected, label: 'action needed', variant: 'pending' },
-          { value: summary.submitted, label: 'in review' },
-          { value: summary.approved, label: 'approved', variant: 'completed' }
-        ]} />
+        <TableStats
+          items={[
+            { value: summary.total, label: 'total' },
+            {
+              value: summary.pending + summary.rejected,
+              label: 'action needed',
+              variant: 'pending'
+            },
+            { value: summary.submitted, label: 'in review' },
+            { value: summary.approved, label: 'approved', variant: 'completed' }
+          ]}
+        />
       }
       actions={
         <>
@@ -149,9 +178,10 @@ export function PortalDocumentRequests({
       ) : filteredRequests.length === 0 ? (
         <EmptyState
           icon={<FileText className="icon-lg" />}
-          message={items.length === 0
-            ? 'No document requests yet. Requests will appear here when your project team needs documents from you.'
-            : 'No document requests match the current filters.'
+          message={
+            items.length === 0
+              ? 'No document requests yet. Requests will appear here when your project team needs documents from you.'
+              : 'No document requests match the current filters.'
           }
         />
       ) : (
@@ -160,11 +190,13 @@ export function PortalDocumentRequests({
           {actionNeeded.length > 0 && (
             <div className="subsection">
               <div className="data-table-header">
-                <h3><span className="title-full">Action Needed</span></h3>
+                <h3>
+                  <span className="title-full">Action Needed</span>
+                </h3>
                 <span className="badge">{actionNeeded.length}</span>
               </div>
               <div className="subsection">
-                {actionNeeded.map(request => (
+                {actionNeeded.map((request) => (
                   <DocumentRequestCard
                     key={request.id}
                     request={request}
@@ -180,9 +212,13 @@ export function PortalDocumentRequests({
           {/* In Review Section */}
           {inReview.length > 0 && (
             <div className="subsection">
-              <div className="data-table-header"><h3><span className="title-full">In Review</span></h3></div>
+              <div className="data-table-header">
+                <h3>
+                  <span className="title-full">In Review</span>
+                </h3>
+              </div>
               <div className="subsection">
-                {inReview.map(request => (
+                {inReview.map((request) => (
                   <DocumentRequestCard
                     key={request.id}
                     request={request}
@@ -198,9 +234,13 @@ export function PortalDocumentRequests({
           {/* Completed Section */}
           {completed.length > 0 && (
             <div className="subsection">
-              <div className="data-table-header"><h3><span className="title-full">Completed</span></h3></div>
+              <div className="data-table-header">
+                <h3>
+                  <span className="title-full">Completed</span>
+                </h3>
+              </div>
               <div className="subsection">
-                {completed.map(request => (
+                {completed.map((request) => (
                   <DocumentRequestCard
                     key={request.id}
                     request={request}

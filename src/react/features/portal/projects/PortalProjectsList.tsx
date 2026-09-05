@@ -60,16 +60,19 @@ const ProjectCard = React.memo(({ project, onClick, onPreviewClick }: ProjectCar
       role="button"
       tabIndex={0}
       onClick={onClick}
-      onKeyDown={(e) => { if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) { e.preventDefault(); onClick(); } }}
+      onKeyDown={(e) => {
+        if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       className="portal-card card-clickable"
     >
       {/* Header: Name and Status */}
       <div className="portal-card-header">
         <div className="portal-card-title-group">
           <FolderOpen className="icon-xs" />
-          <span className="text-primary">
-            {decodeHtmlEntities(project.name)}
-          </span>
+          <span className="text-primary">{decodeHtmlEntities(project.name)}</span>
         </div>
         <div className="portal-card-status-group">
           <span className="badge">{statusLabel}</span>
@@ -79,9 +82,7 @@ const ProjectCard = React.memo(({ project, onClick, onPreviewClick }: ProjectCar
 
       {/* Description */}
       {project.description && (
-        <p className="portal-card-description">
-          {decodeHtmlEntities(project.description)}
-        </p>
+        <p className="portal-card-description">{decodeHtmlEntities(project.description)}</p>
       )}
 
       {/* Progress Bar */}
@@ -115,14 +116,17 @@ function filterProject(
   if (search) {
     const s = search.toLowerCase();
     const matchesSearch =
-      project.name?.toLowerCase().includes(s) ||
-      project.description?.toLowerCase().includes(s);
-    if (!matchesSearch) return false;
+      project.name?.toLowerCase().includes(s) || project.description?.toLowerCase().includes(s);
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(project.status)) return false;
+    if (!statusFilter.includes(project.status)) {
+      return false;
+    }
   }
 
   return true;
@@ -138,16 +142,16 @@ function sortProjects(
 ): number {
   const m = sort.direction === 'asc' ? 1 : -1;
   switch (sort.column) {
-  case 'name':
-    return m * (a.name || '').localeCompare(b.name || '');
-  case 'status':
-    return m * (a.status || '').localeCompare(b.status || '');
-  case 'progress':
-    return m * ((a.progress || 0) - (b.progress || 0));
-  case 'date':
-    return m * (new Date(a.start_date || 0).getTime() - new Date(b.start_date || 0).getTime());
-  default:
-    return 0;
+    case 'name':
+      return m * (a.name || '').localeCompare(b.name || '');
+    case 'status':
+      return m * (a.status || '').localeCompare(b.status || '');
+    case 'progress':
+      return m * ((a.progress || 0) - (b.progress || 0));
+    case 'date':
+      return m * (new Date(a.start_date || 0).getTime() - new Date(b.start_date || 0).getTime());
+    default:
+      return 0;
   }
 }
 
@@ -231,8 +235,11 @@ export function PortalProjectsList({
     let active = 0;
     let completed = 0;
     for (const p of items) {
-      if (p.status === 'active' || p.status === 'in-progress') active++;
-      else if (p.status === 'completed') completed++;
+      if (p.status === 'active' || p.status === 'in-progress') {
+        active++;
+      } else if (p.status === 'completed') {
+        completed++;
+      }
     }
     return { activeCount: active, completedCount: completed };
   }, [items]);
@@ -242,11 +249,13 @@ export function PortalProjectsList({
       containerRef={containerRef}
       title="PROJECTS"
       stats={
-        <TableStats items={[
-          { value: items.length, label: 'total' },
-          { value: activeCount, label: 'active', variant: 'active' },
-          { value: completedCount, label: 'completed', variant: 'completed' }
-        ]} />
+        <TableStats
+          items={[
+            { value: items.length, label: 'total' },
+            { value: activeCount, label: 'active', variant: 'active' },
+            { value: completedCount, label: 'completed', variant: 'completed' }
+          ]}
+        />
       }
       actions={
         <>
@@ -256,7 +265,12 @@ export function PortalProjectsList({
             values={filterValues}
             onChange={(key, value) => setFilter(key, value)}
           />
-          <IconButton action="refresh" onClick={fetchProjects} title="Refresh" loading={isLoading} />
+          <IconButton
+            action="refresh"
+            onClick={fetchProjects}
+            title="Refresh"
+            loading={isLoading}
+          />
         </>
       }
     >
@@ -267,9 +281,10 @@ export function PortalProjectsList({
       ) : filteredProjects.length === 0 ? (
         <EmptyState
           icon={<FolderOpen className="icon-lg" />}
-          message={items.length === 0
-            ? 'No projects yet. Your projects will appear here once they begin.'
-            : 'No projects match the current filters.'
+          message={
+            items.length === 0
+              ? 'No projects yet. Your projects will appear here once they begin.'
+              : 'No projects match the current filters.'
           }
         />
       ) : (

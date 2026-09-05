@@ -103,8 +103,19 @@ export function ProjectDetail({
   initialTab
 }: ProjectDetailProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const validTabs: ProjectDetailTab[] = ['overview', 'files', 'deliverables', 'messages', 'invoices', 'contract', 'notes', 'intake'];
-  const resolvedInitialTab = validTabs.includes(initialTab as ProjectDetailTab) ? (initialTab as ProjectDetailTab) : 'overview';
+  const validTabs: ProjectDetailTab[] = [
+    'overview',
+    'files',
+    'deliverables',
+    'messages',
+    'invoices',
+    'contract',
+    'notes',
+    'intake'
+  ];
+  const resolvedInitialTab = validTabs.includes(initialTab as ProjectDetailTab)
+    ? (initialTab as ProjectDetailTab)
+    : 'overview';
   const [activeTab, setActiveTab] = useState<ProjectDetailTab>(resolvedInitialTab);
 
   // Project data
@@ -125,7 +136,6 @@ export function ProjectDetail({
     addMilestone,
     updateMilestone,
     deleteMilestone,
-    toggleMilestoneComplete,
     toggleTaskComplete,
     assignTaskToMilestone,
     uploadFile,
@@ -206,14 +216,7 @@ export function ProjectDetail({
 
   // Error state
   if (error && !project) {
-    return (
-      <ErrorState
-        message={error}
-        type="general"
-        retryLabel="Retry"
-        onRetry={refetch}
-      />
-    );
+    return <ErrorState message={error} type="general" retryLabel="Retry" onRetry={refetch} />;
   }
 
   // No project found
@@ -255,7 +258,14 @@ export function ProjectDetail({
         }
         meta={[
           ...(project.client_name ? [{ label: 'Client', value: project.client_name }] : []),
-          ...(project.project_type ? [{ label: 'Type', value: PROJECT_TYPE_LABELS[project.project_type] || project.project_type }] : [])
+          ...(project.project_type
+            ? [
+                {
+                  label: 'Type',
+                  value: PROJECT_TYPE_LABELS[project.project_type] || project.project_type
+                }
+              ]
+            : [])
         ]}
         actions={
           <>
@@ -286,10 +296,7 @@ export function ProjectDetail({
                   Generate Documents
                 </PortalDropdownItem>
                 {project.status === 'cancelled' && (
-                  <PortalDropdownItem
-                    onClick={deleteDialog.open}
-                    className="danger"
-                  >
+                  <PortalDropdownItem onClick={deleteDialog.open} className="danger">
                     <Trash2 className="icon-sm" />
                     Delete Project
                   </PortalDropdownItem>
@@ -370,7 +377,6 @@ export function ProjectDetail({
           showNotification={showNotification}
         />
       </TabPanel>
-
 
       <TabPanel tabId="contract" isActive={activeTab === 'contract'}>
         <ContractTab

@@ -60,10 +60,14 @@ export function NotificationBell() {
 
   // Fetch notifications
   const fetchNotifications = React.useCallback(async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      return;
+    }
     try {
       const res = await apiGet(endpoint);
-      if (!res.ok) return;
+      if (!res.ok) {
+        return;
+      }
       const json = await res.json();
       if (json.success && json.data?.notifications) {
         setNotifications(json.data.notifications);
@@ -75,7 +79,9 @@ export function NotificationBell() {
 
   // Initial fetch + polling
   React.useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      return;
+    }
     fetchNotifications();
     const interval = setInterval(fetchNotifications, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
@@ -86,10 +92,14 @@ export function NotificationBell() {
 
   // Close on Escape
   React.useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      return;
+    }
 
     function handleKey(e: KeyboardEvent) {
-      if (e.key === KEYS.ESCAPE) setOpen(false);
+      if (e.key === KEYS.ESCAPE) {
+        setOpen(false);
+      }
     }
 
     document.addEventListener('keydown', handleKey);
@@ -102,9 +112,7 @@ export function NotificationBell() {
     async (id: number) => {
       try {
         await apiPut(`${markReadEndpoint}/${id}/read`);
-        setNotifications((prev) =>
-          prev.map((n) => (n.id === id ? { ...n, is_read: 1 } : n))
-        );
+        setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: 1 } : n)));
       } catch {
         // Silently fail
       }
@@ -121,11 +129,12 @@ export function NotificationBell() {
     }
   }, [markReadEndpoint]);
 
-  const badgeText =
-    unreadCount > MAX_BADGE_DISPLAY ? `${MAX_BADGE_DISPLAY}+` : `${unreadCount}`;
+  const badgeText = unreadCount > MAX_BADGE_DISPLAY ? `${MAX_BADGE_DISPLAY}+` : `${unreadCount}`;
 
   // Don't render the bell when not authenticated
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="notification-bell-container" ref={containerRef}>
@@ -135,20 +144,20 @@ export function NotificationBell() {
         onClick={() => setOpen((prev) => !prev)}
       >
         <Bell aria-hidden="true" />
-        {unreadCount > 0 && (
-          <span className="notification-badge">{badgeText}</span>
-        )}
+        {unreadCount > 0 && <span className="notification-badge">{badgeText}</span>}
       </button>
 
       {open && (
-        <div className="notification-dropdown" role="region" aria-label="Notifications" aria-live="polite">
+        <div
+          className="notification-dropdown"
+          role="region"
+          aria-label="Notifications"
+          aria-live="polite"
+        >
           <div className="notification-header">
             <h3 className="notification-dropdown-title">Notifications</h3>
             {unreadCount > 0 && (
-              <button
-                className="btn-link"
-                onClick={handleMarkAllRead}
-              >
+              <button className="btn-link" onClick={handleMarkAllRead}>
                 Mark all read
               </button>
             )}
@@ -156,25 +165,23 @@ export function NotificationBell() {
 
           <div className="notification-list">
             {notifications.length === 0 ? (
-              <div className="notification-empty">
-                No notifications
-              </div>
+              <div className="notification-empty">No notifications</div>
             ) : (
               notifications.map((n) => (
                 <button
                   key={n.id}
                   className={`notification-item${!n.is_read ? ' unread' : ''}`}
                   onClick={() => {
-                    if (!n.is_read) handleMarkRead(n.id);
+                    if (!n.is_read) {
+                      handleMarkRead(n.id);
+                    }
                   }}
                 >
                   {!n.is_read && <span className="notification-unread-dot" />}
                   <div className="notification-item-content">
                     <p className="notification-item-title">{n.title}</p>
                     <p className="notification-item-message">{n.message}</p>
-                    <span className="notification-item-time">
-                      {formatTimeAgo(n.created_at)}
-                    </span>
+                    <span className="notification-item-time">{formatTimeAgo(n.created_at)}</span>
                   </div>
                 </button>
               ))

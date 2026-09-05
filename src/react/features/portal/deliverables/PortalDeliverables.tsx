@@ -124,14 +124,18 @@ export function PortalDeliverables({ getAuthToken }: PortalDeliverablesProps) {
   const toggleExpand = useCallback((id: number) => {
     setExpandedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   }, []);
 
   return (
-    <TableLayout nested
+    <TableLayout
+      nested
       containerRef={containerRef}
       title="DELIVERABLES"
       actions={
@@ -158,7 +162,8 @@ export function PortalDeliverables({ getAuthToken }: PortalDeliverablesProps) {
           {milestones.map((milestone) => {
             const milestoneTasks = tasksByMilestone.get(milestone.id) ?? [];
             const completedTasks = milestoneTasks.filter((t) => t.status === 'completed').length;
-            const allCompleted = milestoneTasks.length > 0 && completedTasks === milestoneTasks.length;
+            const allCompleted =
+              milestoneTasks.length > 0 && completedTasks === milestoneTasks.length;
 
             const header = (
               <>
@@ -204,7 +209,11 @@ export function PortalDeliverables({ getAuthToken }: PortalDeliverablesProps) {
                         ) : (
                           <Clock className="icon-sm text-secondary" />
                         )}
-                        <span className={cn(task.status === 'completed' && 'text-secondary pd-completed-text')}>
+                        <span
+                          className={cn(
+                            task.status === 'completed' && 'text-secondary pd-completed-text'
+                          )}
+                        >
                           {task.title}
                         </span>
                         {task.due_date && (

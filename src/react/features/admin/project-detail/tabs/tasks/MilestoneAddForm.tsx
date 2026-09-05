@@ -44,7 +44,9 @@ export function MilestoneAddForm({ onAdd, onCancel, showNotification }: Mileston
 
   const addDeliverable = useCallback(() => {
     const text = newDeliverableText.trim();
-    if (!text) return;
+    if (!text) {
+      return;
+    }
     setFormState((prev) => ({
       ...prev,
       deliverables: [...prev.deliverables, { text, completed: false }]
@@ -91,9 +93,7 @@ export function MilestoneAddForm({ onAdd, onCancel, showNotification }: Mileston
 
   return (
     <div className="panel">
-      <h4 className="heading tasks-form-heading">
-        New Milestone
-      </h4>
+      <h4 className="heading tasks-form-heading">New Milestone</h4>
 
       <div className="layout-stack">
         <PortalInput

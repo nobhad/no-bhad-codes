@@ -83,16 +83,18 @@ export function ModalDropdown({
   // Filter options based on search
   const filteredOptions = searchable
     ? options.filter(
-      (opt) =>
-        opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (opt) =>
+          opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
           opt.value.toLowerCase().includes(searchQuery.toLowerCase()) ||
           opt.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+      )
     : options;
 
   // Get display text for trigger
   const displayText = React.useMemo(() => {
-    if (selectedValues.length === 0) return placeholder;
+    if (selectedValues.length === 0) {
+      return placeholder;
+    }
     if (selectedValues.length === 1) {
       const selected = options.find((opt) => opt.value === selectedValues[0]);
       return selected?.label || selectedValues[0];
@@ -151,35 +153,33 @@ export function ModalDropdown({
       }
 
       switch (e.key) {
-      case KEYS.ESCAPE:
-        e.preventDefault();
-        handleClose();
-        break;
-      case KEYS.ARROW_DOWN:
-        e.preventDefault();
-        setFocusedIndex((prev) =>
-          prev < filteredOptions.length - 1 ? prev + 1 : prev
-        );
-        break;
-      case KEYS.ARROW_UP:
-        e.preventDefault();
-        setFocusedIndex((prev) => (prev > 0 ? prev - 1 : prev));
-        break;
-      case KEYS.ENTER:
-      case KEYS.SPACE:
-        e.preventDefault();
-        if (filteredOptions[focusedIndex]) {
-          handleSelect(filteredOptions[focusedIndex].value);
-        }
-        break;
-      case KEYS.HOME:
-        e.preventDefault();
-        setFocusedIndex(0);
-        break;
-      case KEYS.END:
-        e.preventDefault();
-        setFocusedIndex(filteredOptions.length - 1);
-        break;
+        case KEYS.ESCAPE:
+          e.preventDefault();
+          handleClose();
+          break;
+        case KEYS.ARROW_DOWN:
+          e.preventDefault();
+          setFocusedIndex((prev) => (prev < filteredOptions.length - 1 ? prev + 1 : prev));
+          break;
+        case KEYS.ARROW_UP:
+          e.preventDefault();
+          setFocusedIndex((prev) => (prev > 0 ? prev - 1 : prev));
+          break;
+        case KEYS.ENTER:
+        case KEYS.SPACE:
+          e.preventDefault();
+          if (filteredOptions[focusedIndex]) {
+            handleSelect(filteredOptions[focusedIndex].value);
+          }
+          break;
+        case KEYS.HOME:
+          e.preventDefault();
+          setFocusedIndex(0);
+          break;
+        case KEYS.END:
+          e.preventDefault();
+          setFocusedIndex(filteredOptions.length - 1);
+          break;
       }
     },
     [isOpen, filteredOptions, focusedIndex, handleOpen, handleClose, handleSelect]
@@ -198,9 +198,12 @@ export function ModalDropdown({
 
   // Focus trap: keep focus within modal when open
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
 
-    const FOCUSABLE_SELECTOR = 'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const FOCUSABLE_SELECTOR =
+      'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
     const handleTrapFocus = (e: KeyboardEvent) => {
       if (e.key === KEYS.ESCAPE) {
@@ -209,15 +212,19 @@ export function ModalDropdown({
         return;
       }
 
-      if (e.key !== KEYS.TAB) return;
+      if (e.key !== KEYS.TAB) {
+        return;
+      }
 
       const modal = dropdownRef.current;
-      if (!modal) return;
+      if (!modal) {
+        return;
+      }
 
-      const focusableElements = Array.from(
-        modal.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
-      );
-      if (focusableElements.length === 0) return;
+      const focusableElements = Array.from(modal.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+      if (focusableElements.length === 0) {
+        return;
+      }
 
       const firstElement = focusableElements[0];
       const lastElement = focusableElements[focusableElements.length - 1];
@@ -262,7 +269,9 @@ export function ModalDropdown({
   return (
     <div className={cn('modal-dropdown-container', className)}>
       {label && (
-        <label htmlFor={triggerId} className="field-label">{label}</label>
+        <label htmlFor={triggerId} className="field-label">
+          {label}
+        </label>
       )}
 
       {/* Trigger Button */}
@@ -281,20 +290,10 @@ export function ModalDropdown({
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
-        <span
-          className={cn(
-            'text-truncate',
-            selectedValues.length === 0 && 'text-secondary'
-          )}
-        >
+        <span className={cn('text-truncate', selectedValues.length === 0 && 'text-secondary')}>
           {displayText}
         </span>
-        <ChevronDown
-          className={cn(
-            'modal-dropdown-chevron',
-            isOpen && 'is-open'
-          )}
-        />
+        <ChevronDown className={cn('modal-dropdown-chevron', isOpen && 'is-open')} />
       </button>
 
       {error && <p className="form-error-message">{error}</p>}
@@ -343,15 +342,9 @@ export function ModalDropdown({
             )}
 
             {/* Options List */}
-            <div
-              ref={listRef}
-              className="modal-dropdown-list"
-              onKeyDown={handleKeyDown}
-            >
+            <div ref={listRef} className="modal-dropdown-list" onKeyDown={handleKeyDown}>
               {filteredOptions.length === 0 ? (
-                <div className="modal-dropdown-empty">
-                  No options found
-                </div>
+                <div className="modal-dropdown-empty">No options found</div>
               ) : (
                 filteredOptions.map((option, index) => {
                   const isSelected = selectedValues.includes(option.value);
@@ -373,21 +366,14 @@ export function ModalDropdown({
                       aria-selected={isSelected}
                     >
                       {multiple && (
-                        <div
-                          className={cn(
-                            'modal-dropdown-checkbox',
-                            isSelected && 'is-checked'
-                          )}
-                        >
+                        <div className={cn('modal-dropdown-checkbox', isSelected && 'is-checked')}>
                           {isSelected && <Check className="modal-dropdown-check-icon" />}
                         </div>
                       )}
                       <div className="modal-dropdown-option-text">
                         <div className="text-truncate">{option.label}</div>
                         {option.description && (
-                          <div className="modal-dropdown-option-desc">
-                            {option.description}
-                          </div>
+                          <div className="modal-dropdown-option-desc">{option.description}</div>
                         )}
                       </div>
                       {!multiple && isSelected && (
@@ -402,18 +388,10 @@ export function ModalDropdown({
             {/* Footer for multi-select */}
             {multiple && (
               <div className="modal-dropdown-footer">
-                <button
-                  type="button"
-                  onClick={() => onChange([])}
-                  className="btn-secondary btn-sm"
-                >
+                <button type="button" onClick={() => onChange([])} className="btn-secondary btn-sm">
                   Clear
                 </button>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="btn-primary btn-sm"
-                >
+                <button type="button" onClick={handleClose} className="btn-primary btn-sm">
                   Done
                 </button>
               </div>
@@ -428,9 +406,7 @@ export function ModalDropdown({
 /**
  * useModalDropdown hook for external state control
  */
-export function useModalDropdown<T extends string>(
-  initialValue: T | T[] | null = null
-) {
+export function useModalDropdown<T extends string>(initialValue: T | T[] | null = null) {
   const [value, setValue] = useState<T | T[] | null>(initialValue);
 
   const handleChange = useCallback((newValue: string | string[]) => {

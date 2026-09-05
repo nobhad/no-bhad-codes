@@ -109,22 +109,19 @@ export function LeadScoringRuleForm({
   }, [rule, open]);
 
   // Whether threshold is needed (not_empty doesn't need one)
-  const needsThreshold = useMemo(
-    () => form.operator !== 'not_empty',
-    [form.operator]
-  );
+  const needsThreshold = useMemo(() => form.operator !== 'not_empty', [form.operator]);
 
-  const updateField = useCallback(<K extends keyof ScoringRuleFormData>(
-    key: K,
-    value: ScoringRuleFormData[K]
-  ) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-    setErrors((prev) => {
-      const next = { ...prev };
-      delete next[key];
-      return next;
-    });
-  }, []);
+  const updateField = useCallback(
+    <K extends keyof ScoringRuleFormData>(key: K, value: ScoringRuleFormData[K]) => {
+      setForm((prev) => ({ ...prev, [key]: value }));
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    },
+    []
+  );
 
   const validate = useCallback((): boolean => {
     const newErrors: Record<string, string> = {};
@@ -149,17 +146,22 @@ export function LeadScoringRuleForm({
     return Object.keys(newErrors).length === 0;
   }, [form, needsThreshold]);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!validate()) {
+        return;
+      }
 
-    const data: ScoringRuleFormData = {
-      ...form,
-      thresholdValue: needsThreshold ? form.thresholdValue : ''
-    };
+      const data: ScoringRuleFormData = {
+        ...form,
+        thresholdValue: needsThreshold ? form.thresholdValue : ''
+      };
 
-    await onSave(data);
-  }, [form, needsThreshold, validate, onSave]);
+      await onSave(data);
+    },
+    [form, needsThreshold, validate, onSave]
+  );
 
   return (
     <PortalModal
@@ -179,12 +181,8 @@ export function LeadScoringRuleForm({
           >
             Cancel
           </button>
-          <button
-            type="submit"
-            className="btn-primary"
-            disabled={isSaving}
-          >
-            {isSaving ? 'Saving...' : (isEditing ? 'Update Rule' : 'Create Rule')}
+          <button type="submit" className="btn-primary" disabled={isSaving}>
+            {isSaving ? 'Saving...' : isEditing ? 'Update Rule' : 'Create Rule'}
           </button>
         </div>
       }
@@ -192,7 +190,9 @@ export function LeadScoringRuleForm({
       <div className="form-grid">
         {/* Name */}
         <div className="form-group">
-          <label className="field-label" htmlFor="rule-name">Name</label>
+          <label className="field-label" htmlFor="rule-name">
+            Name
+          </label>
           <input
             id="rule-name"
             type="text"
@@ -206,7 +206,9 @@ export function LeadScoringRuleForm({
 
         {/* Description */}
         <div className="form-group">
-          <label className="field-label" htmlFor="rule-description">Description</label>
+          <label className="field-label" htmlFor="rule-description">
+            Description
+          </label>
           <input
             id="rule-description"
             type="text"
@@ -220,7 +222,9 @@ export function LeadScoringRuleForm({
         {/* Field + Operator row */}
         <div className="form-row form-row--half">
           <div className="form-group">
-            <label className="field-label" htmlFor="rule-field">Field</label>
+            <label className="field-label" htmlFor="rule-field">
+              Field
+            </label>
             <select
               id="rule-field"
               className="form-input"
@@ -228,14 +232,18 @@ export function LeadScoringRuleForm({
               onChange={(e) => updateField('fieldName', e.target.value)}
             >
               {FIELD_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
               ))}
             </select>
             {errors.fieldName && <span className="form-error-message">{errors.fieldName}</span>}
           </div>
 
           <div className="form-group">
-            <label className="field-label" htmlFor="rule-operator">Operator</label>
+            <label className="field-label" htmlFor="rule-operator">
+              Operator
+            </label>
             <select
               id="rule-operator"
               className="form-input"
@@ -243,7 +251,9 @@ export function LeadScoringRuleForm({
               onChange={(e) => updateField('operator', e.target.value)}
             >
               {OPERATOR_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
               ))}
             </select>
             {errors.operator && <span className="form-error-message">{errors.operator}</span>}
@@ -267,14 +277,18 @@ export function LeadScoringRuleForm({
               onChange={(e) => updateField('thresholdValue', e.target.value)}
               placeholder={form.operator === 'in' ? 'value1, value2, value3' : 'Value to compare'}
             />
-            {errors.thresholdValue && <span className="form-error-message">{errors.thresholdValue}</span>}
+            {errors.thresholdValue && (
+              <span className="form-error-message">{errors.thresholdValue}</span>
+            )}
           </div>
         )}
 
         {/* Points + Active row */}
         <div className="form-row form-row--half">
           <div className="form-group">
-            <label className="field-label" htmlFor="rule-points">Points</label>
+            <label className="field-label" htmlFor="rule-points">
+              Points
+            </label>
             <input
               id="rule-points"
               type="number"
@@ -288,7 +302,9 @@ export function LeadScoringRuleForm({
           </div>
 
           <div className="form-group">
-            <label className="field-label" htmlFor="rule-active">Status</label>
+            <label className="field-label" htmlFor="rule-active">
+              Status
+            </label>
             <select
               id="rule-active"
               className="form-input"

@@ -64,9 +64,7 @@ const STATUS_FILTER_OPTIONS = [
   { value: 'rejected', label: 'Rejected' }
 ];
 
-const FILTER_CONFIG = [
-  { key: 'status', label: 'Status', options: STATUS_FILTER_OPTIONS }
-];
+const FILTER_CONFIG = [{ key: 'status', label: 'Status', options: STATUS_FILTER_OPTIONS }];
 
 const TOTAL_STARS = 5;
 const MAX_PREVIEW_LENGTH = 80;
@@ -105,7 +103,9 @@ function filterTestimonial(
       t.client_name?.toLowerCase().includes(term) ||
       t.text?.toLowerCase().includes(term) ||
       t.company_name?.toLowerCase().includes(term);
-    if (!matches) return false;
+    if (!matches) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
@@ -125,7 +125,9 @@ function sortTestimonials(a: Testimonial, b: Testimonial): number {
 // ============================================
 
 function renderStars(rating: number | null | undefined): React.ReactNode {
-  if (rating == null) return '—';
+  if (rating == null) {
+    return '—';
+  }
   return (
     <span className="star-rating" title={`${rating}/5`}>
       {Array.from({ length: TOTAL_STARS }, (_, i) => (
@@ -154,27 +156,23 @@ export function TestimonialsTable() {
 
   const deleteDialog = useConfirmDialog();
 
-  const {
-    filterValues,
-    setFilter,
-    search,
-    setSearch,
-    applyFilters,
-    hasActiveFilters
-  } = useTableFilters<Testimonial>({
-    storageKey: 'admin_testimonials',
-    filters: FILTER_CONFIG,
-    filterFn: filterTestimonial,
-    sortFn: sortTestimonials,
-    defaultSort: { column: 'created_at', direction: 'desc' }
-  });
+  const { filterValues, setFilter, search, setSearch, applyFilters, hasActiveFilters } =
+    useTableFilters<Testimonial>({
+      storageKey: 'admin_testimonials',
+      filters: FILTER_CONFIG,
+      filterFn: filterTestimonial,
+      sortFn: sortTestimonials,
+      defaultSort: { column: 'created_at', direction: 'desc' }
+    });
 
   const fetchTestimonials = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       const res = await apiFetch(API_ENDPOINTS.FEEDBACK_TESTIMONIALS);
-      if (!res.ok) throw new Error('Failed to load testimonials');
+      if (!res.ok) {
+        throw new Error('Failed to load testimonials');
+      }
       const json = await res.json();
       setTestimonials(json.data?.testimonials || json.testimonials || []);
     } catch (err) {
@@ -184,9 +182,14 @@ export function TestimonialsTable() {
     }
   }, []);
 
-  useEffect(() => { fetchTestimonials(); }, [fetchTestimonials]);
+  useEffect(() => {
+    fetchTestimonials();
+  }, [fetchTestimonials]);
 
-  const filteredTestimonials = useMemo(() => applyFilters(testimonials), [applyFilters, testimonials]);
+  const filteredTestimonials = useMemo(
+    () => applyFilters(testimonials),
+    [applyFilters, testimonials]
+  );
 
   const pagination = usePagination({
     storageKey: 'admin_testimonials_pagination',
@@ -200,33 +203,47 @@ export function TestimonialsTable() {
   );
 
   // Actions
-  const handlePublish = useCallback(async (id: number) => {
-    try {
-      const res = await apiPut(buildEndpoint.testimonialPublish(id), {});
-      if (!res.ok) throw new Error('Failed to publish');
-      showToast('Testimonial published', 'success');
-      fetchTestimonials();
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Failed to publish', 'error');
-    }
-  }, [fetchTestimonials]);
+  const handlePublish = useCallback(
+    async (id: number) => {
+      try {
+        const res = await apiPut(buildEndpoint.testimonialPublish(id), {});
+        if (!res.ok) {
+          throw new Error('Failed to publish');
+        }
+        showToast('Testimonial published', 'success');
+        fetchTestimonials();
+      } catch (err) {
+        showToast(err instanceof Error ? err.message : 'Failed to publish', 'error');
+      }
+    },
+    [fetchTestimonials]
+  );
 
-  const handleToggleFeatured = useCallback(async (id: number) => {
-    try {
-      const res = await apiPut(buildEndpoint.testimonialFeature(id), {});
-      if (!res.ok) throw new Error('Failed to toggle');
-      showToast('Featured toggled', 'success');
-      fetchTestimonials();
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Failed to toggle', 'error');
-    }
-  }, [fetchTestimonials]);
+  const handleToggleFeatured = useCallback(
+    async (id: number) => {
+      try {
+        const res = await apiPut(buildEndpoint.testimonialFeature(id), {});
+        if (!res.ok) {
+          throw new Error('Failed to toggle');
+        }
+        showToast('Featured toggled', 'success');
+        fetchTestimonials();
+      } catch (err) {
+        showToast(err instanceof Error ? err.message : 'Failed to toggle', 'error');
+      }
+    },
+    [fetchTestimonials]
+  );
 
   const handleDeleteConfirm = useCallback(async () => {
-    if (pendingDeleteId == null) return;
+    if (pendingDeleteId == null) {
+      return;
+    }
     try {
       const res = await apiDelete(buildEndpoint.testimonial(pendingDeleteId));
-      if (!res.ok) throw new Error('Failed to delete');
+      if (!res.ok) {
+        throw new Error('Failed to delete');
+      }
       showToast('Testimonial deleted', 'success');
       setPendingDeleteId(null);
       fetchTestimonials();
@@ -235,17 +252,20 @@ export function TestimonialsTable() {
     }
   }, [pendingDeleteId, fetchTestimonials]);
 
-  const openDeleteConfirm = useCallback((id: number) => {
-    setPendingDeleteId(id);
-    deleteDialog.open();
-  }, [deleteDialog]);
+  const openDeleteConfirm = useCallback(
+    (id: number) => {
+      setPendingDeleteId(id);
+      deleteDialog.open();
+    },
+    [deleteDialog]
+  );
 
   // Stats
   const stats = useMemo(() => {
     const total = testimonials.length;
-    const published = testimonials.filter(t => t.status === 'published').length;
-    const pending = testimonials.filter(t => t.status === 'pending_review').length;
-    const featured = testimonials.filter(t => t.featured === 1).length;
+    const published = testimonials.filter((t) => t.status === 'published').length;
+    const pending = testimonials.filter((t) => t.status === 'pending_review').length;
+    const featured = testimonials.filter((t) => t.featured === 1).length;
 
     return [
       { value: total, label: 'total' },
@@ -260,12 +280,7 @@ export function TestimonialsTable() {
       <TableLayout
         containerRef={containerRef as React.RefObject<HTMLDivElement>}
         title="TESTIMONIALS"
-        stats={
-          <TableStats
-            items={stats}
-            tooltip={`${testimonials.length} Testimonials`}
-          />
-        }
+        stats={<TableStats items={stats} tooltip={`${testimonials.length} Testimonials`} />}
         actions={
           <>
             <SearchFilter
@@ -326,24 +341,23 @@ export function TestimonialsTable() {
               <PortalTableEmpty
                 colSpan={7}
                 icon={<Inbox />}
-                message={hasActiveFilters ? 'No testimonials match your filters' : 'No testimonials yet'}
+                message={
+                  hasActiveFilters ? 'No testimonials match your filters' : 'No testimonials yet'
+                }
               />
             ) : (
-              paginatedTestimonials.map(t => (
+              paginatedTestimonials.map((t) => (
                 <PortalTableRow key={t.id}>
                   <PortalTableCell className="client-cell">
                     <div>{t.client_name}</div>
-                    {t.company_name && (
-                      <div className="text-muted text-sm">{t.company_name}</div>
-                    )}
+                    {t.company_name && <div className="text-muted text-sm">{t.company_name}</div>}
                   </PortalTableCell>
                   <PortalTableCell className="client-cell">{t.project_name || '—'}</PortalTableCell>
                   <PortalTableCell className="primary-cell">
                     <span title={t.text}>
                       {t.text.length > MAX_PREVIEW_LENGTH
                         ? `${t.text.slice(0, MAX_PREVIEW_LENGTH)}...`
-                        : t.text
-                      }
+                        : t.text}
                     </span>
                   </PortalTableCell>
                   <PortalTableCell className="status-col">{renderStars(t.rating)}</PortalTableCell>
@@ -353,9 +367,7 @@ export function TestimonialsTable() {
                     </StatusBadge>
                   </PortalTableCell>
                   <PortalTableCell className="status-col">
-                    {t.featured ? (
-                      <Award size={16} stroke="var(--app-color-warning)" />
-                    ) : '—'}
+                    {t.featured ? <Award size={16} stroke="var(--app-color-warning)" /> : '—'}
                   </PortalTableCell>
                   <PortalTableCell className="col-actions">
                     <div className="table-actions">

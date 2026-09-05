@@ -78,7 +78,7 @@ export function getStatusVariant(status: string): StatusVariant {
     // Active states (blue)
     active: 'active',
     'in-progress': 'active',
-    'in_progress': 'active',
+    in_progress: 'active',
     contacted: 'active',
     sent: 'active',
     viewed: 'active',
@@ -107,7 +107,7 @@ export function getStatusVariant(status: string): StatusVariant {
     // Qualified states (purple)
     qualified: 'qualified',
     'in-review': 'qualified',
-    'in_review': 'qualified',
+    in_review: 'qualified',
     review: 'qualified',
 
     // Inactive states (gray)
@@ -118,7 +118,7 @@ export function getStatusVariant(status: string): StatusVariant {
 
     // Not invited (special)
     'not-invited': 'not-invited',
-    'not_invited': 'not-invited',
+    not_invited: 'not-invited',
 
     // New states (cyan)
     new: 'new',
@@ -126,12 +126,14 @@ export function getStatusVariant(status: string): StatusVariant {
 
     // On-hold states (yellow/orange)
     'on-hold': 'on-hold',
-    'on_hold': 'on-hold',
+    on_hold: 'on-hold',
     blocked: 'on-hold',
     'high-priority': 'on-hold'
   };
 
-  if (!status) return 'inactive';
+  if (!status) {
+    return 'inactive';
+  }
   return statusMap[status.toLowerCase()] || 'inactive';
 }
 

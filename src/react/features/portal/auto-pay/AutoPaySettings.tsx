@@ -85,14 +85,12 @@ function PaymentMethodCard({
           <CreditCard className="icon-sm section-icon" />
           <div className="cell-content">
             <div className="cell-with-icon">
-              <span className="font-semibold">
-                {getBrandLabel(method.brand)}
-              </span>
-              <span className="text-muted">
-                ending in {method.lastFour ?? '----'}
-              </span>
+              <span className="font-semibold">{getBrandLabel(method.brand)}</span>
+              <span className="text-muted">ending in {method.lastFour ?? '----'}</span>
               {method.isDefault && (
-                <StatusBadge status="active" size="sm">Default</StatusBadge>
+                <StatusBadge status="active" size="sm">
+                  Default
+                </StatusBadge>
               )}
             </div>
             <span className="text-muted text-sm">
@@ -187,7 +185,8 @@ function AutoPayToggle({
               <div className="portal-card-inner status-info-row">
                 <Check className="icon-xs text-success" />
                 <span className="text-sm">
-                  Charges will be made to {getBrandLabel(defaultMethod.brand)} ending in {defaultMethod.lastFour ?? '----'}
+                  Charges will be made to {getBrandLabel(defaultMethod.brand)} ending in{' '}
+                  {defaultMethod.lastFour ?? '----'}
                 </span>
               </div>
             )}
@@ -230,10 +229,7 @@ export function AutoPaySettings({ getAuthToken, showNotification }: AutoPaySetti
   });
 
   const methods = useMemo(() => methodsData?.methods ?? [], [methodsData]);
-  const defaultMethod = useMemo(
-    () => methods.find((m) => m.isDefault) ?? null,
-    [methods]
-  );
+  const defaultMethod = useMemo(() => methods.find((m) => m.isDefault) ?? null, [methods]);
 
   // --- Mutation state ---
   const [isSettingDefault, setIsSettingDefault] = useState(false);
@@ -243,33 +239,41 @@ export function AutoPaySettings({ getAuthToken, showNotification }: AutoPaySetti
 
   // --- Handlers ---
 
-  const handleSetDefault = useCallback(async (method: SavedPaymentMethod) => {
-    setIsSettingDefault(true);
-    try {
-      await portalFetch(buildEndpoint.paymentMethodDefault(method.id), {
-        method: 'PUT'
-      });
-      showNotification?.('Default payment method updated', 'success');
-      refetchMethods();
-      refetchAutoPay();
-    } catch (err) {
-      logger.error('Error setting default payment method:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to update default payment method'),
-        'error'
-      );
-    } finally {
-      setIsSettingDefault(false);
-    }
-  }, [portalFetch, showNotification, refetchMethods, refetchAutoPay]);
+  const handleSetDefault = useCallback(
+    async (method: SavedPaymentMethod) => {
+      setIsSettingDefault(true);
+      try {
+        await portalFetch(buildEndpoint.paymentMethodDefault(method.id), {
+          method: 'PUT'
+        });
+        showNotification?.('Default payment method updated', 'success');
+        refetchMethods();
+        refetchAutoPay();
+      } catch (err) {
+        logger.error('Error setting default payment method:', err);
+        showNotification?.(
+          formatErrorMessage(err, 'Failed to update default payment method'),
+          'error'
+        );
+      } finally {
+        setIsSettingDefault(false);
+      }
+    },
+    [portalFetch, showNotification, refetchMethods, refetchAutoPay]
+  );
 
-  const handleDeleteClick = useCallback((method: SavedPaymentMethod) => {
-    setDeleteTarget(method);
-    deleteDialog.open();
-  }, [deleteDialog]);
+  const handleDeleteClick = useCallback(
+    (method: SavedPaymentMethod) => {
+      setDeleteTarget(method);
+      deleteDialog.open();
+    },
+    [deleteDialog]
+  );
 
   const handleDeleteConfirm = useCallback(async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget) {
+      return;
+    }
     await deleteDialog.confirm(async () => {
       await portalFetch(buildEndpoint.paymentMethod(deleteTarget.id), {
         method: 'DELETE'
@@ -289,17 +293,11 @@ export function AutoPaySettings({ getAuthToken, showNotification }: AutoPaySetti
         method: 'PUT',
         body: { enabled: !currentlyEnabled }
       });
-      showNotification?.(
-        currentlyEnabled ? 'Auto-pay disabled' : 'Auto-pay enabled',
-        'success'
-      );
+      showNotification?.(currentlyEnabled ? 'Auto-pay disabled' : 'Auto-pay enabled', 'success');
       refetchAutoPay();
     } catch (err) {
       logger.error('Error toggling auto-pay:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to update auto-pay setting'),
-        'error'
-      );
+      showNotification?.(formatErrorMessage(err, 'Failed to update auto-pay setting'), 'error');
     } finally {
       setIsToggling(false);
     }

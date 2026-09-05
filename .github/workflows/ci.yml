@@ -22,6 +22,12 @@ jobs:
 
       - run: npm run lint
 
+      # Documentation is checked here too, so a doc that names a file which no
+      # longer exists, or a fenced block without a language, fails the push.
+      - run: npm run docs:validate
+
+      - run: npm run lint:md
+
   typecheck:
     name: Typecheck
     runs-on: ubuntu-latest

@@ -98,15 +98,10 @@ function UtilizationBar({ used, total }: { used: number; total: number | null })
         <span className="text-sm">
           {used.toFixed(1)} of {total.toFixed(1)} hours used
         </span>
-        <span className="text-sm text-muted">
-          {Math.round(pct)}%
-        </span>
+        <span className="text-sm text-muted">{Math.round(pct)}%</span>
       </div>
       <div className="progress-bar progress-sm">
-        <div
-          className={`progress-fill ${fillClass}`}
-          style={{ width: `${pct}%` }}
-        />
+        <div className={`progress-fill ${fillClass}`} style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -162,7 +157,9 @@ function RetainerCard({ retainer }: { retainer: Retainer }) {
         {period && (
           <div className="portal-card-meta-item">
             <Calendar size={14} />
-            <span>{daysRemaining} day{daysRemaining !== 1 ? 's' : ''} remaining</span>
+            <span>
+              {daysRemaining} day{daysRemaining !== 1 ? 's' : ''} remaining
+            </span>
           </div>
         )}
 
@@ -190,10 +187,26 @@ export function PortalRetainers(_props: PortalRetainersProps) {
 
   const retainers = useMemo(() => data?.retainers ?? [], [data]);
 
-  if (isLoading) return <div ref={containerRef}><LoadingState message="Loading retainers..." /></div>;
-  if (error) return <div ref={containerRef}><ErrorState message={error} onRetry={refetch} /></div>;
+  if (isLoading) {
+    return (
+      <div ref={containerRef}>
+        <LoadingState message="Loading retainers..." />
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div ref={containerRef}>
+        <ErrorState message={error} onRetry={refetch} />
+      </div>
+    );
+  }
   if (retainers.length === 0) {
-    return <div ref={containerRef}><EmptyState message="No retainer agreements yet." /></div>;
+    return (
+      <div ref={containerRef}>
+        <EmptyState message="No retainer agreements yet." />
+      </div>
+    );
   }
 
   return (

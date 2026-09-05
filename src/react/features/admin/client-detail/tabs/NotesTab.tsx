@@ -57,8 +57,12 @@ export function NotesTab({
 
   // Sort notes: pinned first, then by date
   const sortedNotes = [...notes].sort((a, b) => {
-    if (a.is_pinned && !b.is_pinned) return -1;
-    if (!a.is_pinned && b.is_pinned) return 1;
+    if (a.is_pinned && !b.is_pinned) {
+      return -1;
+    }
+    if (!a.is_pinned && b.is_pinned) {
+      return 1;
+    }
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
@@ -66,9 +70,12 @@ export function NotesTab({
   const unpinnedNotes = sortedNotes.filter((n) => !n.is_pinned);
 
   // Start editing — maps ClientNote to string content
-  const handleStartEdit = useCallback((note: ClientNote) => {
-    startEdit(note.id, note.content);
-  }, [startEdit]);
+  const handleStartEdit = useCallback(
+    (note: ClientNote) => {
+      startEdit(note.id, note.content);
+    },
+    [startEdit]
+  );
 
   // Submit
   const handleSubmit = useCallback(async () => {
@@ -100,7 +107,15 @@ export function NotesTab({
     } finally {
       setIsSubmitting(false);
     }
-  }, [noteContent, editingId, onAddNote, onUpdateNote, showNotification, handleCancel, setIsSubmitting]);
+  }, [
+    noteContent,
+    editingId,
+    onAddNote,
+    onUpdateNote,
+    showNotification,
+    handleCancel,
+    setIsSubmitting
+  ]);
 
   // Delete
   const handleDeleteClick = useCallback(
@@ -112,7 +127,9 @@ export function NotesTab({
   );
 
   const handleConfirmDelete = useCallback(async () => {
-    if (!noteToDelete) return;
+    if (!noteToDelete) {
+      return;
+    }
 
     const success = await onDeleteNote(noteToDelete.id);
     if (success) {
@@ -128,7 +145,10 @@ export function NotesTab({
     async (note: ClientNote) => {
       const success = await onTogglePin(note.id, !note.is_pinned);
       if (success) {
-        showNotification?.(note.is_pinned ? NOTIFICATIONS.note.UNPINNED : NOTIFICATIONS.note.PINNED, 'success');
+        showNotification?.(
+          note.is_pinned ? NOTIFICATIONS.note.UNPINNED : NOTIFICATIONS.note.PINNED,
+          'success'
+        );
       } else {
         showNotification?.(NOTIFICATIONS.note.PIN_FAILED, 'error');
       }
@@ -143,11 +163,7 @@ export function NotesTab({
         <h3 className="heading">
           <span className="title-full">{editingId ? 'Edit Note' : 'New Note'}</span>
         </h3>
-        <button
-          onClick={handleCancel}
-          className="icon-btn"
-          aria-label="Cancel editing"
-        >
+        <button onClick={handleCancel} className="icon-btn" aria-label="Cancel editing">
           <X className="icon-md" />
         </button>
       </div>
@@ -181,17 +197,12 @@ export function NotesTab({
   const renderNote = (note: ClientNote) => (
     <div
       key={note.id}
-      className={cn(
-        'portal-card group',
-        note.is_pinned && 'border-primary-accent'
-      )}
+      className={cn('portal-card group', note.is_pinned && 'border-primary-accent')}
     >
       {/* Note header */}
       <div className="portal-card-header">
         <div className="note-meta">
-          {note.is_pinned && (
-            <Pin className="icon-xs is-active-primary" />
-          )}
+          {note.is_pinned && <Pin className="icon-xs is-active-primary" />}
           <span className="text-secondary">
             {formatNoteDate(note.created_at)}
             {note.updated_at !== note.created_at && ' (edited)'}
@@ -201,10 +212,7 @@ export function NotesTab({
         <div className="action-group">
           <button
             onClick={() => handleTogglePin(note)}
-            className={cn(
-              'icon-btn',
-              note.is_pinned && 'is-active-primary'
-            )}
+            className={cn('icon-btn', note.is_pinned && 'is-active-primary')}
             title={note.is_pinned ? 'Unpin' : 'Pin'}
             aria-label={note.is_pinned ? 'Unpin note' : 'Pin note'}
           >
@@ -230,16 +238,12 @@ export function NotesTab({
       </div>
 
       {/* Note content */}
-      <p className="text-secondary note-content">
-        {note.content}
-      </p>
+      <p className="text-secondary note-content">{note.content}</p>
 
       {/* Note footer */}
       {note.created_by && (
         <div className="note-footer">
-          <span className="text-secondary">
-            by {note.created_by}
-          </span>
+          <span className="text-secondary">by {note.created_by}</span>
         </div>
       )}
     </div>
@@ -249,7 +253,9 @@ export function NotesTab({
     <div className="subsection">
       <div className="panel">
         <div className="data-table-header">
-          <h3><span className="title-full">Notes</span></h3>
+          <h3>
+            <span className="title-full">Notes</span>
+          </h3>
           {!isFormOpen && (
             <div className="data-table-actions">
               <IconButton action="add" onClick={handleStartAdd} title="Add Note" />
@@ -271,26 +277,16 @@ export function NotesTab({
             {/* Pinned notes section */}
             {pinnedNotes.length > 0 && (
               <div>
-                <h3 className="label section-label-block">
-                  Pinned
-                </h3>
-                <div className="layout-stack gap-3">
-                  {pinnedNotes.map(renderNote)}
-                </div>
+                <h3 className="label section-label-block">Pinned</h3>
+                <div className="layout-stack gap-3">{pinnedNotes.map(renderNote)}</div>
               </div>
             )}
 
             {/* Regular notes */}
             {unpinnedNotes.length > 0 && (
               <div>
-                {pinnedNotes.length > 0 && (
-                  <h3 className="label section-label-block">
-                    Recent
-                  </h3>
-                )}
-                <div className="layout-stack gap-3">
-                  {unpinnedNotes.map(renderNote)}
-                </div>
+                {pinnedNotes.length > 0 && <h3 className="label section-label-block">Recent</h3>}
+                <div className="layout-stack gap-3">{unpinnedNotes.map(renderNote)}</div>
               </div>
             )}
           </div>

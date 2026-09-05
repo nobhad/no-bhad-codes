@@ -1,9 +1,6 @@
 import * as React from 'react';
 import { useMemo } from 'react';
-import {
-  Inbox,
-  User
-} from 'lucide-react';
+import { Inbox, User } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -56,7 +53,9 @@ function filterConversation(
   search: string
 ): boolean {
   // Always exclude archived
-  if (conversation.isArchived) return false;
+  if (conversation.isArchived) {
+    return false;
+  }
 
   if (search) {
     const query = search.toLowerCase();
@@ -76,21 +75,26 @@ function sortConversations(a: Conversation, b: Conversation, sort: SortConfig): 
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'client':
-    return multiplier * a.clientName.localeCompare(b.clientName);
-  case 'unread':
-    return multiplier * (a.unreadCount - b.unreadCount);
-  case 'lastMessageAt': {
-    const aVal = a.lastMessageAt || '';
-    const bVal = b.lastMessageAt || '';
-    return multiplier * aVal.localeCompare(bVal);
-  }
-  default:
-    return 0;
+    case 'client':
+      return multiplier * a.clientName.localeCompare(b.clientName);
+    case 'unread':
+      return multiplier * (a.unreadCount - b.unreadCount);
+    case 'lastMessageAt': {
+      const aVal = a.lastMessageAt || '';
+      const bVal = b.lastMessageAt || '';
+      return multiplier * aVal.localeCompare(bVal);
+    }
+    default:
+      return 0;
   }
 }
 
-export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, overviewMode = false }: MessagesTableProps) {
+export function MessagesTable({
+  onNavigate,
+  getAuthToken,
+  defaultPageSize = 25,
+  overviewMode = false
+}: MessagesTableProps) {
   const containerRef = useFadeIn();
 
   const { data, isLoading, error, refetch } = useListFetch<Conversation>({
@@ -100,21 +104,18 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
   });
   const conversations = useMemo(() => data?.items ?? [], [data]);
 
-  const {
-    search,
-    setSearch,
-    sort,
-    toggleSort,
-    applyFilters,
-    hasActiveFilters
-  } = useTableFilters<Conversation>({
-    storageKey: overviewMode ? undefined : 'admin_messages',
-    filters: [],
-    filterFn: filterConversation,
-    sortFn: sortConversations
-  });
+  const { search, setSearch, sort, toggleSort, applyFilters, hasActiveFilters } =
+    useTableFilters<Conversation>({
+      storageKey: overviewMode ? undefined : 'admin_messages',
+      filters: [],
+      filterFn: filterConversation,
+      sortFn: sortConversations
+    });
 
-  const filteredConversations = useMemo(() => applyFilters(conversations), [applyFilters, conversations]);
+  const filteredConversations = useMemo(
+    () => applyFilters(conversations),
+    [applyFilters, conversations]
+  );
 
   const pagination = usePagination({
     totalItems: filteredConversations.length,
@@ -136,7 +137,7 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
       stats={
         <TableStats
           items={[
-            { value: conversations.filter(c => !c.isArchived).length, label: 'conversations' },
+            { value: conversations.filter((c) => !c.isArchived).length, label: 'conversations' },
             { value: totalUnread, label: 'unread', variant: 'pending' }
           ]}
           tooltip={`${conversations.length} Conversations • ${totalUnread} Unread`}
@@ -144,11 +145,7 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
       }
       actions={
         <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search messages..."
-          />
+          <SearchFilter value={search} onChange={setSearch} placeholder="Search messages..." />
           <IconButton action="refresh" onClick={refetch} disabled={isLoading} title="Refresh" />
         </>
       }
@@ -210,7 +207,9 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
             <PortalTableEmpty
               colSpan={5}
               icon={<Inbox />}
-              message={hasActiveFilters ? 'No conversations match your search' : 'No conversations yet'}
+              message={
+                hasActiveFilters ? 'No conversations match your search' : 'No conversations yet'
+              }
             />
           ) : (
             paginatedConversations.map((conversation) => (
@@ -229,10 +228,9 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
                   </div>
                 </PortalTableCell>
                 <PortalTableCell className="message-preview-cell">
-                  {conversation.lastMessage
-                    ? <span className="text-truncate">{conversation.lastMessage}</span>
-                    : null
-                  }
+                  {conversation.lastMessage ? (
+                    <span className="text-truncate">{conversation.lastMessage}</span>
+                  ) : null}
                 </PortalTableCell>
                 <PortalTableCell className="text-center">
                   {conversation.unreadCount > 0 && (
@@ -240,10 +238,7 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
                   )}
                 </PortalTableCell>
                 <PortalTableCell className="date-col">
-                  {conversation.lastMessageAt
-                    ? formatDate(conversation.lastMessageAt)
-                    : null
-                  }
+                  {conversation.lastMessageAt ? formatDate(conversation.lastMessageAt) : null}
                 </PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="action-group">

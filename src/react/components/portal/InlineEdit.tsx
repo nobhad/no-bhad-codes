@@ -44,7 +44,9 @@ function useInlineEditState({ value, disabled, onSave }: UseInlineEditStateOptio
   }, [value, isEditing]);
 
   const startEditing = useCallback(() => {
-    if (disabled) return;
+    if (disabled) {
+      return;
+    }
     setEditValue(value);
     setIsEditing(true);
   }, [disabled, value]);
@@ -136,15 +138,8 @@ export function InlineEdit({
     [onSaveProp, parseInput]
   );
 
-  const {
-    isEditing,
-    editValue,
-    setEditValue,
-    isSaving,
-    startEditing,
-    cancelEditing,
-    saveValue
-  } = useInlineEditState({ value, disabled, onSave });
+  const { isEditing, editValue, setEditValue, isSaving, startEditing, cancelEditing, saveValue } =
+    useInlineEditState({ value, disabled, onSave });
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -215,7 +210,7 @@ export function InlineEdit({
         // Date input returns YYYY-MM-DD, convert to ISO string for storage
         if (newValue) {
           try {
-            const date = new Date(`${newValue  }T00:00:00`);
+            const date = new Date(`${newValue}T00:00:00`);
             if (!isNaN(date.getTime())) {
               newValue = date.toISOString();
             }
@@ -232,10 +227,7 @@ export function InlineEdit({
 
   if (isEditing) {
     return (
-      <div
-        className={cn('inline-edit-wrapper', className)}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className={cn('inline-edit-wrapper', className)} onClick={(e) => e.stopPropagation()}>
         {type === 'date' ? (
           <div className="inline-edit-date-wrapper">
             <Calendar
@@ -243,8 +235,12 @@ export function InlineEdit({
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => {
                 try {
-                  (inputRef.current as HTMLInputElement & { showPicker?: () => void })?.showPicker?.();
-                } catch { /* unsupported */ }
+                  (
+                    inputRef.current as HTMLInputElement & { showPicker?: () => void }
+                  )?.showPicker?.();
+                } catch {
+                  /* unsupported */
+                }
               }}
             />
             <input
@@ -296,26 +292,16 @@ export function InlineEdit({
 
   return (
     <div
-      className={cn(
-        'inline-edit-display',
-        disabled && 'is-disabled',
-        className
-      )}
+      className={cn('inline-edit-display', disabled && 'is-disabled', className)}
       onClick={(e) => {
         e.stopPropagation();
         startEditing();
       }}
       title={disabled ? undefined : 'Click to edit'}
     >
-      {type === 'date' && !disabled && (
-        <Calendar className="icon-sm" />
-      )}
-      <span className={cn('inline-edit-value', !value && 'is-placeholder')}>
-        {displayValue}
-      </span>
-      {showEditIcon && !disabled && type !== 'date' && (
-        <Pencil className="inline-edit-icon" />
-      )}
+      {type === 'date' && !disabled && <Calendar className="icon-sm" />}
+      <span className={cn('inline-edit-value', !value && 'is-placeholder')}>{displayValue}</span>
+      {showEditIcon && !disabled && type !== 'date' && <Pencil className="inline-edit-icon" />}
     </div>
   );
 }
@@ -325,7 +311,9 @@ export function InlineEdit({
  */
 export function formatCurrencyDisplay(value: string): string {
   const num = parseFloat(value.replace(/[^0-9.-]/g, ''));
-  if (isNaN(num)) return '-';
+  if (isNaN(num)) {
+    return '-';
+  }
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -339,7 +327,9 @@ export function formatCurrencyDisplay(value: string): string {
  */
 export function parseCurrencyInput(value: string): string {
   const num = parseFloat(value.replace(/[^0-9.-]/g, ''));
-  if (isNaN(num)) return '0';
+  if (isNaN(num)) {
+    return '0';
+  }
   return String(Math.round(num));
 }
 
@@ -347,10 +337,14 @@ export function parseCurrencyInput(value: string): string {
  * Format date for display (e.g., "Jan 15, 2025")
  */
 export function formatDateForDisplay(value: string): string | null {
-  if (!value) return null;
+  if (!value) {
+    return null;
+  }
   try {
     const date = new Date(value);
-    if (isNaN(date.getTime())) return null;
+    if (isNaN(date.getTime())) {
+      return null;
+    }
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -365,10 +359,14 @@ export function formatDateForDisplay(value: string): string | null {
  * Format date for input element (YYYY-MM-DD)
  */
 export function formatDateForInput(value: string): string {
-  if (!value) return '';
+  if (!value) {
+    return '';
+  }
   try {
     const date = new Date(value);
-    if (isNaN(date.getTime())) return '';
+    if (isNaN(date.getTime())) {
+      return '';
+    }
     // Format as YYYY-MM-DD for date input
     return date.toISOString().split('T')[0];
   } catch {
@@ -380,10 +378,14 @@ export function formatDateForInput(value: string): string {
  * Parse date input to ISO string
  */
 export function parseDateInput(value: string): string {
-  if (!value) return '';
+  if (!value) {
+    return '';
+  }
   try {
     const date = new Date(value);
-    if (isNaN(date.getTime())) return '';
+    if (isNaN(date.getTime())) {
+      return '';
+    }
     return date.toISOString();
   } catch {
     return '';
@@ -432,14 +434,8 @@ export function InlineSelect({
   disabled = false,
   showEditIcon = true
 }: InlineSelectProps) {
-  const {
-    isEditing,
-    editValue,
-    isSaving,
-    startEditing,
-    cancelEditing,
-    saveValue
-  } = useInlineEditState({ value, disabled, onSave });
+  const { isEditing, editValue, isSaving, startEditing, cancelEditing, saveValue } =
+    useInlineEditState({ value, disabled, onSave });
 
   /** Find an option by normalized value comparison */
   const findOption = useCallback(
@@ -467,16 +463,18 @@ export function InlineSelect({
     const normalizedEdit = editValue ? normalizeValue(editValue) : '';
 
     return (
-      <div
-        className={cn('inline-edit-wrapper', className)}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <PortalDropdown defaultOpen onOpenChange={(open) => { if (!open) cancelEditing(); }}>
+      <div className={cn('inline-edit-wrapper', className)} onClick={(e) => e.stopPropagation()}>
+        <PortalDropdown
+          defaultOpen
+          onOpenChange={(open) => {
+            if (!open) {
+              cancelEditing();
+            }
+          }}
+        >
           <PortalDropdownTrigger asChild>
             <button className="dropdown-trigger--form" disabled={isSaving}>
-              <span className="dropdown-value--form">
-                {triggerLabel}
-              </span>
+              <span className="dropdown-value--form">{triggerLabel}</span>
               <ChevronDown className="dropdown-caret--form" />
             </button>
           </PortalDropdownTrigger>
@@ -484,10 +482,7 @@ export function InlineSelect({
             {options
               .filter((opt) => normalizeValue(opt.value) !== normalizedEdit)
               .map((opt) => (
-                <PortalDropdownItem
-                  key={opt.value}
-                  onSelect={() => handleSelect(opt.value)}
-                >
+                <PortalDropdownItem key={opt.value} onSelect={() => handleSelect(opt.value)}>
                   {opt.label}
                 </PortalDropdownItem>
               ))}
@@ -499,23 +494,15 @@ export function InlineSelect({
 
   return (
     <div
-      className={cn(
-        'inline-edit-display',
-        disabled && 'is-disabled',
-        className
-      )}
+      className={cn('inline-edit-display', disabled && 'is-disabled', className)}
       onClick={(e) => {
         e.stopPropagation();
         startEditing();
       }}
       title={disabled ? undefined : 'Click to edit'}
     >
-      <span className={cn('inline-edit-value', !value && 'is-placeholder')}>
-        {displayValue}
-      </span>
-      {showEditIcon && !disabled && (
-        <Pencil className="inline-edit-icon" />
-      )}
+      <span className={cn('inline-edit-value', !value && 'is-placeholder')}>{displayValue}</span>
+      {showEditIcon && !disabled && <Pencil className="inline-edit-icon" />}
     </div>
   );
 }
@@ -554,15 +541,8 @@ export function InlineTextarea({
   showEditIcon = true,
   minRows = 3
 }: InlineTextareaProps) {
-  const {
-    isEditing,
-    editValue,
-    setEditValue,
-    isSaving,
-    startEditing,
-    cancelEditing,
-    saveValue
-  } = useInlineEditState({ value, disabled, onSave });
+  const { isEditing, editValue, setEditValue, isSaving, startEditing, cancelEditing, saveValue } =
+    useInlineEditState({ value, disabled, onSave });
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -663,12 +643,12 @@ export function InlineTextarea({
       }}
       title={disabled ? undefined : 'Click to edit'}
     >
-      <span className={cn('inline-edit-value inline-edit-value--multiline', !value && 'is-placeholder')}>
+      <span
+        className={cn('inline-edit-value inline-edit-value--multiline', !value && 'is-placeholder')}
+      >
         {displayValue}
       </span>
-      {showEditIcon && !disabled && (
-        <Pencil className="inline-edit-icon" />
-      )}
+      {showEditIcon && !disabled && <Pencil className="inline-edit-icon" />}
     </div>
   );
 }

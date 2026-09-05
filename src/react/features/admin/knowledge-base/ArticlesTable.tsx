@@ -1,11 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import {
-  FileText,
-  Folder,
-  Inbox,
-  CheckCircle
-} from 'lucide-react';
+import { FileText, Folder, Inbox, CheckCircle } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
@@ -97,13 +92,17 @@ function filterArticle(
 
   const categoryFilter = filters.category;
   if (categoryFilter && categoryFilter.length > 0) {
-    if (!categoryFilter.includes(String(article.category_id))) return false;
+    if (!categoryFilter.includes(String(article.category_id))) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
     const articleStatus = article.is_published ? 'published' : 'draft';
-    if (!statusFilter.includes(articleStatus)) return false;
+    if (!statusFilter.includes(articleStatus)) {
+      return false;
+    }
   }
 
   return true;
@@ -114,18 +113,24 @@ function sortArticles(a: Article, b: Article, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'title':
-    return multiplier * a.title.localeCompare(b.title);
-  case 'view_count':
-    return multiplier * (a.view_count - b.view_count);
-  case 'updated_at':
-    return multiplier * a.updated_at.localeCompare(b.updated_at);
-  default:
-    return 0;
+    case 'title':
+      return multiplier * a.title.localeCompare(b.title);
+    case 'view_count':
+      return multiplier * (a.view_count - b.view_count);
+    case 'updated_at':
+      return multiplier * a.updated_at.localeCompare(b.updated_at);
+    default:
+      return 0;
   }
 }
 
-export function ArticlesTable({ onNavigate, getAuthToken: _getAuthToken, showNotification, defaultPageSize = 25, overviewMode = false }: ArticlesTableProps) {
+export function ArticlesTable({
+  onNavigate,
+  getAuthToken: _getAuthToken,
+  showNotification,
+  defaultPageSize = 25,
+  overviewMode = false
+}: ArticlesTableProps) {
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -170,7 +175,9 @@ export function ArticlesTable({ onNavigate, getAuthToken: _getAuthToken, showNot
 
       // Load articles
       const articlesRes = await apiFetch(API_ENDPOINTS.ADMIN.KB_ARTICLES);
-      if (!articlesRes.ok) throw new Error('Failed to load articles');
+      if (!articlesRes.ok) {
+        throw new Error('Failed to load articles');
+      }
       const artData = await articlesRes.json();
       setArticles(artData.data?.articles || artData.articles || []);
 
@@ -178,7 +185,9 @@ export function ArticlesTable({ onNavigate, getAuthToken: _getAuthToken, showNot
       const statsRes = await apiFetch(API_ENDPOINTS.ADMIN.KB_STATS);
       if (statsRes.ok) {
         const statsData = await statsRes.json();
-        setStats(statsData.data || statsData || { totalArticles: 0, totalViews: 0, published: 0, draft: 0 });
+        setStats(
+          statsData.data || statsData || { totalArticles: 0, totalViews: 0, published: 0, draft: 0 }
+        );
       }
     } catch (err) {
       setError(formatErrorMessage(err, 'Failed to load articles'));
@@ -192,52 +201,69 @@ export function ArticlesTable({ onNavigate, getAuthToken: _getAuthToken, showNot
   }, [loadData]);
 
   // Dynamic category filter options built from API data
-  const categoryFilterOptions = useMemo(() => [
-    { value: 'all', label: 'All Categories' },
-    ...categories.map((cat) => ({
-      value: String(cat.id),
-      label: `${cat.name} (${cat.article_count})`
-    }))
-  ], [categories]);
+  const categoryFilterOptions = useMemo(
+    () => [
+      { value: 'all', label: 'All Categories' },
+      ...categories.map((cat) => ({
+        value: String(cat.id),
+        label: `${cat.name} (${cat.article_count})`
+      }))
+    ],
+    [categories]
+  );
 
   // Category options for the create modal
-  const modalCategoryOptions = useMemo(() =>
-    categories.map((cat) => ({
-      value: String(cat.id),
-      label: cat.name
-    })),
-  [categories]);
+  const modalCategoryOptions = useMemo(
+    () =>
+      categories.map((cat) => ({
+        value: String(cat.id),
+        label: cat.name
+      })),
+    [categories]
+  );
 
   // Single delete handler
-  const handleDeleteArticle = useCallback(async (articleId: number) => {
-    if (!window.confirm('Are you sure you want to delete this article?')) return;
-    try {
-      const res = await apiFetch(`${API_ENDPOINTS.ADMIN.KB_ARTICLES}/${articleId}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to delete article');
-      showNotification?.('Article deleted', 'success');
-      loadData();
-    } catch {
-      showNotification?.('Failed to delete article', 'error');
-    }
-  }, [showNotification, loadData]);
-
-  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
-    setCreateLoading(true);
-    try {
-      const res = await apiPost(API_ENDPOINTS.ADMIN.KB_ARTICLES, formData);
-      if (res.ok) {
-        showNotification?.('Article created successfully', 'success');
-        setCreateOpen(false);
-        loadData();
-      } else {
-        showNotification?.('Failed to create article', 'error');
+  const handleDeleteArticle = useCallback(
+    async (articleId: number) => {
+      if (!window.confirm('Are you sure you want to delete this article?')) {
+        return;
       }
-    } catch {
-      showNotification?.('Failed to create article', 'error');
-    } finally {
-      setCreateLoading(false);
-    }
-  }, [showNotification, loadData]);
+      try {
+        const res = await apiFetch(`${API_ENDPOINTS.ADMIN.KB_ARTICLES}/${articleId}`, {
+          method: 'DELETE'
+        });
+        if (!res.ok) {
+          throw new Error('Failed to delete article');
+        }
+        showNotification?.('Article deleted', 'success');
+        loadData();
+      } catch {
+        showNotification?.('Failed to delete article', 'error');
+      }
+    },
+    [showNotification, loadData]
+  );
+
+  const handleCreate = useCallback(
+    async (formData: Record<string, unknown>) => {
+      setCreateLoading(true);
+      try {
+        const res = await apiPost(API_ENDPOINTS.ADMIN.KB_ARTICLES, formData);
+        if (res.ok) {
+          showNotification?.('Article created successfully', 'success');
+          setCreateOpen(false);
+          loadData();
+        } else {
+          showNotification?.('Failed to create article', 'error');
+        }
+      } catch {
+        showNotification?.('Failed to create article', 'error');
+      } finally {
+        setCreateLoading(false);
+      }
+    },
+    [showNotification, loadData]
+  );
 
   // Export functionality
   const { exportCsv, isExporting } = useExport({
@@ -276,11 +302,7 @@ export function ArticlesTable({ onNavigate, getAuthToken: _getAuthToken, showNot
         }
         actions={
           <>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search articles..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search articles..." />
             <FilterDropdown
               sections={[
                 { key: 'category', label: 'CATEGORY', options: categoryFilterOptions },
@@ -289,7 +311,12 @@ export function ArticlesTable({ onNavigate, getAuthToken: _getAuthToken, showNot
               values={filterValues}
               onChange={setFilter}
             />
-            <IconButton action="download" title="Export" onClick={exportCsv} disabled={isExporting || articles.length === 0} />
+            <IconButton
+              action="download"
+              title="Export"
+              onClick={exportCsv}
+              disabled={isExporting || articles.length === 0}
+            />
             <IconButton action="refresh" onClick={loadData} disabled={isLoading} title="Refresh" />
             <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Article" />
           </>
@@ -320,7 +347,7 @@ export function ArticlesTable({ onNavigate, getAuthToken: _getAuthToken, showNot
                 sortDirection={sort?.column === 'title' ? sort.direction : null}
                 onClick={() => toggleSort('title')}
               >
-              Article
+                Article
               </PortalTableHead>
               <PortalTableHead>Category</PortalTableHead>
               <PortalTableHead>Status</PortalTableHead>
@@ -331,7 +358,7 @@ export function ArticlesTable({ onNavigate, getAuthToken: _getAuthToken, showNot
                 sortDirection={sort?.column === 'view_count' ? sort.direction : null}
                 onClick={() => toggleSort('view_count')}
               >
-              Views
+                Views
               </PortalTableHead>
               <PortalTableHead
                 className="date-col"
@@ -339,7 +366,7 @@ export function ArticlesTable({ onNavigate, getAuthToken: _getAuthToken, showNot
                 sortDirection={sort?.column === 'updated_at' ? sort.direction : null}
                 onClick={() => toggleSort('updated_at')}
               >
-              Updated
+                Updated
               </PortalTableHead>
               <PortalTableHead className="col-actions">Actions</PortalTableHead>
             </PortalTableRow>
@@ -377,21 +404,32 @@ export function ArticlesTable({ onNavigate, getAuthToken: _getAuthToken, showNot
                     </div>
                   </PortalTableCell>
                   <PortalTableCell className="status-col">
-                    <StatusBadge status={getStatusVariant(article.is_published ? 'published' : 'draft')} size="sm">
+                    <StatusBadge
+                      status={getStatusVariant(article.is_published ? 'published' : 'draft')}
+                      size="sm"
+                    >
                       {article.is_published ? 'Published' : 'Draft'}
                     </StatusBadge>
                   </PortalTableCell>
                   <PortalTableCell className="text-center">
-                    {article.is_featured && (
-                      <CheckCircle className="icon-xs status-completed" />
-                    )}
+                    {article.is_featured && <CheckCircle className="icon-xs status-completed" />}
                   </PortalTableCell>
                   <PortalTableCell className="text-center">{article.view_count}</PortalTableCell>
-                  <PortalTableCell className="date-col">{formatDate(article.updated_at)}</PortalTableCell>
+                  <PortalTableCell className="date-col">
+                    {formatDate(article.updated_at)}
+                  </PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
-                      <IconButton action="view" title="View" onClick={() => onNavigate?.('kb-article', String(article.id))} />
-                      <IconButton action="delete" title="Delete" onClick={() => handleDeleteArticle(article.id)} />
+                      <IconButton
+                        action="view"
+                        title="View"
+                        onClick={() => onNavigate?.('kb-article', String(article.id))}
+                      />
+                      <IconButton
+                        action="delete"
+                        title="Delete"
+                        onClick={() => handleDeleteArticle(article.id)}
+                      />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>

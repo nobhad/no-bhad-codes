@@ -25,7 +25,9 @@ import type { PortalMessagesProps, Message, MessageAttachment } from './types';
 
 /** Parse attachments from API (may be JSON string, array, or null) */
 function parseAttachments(raw: Message['attachments']): MessageAttachment[] {
-  if (!raw) return [];
+  if (!raw) {
+    return [];
+  }
   if (typeof raw === 'string') {
     try {
       return JSON.parse(raw) as MessageAttachment[];
@@ -66,10 +68,7 @@ function mapMessage(m: Message): ThreadMessage {
 // MAIN COMPONENT
 // ============================================================================
 
-export function PortalMessagesView({
-  getAuthToken,
-  showNotification
-}: PortalMessagesProps) {
+export function PortalMessagesView({ getAuthToken, showNotification }: PortalMessagesProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
   const {
@@ -93,30 +92,40 @@ export function PortalMessagesView({
 
   // SSE for real-time updates
   useEventSource({
-    onNewMessage: useCallback((data: { threadId: number }) => {
-      if (selectedThread && data.threadId === selectedThread.id) {
-        refreshMessages();
-      }
-      refreshThreads();
-    }, [selectedThread, refreshMessages, refreshThreads]),
-
-    onTyping: useCallback((data: { threadId: number; isTyping: boolean; senderName: string }) => {
-      if (!selectedThread || data.threadId !== selectedThread.id) return;
-
-      if (data.isTyping) {
-        setTypingUser(data.senderName);
-        if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
-        typingTimerRef.current = setTimeout(() => {
-          setTypingUser(null);
-        }, TIMING.SEARCH_DEBOUNCE * 10);
-      } else {
-        setTypingUser(null);
-        if (typingTimerRef.current) {
-          clearTimeout(typingTimerRef.current);
-          typingTimerRef.current = null;
+    onNewMessage: useCallback(
+      (data: { threadId: number }) => {
+        if (selectedThread && data.threadId === selectedThread.id) {
+          refreshMessages();
         }
-      }
-    }, [selectedThread])
+        refreshThreads();
+      },
+      [selectedThread, refreshMessages, refreshThreads]
+    ),
+
+    onTyping: useCallback(
+      (data: { threadId: number; isTyping: boolean; senderName: string }) => {
+        if (!selectedThread || data.threadId !== selectedThread.id) {
+          return;
+        }
+
+        if (data.isTyping) {
+          setTypingUser(data.senderName);
+          if (typingTimerRef.current) {
+            clearTimeout(typingTimerRef.current);
+          }
+          typingTimerRef.current = setTimeout(() => {
+            setTypingUser(null);
+          }, TIMING.SEARCH_DEBOUNCE * 10);
+        } else {
+          setTypingUser(null);
+          if (typingTimerRef.current) {
+            clearTimeout(typingTimerRef.current);
+            typingTimerRef.current = null;
+          }
+        }
+      },
+      [selectedThread]
+    )
   });
 
   // Auto-select first thread when threads load
@@ -127,10 +136,7 @@ export function PortalMessagesView({
   }, [threadsLoading, threads, selectedThread, selectThread]);
 
   // Map portal messages → factory ThreadMessage[]
-  const threadMessages = useMemo<ThreadMessage[]>(
-    () => messages.map(mapMessage),
-    [messages]
-  );
+  const threadMessages = useMemo<ThreadMessage[]>(() => messages.map(mapMessage), [messages]);
 
   // Wrap sendMessage to match factory signature (content, files) => Promise<boolean>
   const handleSend = useCallback(
@@ -167,7 +173,12 @@ export function PortalMessagesView({
         containerRef={containerRef}
         title="MESSAGES"
         actions={
-          <IconButton action="refresh" onClick={refreshThreads} loading={threadsLoading} title="Refresh" />
+          <IconButton
+            action="refresh"
+            onClick={refreshThreads}
+            loading={threadsLoading}
+            title="Refresh"
+          />
         }
       >
         <EmptyState
@@ -184,14 +195,15 @@ export function PortalMessagesView({
       containerRef={containerRef}
       title={threadTitle}
       actions={
-        <IconButton action="refresh" onClick={refreshMessages} loading={messagesLoading} title="Refresh" />
+        <IconButton
+          action="refresh"
+          onClick={refreshMessages}
+          loading={messagesLoading}
+          title="Refresh"
+        />
       }
     >
-      {typingUser && (
-        <div className="msgtab-typing-indicator">
-          {typingUser} is typing...
-        </div>
-      )}
+      {typingUser && <div className="msgtab-typing-indicator">{typingUser} is typing...</div>}
       <MessageThread
         messages={threadMessages}
         isLoading={messagesLoading}

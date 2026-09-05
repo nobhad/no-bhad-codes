@@ -20,8 +20,7 @@ import { QuestionnaireForm } from './QuestionnaireForm';
 import { QUESTIONNAIRE_STATUS_CONFIG } from './types';
 import type {
   PortalQuestionnairesProps,
-  PortalQuestionnaireResponse,
-  QuestionnaireStatus
+  PortalQuestionnaireResponse
 } from './types';
 import { formatCardDate } from '@react/utils/cardFormatters';
 import { usePortalData } from '@react/hooks/usePortalFetch';
@@ -40,12 +39,16 @@ function filterQuestionnaire(
     const matchesSearch =
       response.questionnaire?.title?.toLowerCase().includes(s) ||
       response.questionnaire?.description?.toLowerCase().includes(s);
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(response.status)) return false;
+    if (!statusFilter.includes(response.status)) {
+      return false;
+    }
   }
 
   return true;
@@ -61,26 +64,29 @@ export function PortalQuestionnairesView({
   const containerRef = useFadeIn<HTMLDivElement>();
   const cardsRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_SLOW, GSAP.STAGGER_DELAY_SHORT);
 
-  const { data: responses, isLoading, error, refetch } = usePortalData<PortalQuestionnaireResponse[]>({
+  const {
+    data: responses,
+    isLoading,
+    error,
+    refetch
+  } = usePortalData<PortalQuestionnaireResponse[]>({
     getAuthToken,
     url: API_ENDPOINTS.QUESTIONNAIRES_MY_RESPONSES,
-    transform: (raw) => (raw as Record<string, unknown>).responses as PortalQuestionnaireResponse[] || []
+    transform: (raw) =>
+      ((raw as Record<string, unknown>).responses as PortalQuestionnaireResponse[]) || []
   });
   const items = useMemo(() => responses ?? [], [responses]);
-  const [selectedResponse, setSelectedResponse] = useState<PortalQuestionnaireResponse | null>(null);
+  const [selectedResponse, setSelectedResponse] = useState<PortalQuestionnaireResponse | null>(
+    null
+  );
 
   // Table filters
-  const {
-    filterValues,
-    setFilter,
-    search,
-    setSearch,
-    applyFilters
-  } = useTableFilters<PortalQuestionnaireResponse>({
-    storageKey: 'portal_questionnaires',
-    filters: PORTAL_QUESTIONNAIRES_FILTER_CONFIG,
-    filterFn: filterQuestionnaire
-  });
+  const { filterValues, setFilter, search, setSearch, applyFilters } =
+    useTableFilters<PortalQuestionnaireResponse>({
+      storageKey: 'portal_questionnaires',
+      filters: PORTAL_QUESTIONNAIRES_FILTER_CONFIG,
+      filterFn: filterQuestionnaire
+    });
 
   const filteredResponses = useMemo(() => applyFilters(items), [applyFilters, items]);
 
@@ -116,9 +122,13 @@ export function PortalQuestionnairesView({
     let pending = 0;
     let revision = 0;
     for (const r of items) {
-      if (r.status === 'submitted' || r.status === 'approved') completed++;
-      else if (r.status === 'pending' || r.status === 'in_progress') pending++;
-      else if (r.status === 'rejected') revision++;
+      if (r.status === 'submitted' || r.status === 'approved') {
+        completed++;
+      } else if (r.status === 'pending' || r.status === 'in_progress') {
+        pending++;
+      } else if (r.status === 'rejected') {
+        revision++;
+      }
     }
     return { completedCount: completed, pendingCount: pending, needsRevisionCount: revision };
   }, [items]);
@@ -137,20 +147,27 @@ export function PortalQuestionnairesView({
   }
 
   return (
-    <TableLayout nested
+    <TableLayout
+      nested
       containerRef={containerRef}
       title="QUESTIONNAIRES"
       stats={
-        <TableStats items={[
-          { value: items.length, label: 'total' },
-          { value: completedCount, label: 'completed', variant: 'completed' },
-          { value: pendingCount, label: 'pending', variant: 'pending' },
-          { value: needsRevisionCount, label: 'needs revision', variant: 'overdue' }
-        ]} />
+        <TableStats
+          items={[
+            { value: items.length, label: 'total' },
+            { value: completedCount, label: 'completed', variant: 'completed' },
+            { value: pendingCount, label: 'pending', variant: 'pending' },
+            { value: needsRevisionCount, label: 'needs revision', variant: 'overdue' }
+          ]}
+        />
       }
       actions={
         <>
-          <SearchFilter value={search} onChange={setSearch} placeholder="Search questionnaires..." />
+          <SearchFilter
+            value={search}
+            onChange={setSearch}
+            placeholder="Search questionnaires..."
+          />
           <FilterDropdown
             sections={PORTAL_QUESTIONNAIRES_FILTER_CONFIG}
             values={filterValues}
@@ -167,9 +184,10 @@ export function PortalQuestionnairesView({
       ) : filteredResponses.length === 0 ? (
         <EmptyState
           icon={<FileText className="icon-lg" />}
-          message={items.length === 0
-            ? 'No questionnaires assigned yet. Questionnaires will appear here when Noelle sends them.'
-            : 'No questionnaires match the current filters.'
+          message={
+            items.length === 0
+              ? 'No questionnaires assigned yet. Questionnaires will appear here when Noelle sends them.'
+              : 'No questionnaires match the current filters.'
           }
         />
       ) : (
@@ -189,13 +207,9 @@ export function PortalQuestionnairesView({
                   <div className="portal-card-title-group">
                     {<StatusIcon status={response.status} className="icon-sm" />}
                     <div className="portal-card-title-group flex-col">
-                      <span className="text-primary">
-                        {response.questionnaire.title}
-                      </span>
+                      <span className="text-primary">{response.questionnaire.title}</span>
                       {response.questionnaire.description && (
-                        <span className="text-secondary">
-                          {response.questionnaire.description}
-                        </span>
+                        <span className="text-secondary">{response.questionnaire.description}</span>
                       )}
                     </div>
                   </div>
@@ -205,13 +219,10 @@ export function PortalQuestionnairesView({
                       <span className="text-secondary">
                         {response.submitted_at
                           ? `Submitted ${formatCardDate(response.submitted_at)}`
-                          : `Updated ${formatCardDate(response.updated_at || response.created_at)}`
-                        }
+                          : `Updated ${formatCardDate(response.updated_at || response.created_at)}`}
                       </span>
                     </div>
-                    {isActionable && (
-                      <ChevronRight className="icon-xs" />
-                    )}
+                    {isActionable && <ChevronRight className="icon-xs" />}
                   </div>
                 </div>
 

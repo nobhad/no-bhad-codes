@@ -60,7 +60,12 @@ const STATUS_LABELS: Record<string, string> = {
 
 export function PaymentScheduleView({ getAuthToken }: PaymentScheduleViewProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const { data: installmentData, isLoading: loadingInstallments, error: installmentError, refetch } = usePortalData<{ installments: PaymentInstallment[] }>({
+  const {
+    data: installmentData,
+    isLoading: loadingInstallments,
+    error: installmentError,
+    refetch
+  } = usePortalData<{ installments: PaymentInstallment[] }>({
     getAuthToken,
     url: API_ENDPOINTS.PAYMENT_SCHEDULES_MY
   });
@@ -73,10 +78,26 @@ export function PaymentScheduleView({ getAuthToken }: PaymentScheduleViewProps) 
   const installments = useMemo(() => installmentData?.installments || [], [installmentData]);
   const summary = summaryData?.summary;
 
-  if (loadingInstallments) return <div ref={containerRef}><LoadingState message="Loading payment schedule..." /></div>;
-  if (installmentError) return <div ref={containerRef}><ErrorState message={installmentError} onRetry={refetch} /></div>;
+  if (loadingInstallments) {
+    return (
+      <div ref={containerRef}>
+        <LoadingState message="Loading payment schedule..." />
+      </div>
+    );
+  }
+  if (installmentError) {
+    return (
+      <div ref={containerRef}>
+        <ErrorState message={installmentError} onRetry={refetch} />
+      </div>
+    );
+  }
   if (installments.length === 0) {
-    return <div ref={containerRef}><EmptyState message="No payment schedule has been set up yet." /></div>;
+    return (
+      <div ref={containerRef}>
+        <EmptyState message="No payment schedule has been set up yet." />
+      </div>
+    );
   }
 
   return (

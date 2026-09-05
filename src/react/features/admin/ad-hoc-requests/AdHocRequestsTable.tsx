@@ -1,10 +1,6 @@
 import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
-import {
-  Zap,
-  Inbox,
-  User
-} from 'lucide-react';
+import { Zap, Inbox, User } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -111,17 +107,23 @@ function filterAdHocRequest(
       request.title.toLowerCase().includes(searchLower) ||
       request.clientName.toLowerCase().includes(searchLower) ||
       request.projectName?.toLowerCase().includes(searchLower);
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(request.status)) return false;
+    if (!statusFilter.includes(request.status)) {
+      return false;
+    }
   }
 
   const priorityFilter = filters.priority;
   if (priorityFilter && priorityFilter.length > 0) {
-    if (!priorityFilter.includes(request.priority)) return false;
+    if (!priorityFilter.includes(request.priority)) {
+      return false;
+    }
   }
 
   return true;
@@ -133,38 +135,54 @@ function sortAdHocRequests(a: AdHocRequest, b: AdHocRequest, sort: SortConfig): 
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'title':
-    return multiplier * a.title.localeCompare(b.title);
-  case 'priority': {
-    const order = { urgent: 0, high: 1, medium: 2, low: 3 };
-    return multiplier * (order[a.priority] - order[b.priority]);
-  }
-  case 'dueDate':
-    return multiplier * ((a.dueDate || '').localeCompare(b.dueDate || ''));
-  case 'createdAt':
-    return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-  default:
-    return 0;
+    case 'title':
+      return multiplier * a.title.localeCompare(b.title);
+    case 'priority': {
+      const order = { urgent: 0, high: 1, medium: 2, low: 3 };
+      return multiplier * (order[a.priority] - order[b.priority]);
+    }
+    case 'dueDate':
+      return multiplier * (a.dueDate || '').localeCompare(b.dueDate || '');
+    case 'createdAt':
+      return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    default:
+      return 0;
   }
 }
 
-export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: AdHocRequestsTableProps) {
+export function AdHocRequestsTable({
+  clientId,
+  projectId,
+  getAuthToken,
+  showNotification,
+  onNavigate,
+  defaultPageSize = 25,
+  overviewMode = false
+}: AdHocRequestsTableProps) {
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
-  const { clientOptions: entityClients, projectOptions: entityProjects } = useEntityOptions(createOpen);
+  const { clientOptions: entityClients, projectOptions: entityProjects } =
+    useEntityOptions(createOpen);
 
   // Build endpoint with optional query params
   const endpoint = useMemo(() => {
     const params = new URLSearchParams();
-    if (clientId) params.set('clientId', clientId);
-    if (projectId) params.set('projectId', projectId);
+    if (clientId) {
+      params.set('clientId', clientId);
+    }
+    if (projectId) {
+      params.set('projectId', projectId);
+    }
     const qs = params.toString();
     return qs ? `${API_ENDPOINTS.AD_HOC_REQUESTS}?${qs}` : API_ENDPOINTS.AD_HOC_REQUESTS;
   }, [clientId, projectId]);
 
   // Data fetching via useListFetch
-  const { data, isLoading, error, refetch, setData } = useListFetch<AdHocRequest, AdHocRequestStats>({
+  const { data, isLoading, error, refetch, setData } = useListFetch<
+    AdHocRequest,
+    AdHocRequestStats
+  >({
     endpoint,
     getAuthToken,
     defaultStats: DEFAULT_AD_HOC_STATS,
@@ -222,72 +240,101 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
   });
 
   // Status change handler
-  const handleStatusChange = useCallback(async (requestId: number, newStatus: string) => {
-    await executeUpdateWithToast(
-      'status',
-      () => apiFetch(buildEndpoint.adHocRequest(requestId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      }),
-      () => setData((prev) => prev ? {
-        ...prev,
-        items: prev.items.map((request) =>
-          request.id === requestId
-            ? { ...request, status: newStatus as AdHocRequest['status'] }
-            : request
-        )
-      } : prev)
-    );
-  }, [setData]);
+  const handleStatusChange = useCallback(
+    async (requestId: number, newStatus: string) => {
+      await executeUpdateWithToast(
+        'status',
+        () =>
+          apiFetch(buildEndpoint.adHocRequest(requestId), {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+          }),
+        () =>
+          setData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  items: prev.items.map((request) =>
+                    request.id === requestId
+                      ? { ...request, status: newStatus as AdHocRequest['status'] }
+                      : request
+                  )
+                }
+              : prev
+          )
+      );
+    },
+    [setData]
+  );
 
   // Generic field update handler
-  const handleFieldUpdate = useCallback(async (requestId: number, field: string, value: string): Promise<boolean> => {
-    let success = false;
-    await executeUpdateWithToast(
-      field,
-      () => apiFetch(buildEndpoint.adHocRequest(requestId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [field]: value })
-      }),
-      () => {
-        setData((prev) => prev ? {
-          ...prev,
-          items: prev.items.map((request) =>
-            request.id === requestId
-              ? { ...request, [field]: value }
-              : request
-          )
-        } : prev);
-        success = true;
-      }
-    );
-    return success;
-  }, [setData]);
+  const handleFieldUpdate = useCallback(
+    async (requestId: number, field: string, value: string): Promise<boolean> => {
+      let success = false;
+      await executeUpdateWithToast(
+        field,
+        () =>
+          apiFetch(buildEndpoint.adHocRequest(requestId), {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ [field]: value })
+          }),
+        () => {
+          setData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  items: prev.items.map((request) =>
+                    request.id === requestId ? { ...request, [field]: value } : request
+                  )
+                }
+              : prev
+          );
+          success = true;
+        }
+      );
+      return success;
+    },
+    [setData]
+  );
 
   // Single delete handler
-  const handleDeleteRequest = useCallback(async (requestId: number) => {
-    if (!window.confirm('Are you sure you want to delete this request?')) return;
-    await executeWithToast(
-      () => apiFetch(buildEndpoint.adHocRequest(requestId), { method: 'DELETE' }),
-      { success: 'Request deleted', error: 'Failed to delete request' },
-      () => {
-        setData((prev) => prev ? { ...prev, items: prev.items.filter((r) => r.id !== requestId) } : prev);
+  const handleDeleteRequest = useCallback(
+    async (requestId: number) => {
+      if (!window.confirm('Are you sure you want to delete this request?')) {
+        return;
       }
-    );
-  }, [setData]);
+      await executeWithToast(
+        () => apiFetch(buildEndpoint.adHocRequest(requestId), { method: 'DELETE' }),
+        { success: 'Request deleted', error: 'Failed to delete request' },
+        () => {
+          setData((prev) =>
+            prev ? { ...prev, items: prev.items.filter((r) => r.id !== requestId) } : prev
+          );
+        }
+      );
+    },
+    [setData]
+  );
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
     const ids = selection.selectedItems.map((r) => r.id);
     await executeWithToast(
       () => apiPost(API_ENDPOINTS.AD_HOC_REQUESTS_BULK_DELETE, { ids }),
-      { success: `Deleted ${ids.length} request${ids.length !== 1 ? 's' : ''}`, error: 'Failed to delete requests' },
+      {
+        success: `Deleted ${ids.length} request${ids.length !== 1 ? 's' : ''}`,
+        error: 'Failed to delete requests'
+      },
       () => {
-        setData((prev) => prev ? { ...prev, items: prev.items.filter((r) => !ids.includes(r.id)) } : prev);
+        setData((prev) =>
+          prev ? { ...prev, items: prev.items.filter((r) => !ids.includes(r.id)) } : prev
+        );
         selection.clearSelection();
       }
     );
@@ -307,7 +354,9 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
   // Handle bulk status change
   const handleBulkStatusChange = useCallback(
     async (newStatus: string) => {
-      if (selection.selectedCount === 0) return;
+      if (selection.selectedCount === 0) {
+        return;
+      }
 
       for (const request of selection.selectedItems) {
         await handleStatusChange(request.id, newStatus);
@@ -329,43 +378,59 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
   const clientOptions = useMemo(() => {
     const map = new Map<string, string>();
     entityClients.forEach((o) => map.set(o.value, o.label));
-    requests.forEach((r) => { if (r.clientId && r.clientName) map.set(String(r.clientId), r.clientName); });
+    requests.forEach((r) => {
+      if (r.clientId && r.clientName) {
+        map.set(String(r.clientId), r.clientName);
+      }
+    });
     return Array.from(map, ([value, label]) => ({ value, label }));
   }, [requests, entityClients]);
 
   const projectOptions = useMemo(() => {
     const map = new Map<string, string>();
     entityProjects.forEach((o) => map.set(o.value, o.label));
-    requests.forEach((r) => { if (r.projectId && r.projectName) map.set(String(r.projectId), r.projectName); });
+    requests.forEach((r) => {
+      if (r.projectId && r.projectName) {
+        map.set(String(r.projectId), r.projectName);
+      }
+    });
     return Array.from(map, ([value, label]) => ({ value, label }));
   }, [requests, entityProjects]);
 
   // Create handler
-  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
-    setCreateLoading(true);
-    try {
-      const res = await apiPost(API_ENDPOINTS.AD_HOC_REQUESTS, formData);
-      if (res.ok) {
-        showNotification?.('Ad-hoc request created successfully', 'success');
-        setCreateOpen(false);
-        refetch();
-      } else {
+  const handleCreate = useCallback(
+    async (formData: Record<string, unknown>) => {
+      setCreateLoading(true);
+      try {
+        const res = await apiPost(API_ENDPOINTS.AD_HOC_REQUESTS, formData);
+        if (res.ok) {
+          showNotification?.('Ad-hoc request created successfully', 'success');
+          setCreateOpen(false);
+          refetch();
+        } else {
+          showNotification?.('Failed to create ad-hoc request', 'error');
+        }
+      } catch {
         showNotification?.('Failed to create ad-hoc request', 'error');
+      } finally {
+        setCreateLoading(false);
       }
-    } catch {
-      showNotification?.('Failed to create ad-hoc request', 'error');
-    } finally {
-      setCreateLoading(false);
-    }
-  }, [showNotification, refetch]);
+    },
+    [showNotification, refetch]
+  );
 
   function getPriorityColor(priority: string): string {
     switch (priority) {
-    case 'urgent': return 'var(--status-cancelled)';
-    case 'high': return 'var(--status-pending)';
-    case 'medium': return 'var(--status-active)';
-    case 'low': return 'var(--color-text-tertiary)';
-    default: return 'var(--color-text-tertiary)';
+      case 'urgent':
+        return 'var(--status-cancelled)';
+      case 'high':
+        return 'var(--status-pending)';
+      case 'medium':
+        return 'var(--status-active)';
+      case 'low':
+        return 'var(--color-text-tertiary)';
+      default:
+        return 'var(--color-text-tertiary)';
     }
   }
 
@@ -386,11 +451,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
       }
       actions={
         <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search requests..."
-          />
+          <SearchFilter value={search} onChange={setSearch} placeholder="Search requests..." />
           <FilterDropdown
             sections={AD_HOC_REQUESTS_FILTER_CONFIG}
             values={filterValues}
@@ -485,15 +546,13 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
             <PortalTableEmpty
               colSpan={8}
               icon={<Inbox />}
-              message={hasActiveFilters ? 'No requests match your filters' : 'No ad-hoc requests yet'}
+              message={
+                hasActiveFilters ? 'No requests match your filters' : 'No ad-hoc requests yet'
+              }
             />
           ) : (
             paginatedRequests.map((request) => (
-              <PortalTableRow
-                key={request.id}
-                clickable
-                selected={selection.isSelected(request)}
-              >
+              <PortalTableRow key={request.id} clickable selected={selection.isSelected(request)}>
                 <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selection.isSelected(request)}
@@ -570,14 +629,12 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                   ariaLabel="Change request status"
                 />
                 <PortalTableCell className="text-right">
-                  {request.actualHours !== undefined && (
-                    <span>{request.actualHours}/</span>
-                  )}
+                  {request.actualHours !== undefined && <span>{request.actualHours}/</span>}
                   <InlineEdit
                     value={String(request.estimatedHours ?? '')}
                     type="number"
                     placeholder="0h"
-                    formatDisplay={(val) => val ? `${val}h` : '0h'}
+                    formatDisplay={(val) => (val ? `${val}h` : '0h')}
                     onSave={(value) => handleFieldUpdate(request.id, 'estimatedHours', value)}
                   />
                 </PortalTableCell>
@@ -591,14 +648,30 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                 </PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="action-group">
-                    <IconButton action="view" title="View" onClick={() => onNavigate?.('adhoc-request-detail', String(request.id))} />
+                    <IconButton
+                      action="view"
+                      title="View"
+                      onClick={() => onNavigate?.('adhoc-request-detail', String(request.id))}
+                    />
                     {request.status === 'pending' && (
-                      <IconButton action="start" title="Start" onClick={() => handleStatusChange(request.id, 'in-progress')} />
+                      <IconButton
+                        action="start"
+                        title="Start"
+                        onClick={() => handleStatusChange(request.id, 'in-progress')}
+                      />
                     )}
                     {request.status === 'in-progress' && (
-                      <IconButton action="pause" title="Put On Hold" onClick={() => handleStatusChange(request.id, 'on-hold')} />
+                      <IconButton
+                        action="pause"
+                        title="Put On Hold"
+                        onClick={() => handleStatusChange(request.id, 'on-hold')}
+                      />
                     )}
-                    <IconButton action="delete" title="Delete" onClick={() => handleDeleteRequest(request.id)} />
+                    <IconButton
+                      action="delete"
+                      title="Delete"
+                      onClick={() => handleDeleteRequest(request.id)}
+                    />
                   </div>
                 </PortalTableCell>
               </PortalTableRow>

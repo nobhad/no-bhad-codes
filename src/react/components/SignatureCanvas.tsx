@@ -15,7 +15,7 @@ import { Eraser, Pencil, Type, Upload } from 'lucide-react';
 const CANVAS_WIDTH = 500;
 const CANVAS_HEIGHT = 200;
 const LINE_WIDTH = 2;
-const SIGNATURE_FONT_FAMILY = '\'Allura\', \'Segoe Script\', cursive';
+const SIGNATURE_FONT_FAMILY = "'Allura', 'Segoe Script', cursive";
 const TYPED_FONT_SIZE = 40;
 const TYPED_CANVAS_FONT = `${TYPED_FONT_SIZE}px ${SIGNATURE_FONT_FAMILY}`;
 const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -47,11 +47,15 @@ function renderTypedSignature(text: string): string {
   offscreen.width = CANVAS_WIDTH;
   offscreen.height = CANVAS_HEIGHT;
   const ctx = offscreen.getContext('2d');
-  if (!ctx) return '';
+  if (!ctx) {
+    return '';
+  }
 
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  ctx.fillStyle = getComputedStyle(document.documentElement)
-    .getPropertyValue('--app-color-text-primary').trim() || INK_COLOR_FALLBACK;
+  ctx.fillStyle =
+    getComputedStyle(document.documentElement)
+      .getPropertyValue('--app-color-text-primary')
+      .trim() || INK_COLOR_FALLBACK;
   ctx.font = TYPED_CANVAS_FONT;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -61,8 +65,11 @@ function renderTypedSignature(text: string): string {
 
 /** Get the ink color from CSS variables */
 function getInkColor(): string {
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue('--app-color-text-primary').trim() || INK_COLOR_FALLBACK;
+  return (
+    getComputedStyle(document.documentElement)
+      .getPropertyValue('--app-color-text-primary')
+      .trim() || INK_COLOR_FALLBACK
+  );
 }
 
 // ============================================
@@ -83,9 +90,13 @@ export function SignatureCanvas({ onSignatureChange, mode, onModeChange }: Signa
 
   const initCanvasContext = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      return;
+    }
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      return;
+    }
     ctx.strokeStyle = getInkColor();
     ctx.lineWidth = LINE_WIDTH;
     ctx.lineCap = 'round';
@@ -100,14 +111,18 @@ export function SignatureCanvas({ onSignatureChange, mode, onModeChange }: Signa
 
   const getCanvasPoint = (clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
+    if (!canvas) {
+      return { x: 0, y: 0 };
+    }
     const rect = canvas.getBoundingClientRect();
     return { x: clientX - rect.left, y: clientY - rect.top };
   };
 
   const startDrawing = useCallback((clientX: number, clientY: number) => {
     const ctx = canvasRef.current?.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      return;
+    }
     isDrawingRef.current = true;
     const { x, y } = getCanvasPoint(clientX, clientY);
     ctx.beginPath();
@@ -115,9 +130,13 @@ export function SignatureCanvas({ onSignatureChange, mode, onModeChange }: Signa
   }, []);
 
   const draw = useCallback((clientX: number, clientY: number) => {
-    if (!isDrawingRef.current) return;
+    if (!isDrawingRef.current) {
+      return;
+    }
     const ctx = canvasRef.current?.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      return;
+    }
     hasStrokesRef.current = true;
     const { x, y } = getCanvasPoint(clientX, clientY);
     ctx.lineTo(x, y);
@@ -125,7 +144,9 @@ export function SignatureCanvas({ onSignatureChange, mode, onModeChange }: Signa
   }, []);
 
   const stopDrawing = useCallback(() => {
-    if (!isDrawingRef.current) return;
+    if (!isDrawingRef.current) {
+      return;
+    }
     isDrawingRef.current = false;
     // Emit signature data after a stroke ends
     if (hasStrokesRef.current && canvasRef.current) {
@@ -134,29 +155,42 @@ export function SignatureCanvas({ onSignatureChange, mode, onModeChange }: Signa
   }, [onSignatureChange]);
 
   // Mouse events
-  const onMouseDown = useCallback((e: React.MouseEvent) => startDrawing(e.clientX, e.clientY), [startDrawing]);
+  const onMouseDown = useCallback(
+    (e: React.MouseEvent) => startDrawing(e.clientX, e.clientY),
+    [startDrawing]
+  );
   const onMouseMove = useCallback((e: React.MouseEvent) => draw(e.clientX, e.clientY), [draw]);
 
   // Touch events
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    startDrawing(touch.clientX, touch.clientY);
-  }, [startDrawing]);
+  const onTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      startDrawing(touch.clientX, touch.clientY);
+    },
+    [startDrawing]
+  );
 
-  const onTouchMove = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    draw(touch.clientX, touch.clientY);
-  }, [draw]);
+  const onTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      draw(touch.clientX, touch.clientY);
+    },
+    [draw]
+  );
 
   // ------- Clear -------
 
   const clearCanvas = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      return;
+    }
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      return;
+    }
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     hasStrokesRef.current = false;
     onSignatureChange(null);
@@ -164,47 +198,57 @@ export function SignatureCanvas({ onSignatureChange, mode, onModeChange }: Signa
 
   // ------- Typed signature -------
 
-  const handleTypedChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setTypedValue(value);
-    if (value.trim()) {
-      onSignatureChange(renderTypedSignature(value.trim()));
-    } else {
-      onSignatureChange(null);
-    }
-  }, [onSignatureChange]);
+  const handleTypedChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setTypedValue(value);
+      if (value.trim()) {
+        onSignatureChange(renderTypedSignature(value.trim()));
+      } else {
+        onSignatureChange(null);
+      }
+    },
+    [onSignatureChange]
+  );
 
   // ------- Upload handler -------
 
-  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setUploadError(null);
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setUploadError(null);
+      const file = e.target.files?.[0];
+      if (!file) {
+        return;
+      }
 
-    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-      setUploadError('Please upload a PNG, JPEG, or WebP image.');
-      return;
-    }
+      if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+        setUploadError('Please upload a PNG, JPEG, or WebP image.');
+        return;
+      }
 
-    if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-      setUploadError('File must be under 5 MB.');
-      return;
-    }
+      if (file.size > MAX_UPLOAD_SIZE_BYTES) {
+        setUploadError('File must be under 5 MB.');
+        return;
+      }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      setUploadPreview(dataUrl);
-      onSignatureChange(dataUrl);
-    };
-    reader.readAsDataURL(file);
-  }, [onSignatureChange]);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        setUploadPreview(dataUrl);
+        onSignatureChange(dataUrl);
+      };
+      reader.readAsDataURL(file);
+    },
+    [onSignatureChange]
+  );
 
   const clearUpload = useCallback(() => {
     setUploadPreview(null);
     setUploadError(null);
     onSignatureChange(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   }, [onSignatureChange]);
 
   // Clear state when switching modes
@@ -310,9 +354,7 @@ export function SignatureCanvas({ onSignatureChange, mode, onModeChange }: Signa
             onChange={handleFileUpload}
             className="signature-upload-input"
           />
-          {uploadError && (
-            <p className="form-error-message">{uploadError}</p>
-          )}
+          {uploadError && <p className="form-error-message">{uploadError}</p>}
           {uploadPreview && (
             <div className="signature-upload-preview">
               <img

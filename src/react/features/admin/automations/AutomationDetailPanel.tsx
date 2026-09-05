@@ -34,10 +34,7 @@ import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { formatErrorMessage } from '@/utils/error-utils';
 import { createLogger } from '@/utils/logger';
 import type { Automation, AutomationRun } from './types';
-import {
-  ACTION_TYPE_LABELS,
-  TRIGGER_EVENT_GROUPS
-} from './types';
+import { ACTION_TYPE_LABELS, TRIGGER_EVENT_GROUPS } from './types';
 import { AutomationBuilder } from './AutomationBuilder';
 
 const logger = createLogger('AutomationDetailPanel');
@@ -49,7 +46,10 @@ const logger = createLogger('AutomationDetailPanel');
 const RECENT_RUNS_LIMIT = 20;
 const ACTION_NUMBER_MIN_WIDTH = '20px';
 
-const RUN_STATUS_CONFIG: Record<string, { label: string; variant: string; icon: React.ComponentType<{ className?: string }> }> = {
+const RUN_STATUS_CONFIG: Record<
+  string,
+  { label: string; variant: string; icon: React.ComponentType<{ className?: string }> }
+> = {
   running: { label: 'Running', variant: 'active', icon: RefreshCw },
   completed: { label: 'Completed', variant: 'completed', icon: CheckCircle2 },
   failed: { label: 'Failed', variant: 'cancelled', icon: XCircle },
@@ -145,7 +145,9 @@ export function AutomationDetailPanel({
   // ---- Actions ----
 
   const handleToggleActive = useCallback(async () => {
-    if (!automation) return;
+    if (!automation) {
+      return;
+    }
     const endpoint = automation.isActive ? 'deactivate' : 'activate';
     setIsToggling(true);
     try {
@@ -160,10 +162,7 @@ export function AutomationDetailPanel({
       await loadAutomation();
     } catch (err) {
       logger.error('Error toggling automation status:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to update automation'),
-        'error'
-      );
+      showNotification?.(formatErrorMessage(err, 'Failed to update automation'), 'error');
     } finally {
       setIsToggling(false);
     }
@@ -172,42 +171,36 @@ export function AutomationDetailPanel({
   const handleRunNow = useCallback(async () => {
     setIsRunning(true);
     try {
-      await portalFetch(
-        `${API_ENDPOINTS.ADMIN.WORKFLOWS}/automations/${automationId}/run`,
-        { method: 'POST' }
-      );
+      await portalFetch(`${API_ENDPOINTS.ADMIN.WORKFLOWS}/automations/${automationId}/run`, {
+        method: 'POST'
+      });
       showNotification?.('Automation triggered', 'success');
       await loadRuns();
     } catch (err) {
       logger.error('Error triggering automation:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to trigger automation'),
-        'error'
-      );
+      showNotification?.(formatErrorMessage(err, 'Failed to trigger automation'), 'error');
     } finally {
       setIsRunning(false);
     }
   }, [automationId, portalFetch, showNotification, loadRuns]);
 
   const handleDelete = useCallback(async () => {
-    if (!confirm('Are you sure you want to delete this automation? This action cannot be undone.')) {
+    if (
+      !confirm('Are you sure you want to delete this automation? This action cannot be undone.')
+    ) {
       return;
     }
 
     setIsDeleting(true);
     try {
-      await portalFetch(
-        `${API_ENDPOINTS.ADMIN.WORKFLOWS}/automations/${automationId}`,
-        { method: 'DELETE' }
-      );
+      await portalFetch(`${API_ENDPOINTS.ADMIN.WORKFLOWS}/automations/${automationId}`, {
+        method: 'DELETE'
+      });
       showNotification?.('Automation deleted', 'success');
       onBack();
     } catch (err) {
       logger.error('Error deleting automation:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to delete automation'),
-        'error'
-      );
+      showNotification?.(formatErrorMessage(err, 'Failed to delete automation'), 'error');
     } finally {
       setIsDeleting(false);
     }
@@ -221,7 +214,9 @@ export function AutomationDetailPanel({
   // ---- Derived data ----
 
   const triggerLabel = useMemo(() => {
-    if (!automation) return '';
+    if (!automation) {
+      return '';
+    }
     return TRIGGER_EVENT_LABELS[automation.triggerEvent] || automation.triggerEvent;
   }, [automation]);
 
@@ -269,10 +264,7 @@ export function AutomationDetailPanel({
   // ---- Main render ----
 
   return (
-    <div
-      ref={containerRef as React.RefObject<HTMLDivElement>}
-      className="flex flex-col gap-4"
-    >
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="flex flex-col gap-4">
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
@@ -286,7 +278,13 @@ export function AutomationDetailPanel({
           </button>
           <Zap className="icon-sm text-accent" />
           <div>
-            <h2 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-semibold)', margin: 0 }}>
+            <h2
+              style={{
+                fontSize: 'var(--font-size-lg)',
+                fontWeight: 'var(--font-weight-semibold)',
+                margin: 0
+              }}
+            >
               {automation.name}
             </h2>
             {automation.description && (
@@ -342,10 +340,7 @@ export function AutomationDetailPanel({
         <div className="portal-card-header">
           <span className="cell-title">Overview</span>
           <div className="action-group">
-            <StatusBadge
-              status={automation.isActive ? 'completed' : 'pending'}
-              size="sm"
-            >
+            <StatusBadge status={automation.isActive ? 'completed' : 'pending'} size="sm">
               {automation.isActive ? 'Active' : 'Inactive'}
             </StatusBadge>
             <button
@@ -380,7 +375,7 @@ export function AutomationDetailPanel({
                 <span className="field-label">Conditions</span>
                 {automation.triggerConditions.map((cond, idx) => (
                   <span key={idx} className="text-muted text-sm">
-                    {(cond.field as string)} {(cond.operator as string)} {String(cond.value)}
+                    {cond.field as string} {cond.operator as string} {String(cond.value)}
                   </span>
                 ))}
               </div>
@@ -388,22 +383,15 @@ export function AutomationDetailPanel({
 
             {/* Actions summary */}
             <div className="flex flex-col gap-1">
-              <span className="field-label">
-                Actions ({automation.actions.length})
-              </span>
+              <span className="field-label">Actions ({automation.actions.length})</span>
               {automation.actions.length === 0 ? (
-                <span className="text-muted text-sm">
-                  No actions configured
-                </span>
+                <span className="text-muted text-sm">No actions configured</span>
               ) : (
                 <div className="flex flex-col gap-1">
                   {automation.actions
                     .sort((a, b) => a.actionOrder - b.actionOrder)
                     .map((action, idx) => (
-                      <div
-                        key={action.id}
-                        className="flex items-center gap-2 text-sm"
-                      >
+                      <div key={action.id} className="flex items-center gap-2 text-sm">
                         <span
                           className="text-muted font-semibold"
                           style={{ minWidth: ACTION_NUMBER_MIN_WIDTH }}
@@ -487,7 +475,9 @@ export function AutomationDetailPanel({
                   >
                     <span style={{ flex: 1 }}>
                       <StatusBadge
-                        status={statusInfo.variant as 'completed' | 'pending' | 'active' | 'cancelled'}
+                        status={
+                          statusInfo.variant as 'completed' | 'pending' | 'active' | 'cancelled'
+                        }
                         size="sm"
                       >
                         {statusInfo.label}
@@ -503,7 +493,9 @@ export function AutomationDetailPanel({
                       </div>
                     </span>
                     <span style={{ flex: 2 }}>
-                      {run.completedAt ? formatDate(run.completedAt) : (
+                      {run.completedAt ? (
+                        formatDate(run.completedAt)
+                      ) : (
                         <span className="text-muted">In progress</span>
                       )}
                     </span>

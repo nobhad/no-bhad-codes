@@ -23,10 +23,7 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
   );
   const completedProjects = projects.filter((p) => p.status === 'completed');
   const otherProjects = projects.filter(
-    (p) =>
-      p.status !== 'active' &&
-      p.status !== 'in-progress' &&
-      p.status !== 'completed'
+    (p) => p.status !== 'active' && p.status !== 'in-progress' && p.status !== 'completed'
   );
 
   if (projects.length === 0) {
@@ -48,7 +45,8 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
 
   const renderProjectCard = (project: ClientProject) => {
     const progress = project.progress ?? 0;
-    const statusConfig = PROJECT_STATUS_CONFIG[project.status as keyof typeof PROJECT_STATUS_CONFIG];
+    const statusConfig =
+      PROJECT_STATUS_CONFIG[project.status as keyof typeof PROJECT_STATUS_CONFIG];
 
     return (
       <div
@@ -57,21 +55,21 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
         onClick={() => handleCardClick(project)}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleCardClick(project); }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            handleCardClick(project);
+          }
+        }}
       >
         <div className="portal-card-header">
           <div className="project-card-info">
             <div className="project-title-row">
-              <h4 className="heading truncate">
-                {project.project_name}
-              </h4>
+              <h4 className="heading truncate">{project.project_name}</h4>
               <span className="text-secondary text-xs">
                 <Clock className="icon-xs" aria-hidden="true" />
                 {formatDate(project.created_at, 'label')}
               </span>
-              <span className="badge">
-                {statusConfig?.label || project.status}
-              </span>
+              <span className="badge">{statusConfig?.label || project.status}</span>
             </div>
           </div>
         </div>
@@ -84,26 +82,24 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
     );
   };
 
-  const renderSection = (
-    title: string,
-    projectList: ClientProject[],
-    emptyMessage?: string
-  ) => {
-    if (projectList.length === 0 && !emptyMessage) return null;
+  const renderSection = (title: string, projectList: ClientProject[], emptyMessage?: string) => {
+    if (projectList.length === 0 && !emptyMessage) {
+      return null;
+    }
 
     return (
       <div className="subsection">
         <div className="data-table-header">
-          <h3><span className="title-full">{title} ({projectList.length})</span></h3>
+          <h3>
+            <span className="title-full">
+              {title} ({projectList.length})
+            </span>
+          </h3>
         </div>
         {projectList.length === 0 ? (
-          <p className="text-secondary empty-text-italic">
-            {emptyMessage}
-          </p>
+          <p className="text-secondary empty-text-italic">{emptyMessage}</p>
         ) : (
-          <div className="layout-stack gap-3">
-            {projectList.map(renderProjectCard)}
-          </div>
+          <div className="layout-stack gap-3">{projectList.map(renderProjectCard)}</div>
         )}
       </div>
     );
@@ -113,21 +109,17 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
     <div className="subsection">
       <div className="panel">
         <div className="data-table-header">
-          <h3><span className="title-full">Projects ({projects.length})</span></h3>
+          <h3>
+            <span className="title-full">Projects ({projects.length})</span>
+          </h3>
           <div className="summary-stats-inline">
             <div className="stat-inline">
-              <span className="stat-value">
-                {activeProjects.length}
-              </span>
+              <span className="stat-value">{activeProjects.length}</span>
               <span className="text-secondary stat-inline-label">Active</span>
             </div>
             <div className="stat-inline">
-              <span className="stat-value">
-                {completedProjects.length}
-              </span>
-              <span className="text-secondary stat-inline-label">
-                Completed
-              </span>
+              <span className="stat-value">{completedProjects.length}</span>
+              <span className="text-secondary stat-inline-label">Completed</span>
             </div>
           </div>
         </div>

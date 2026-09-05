@@ -29,11 +29,7 @@ import {
 import { StatCard } from '@react/components/portal/StatCard';
 import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn } from '@react/hooks/useGsap';
-import {
-  apiFetch,
-  unwrapApiData,
-  toFriendlyError
-} from '@/utils/api-client';
+import { apiFetch, unwrapApiData, toFriendlyError } from '@/utils/api-client';
 import type {
   CircuitBreakerSnapshot,
   AsyncTasksSummary,
@@ -74,13 +70,19 @@ export function SystemHealthDashboard({ showNotification }: SystemHealthDashboar
       ]);
 
       if (!breakersRes.ok) {
-        throw new Error(await toFriendlyError(breakersRes, { fallback: 'Failed to load circuit breakers' }));
+        throw new Error(
+          await toFriendlyError(breakersRes, { fallback: 'Failed to load circuit breakers' })
+        );
       }
       if (!tasksRes.ok) {
-        throw new Error(await toFriendlyError(tasksRes, { fallback: 'Failed to load async tasks' }));
+        throw new Error(
+          await toFriendlyError(tasksRes, { fallback: 'Failed to load async tasks' })
+        );
       }
       if (!driftRes.ok) {
-        throw new Error(await toFriendlyError(driftRes, { fallback: 'Failed to load schema drift' }));
+        throw new Error(
+          await toFriendlyError(driftRes, { fallback: 'Failed to load schema drift' })
+        );
       }
 
       const breakersJson = await breakersRes.json();
@@ -130,8 +132,12 @@ export function SystemHealthDashboard({ showNotification }: SystemHealthDashboar
     }
   }, [showNotification]);
 
-  if (loading) return <LoadingState message="Loading system health..." />;
-  if (error) return <ErrorState message={error} onRetry={loadHealth} />;
+  if (loading) {
+    return <LoadingState message="Loading system health..." />;
+  }
+  if (error) {
+    return <ErrorState message={error} onRetry={loadHealth} />;
+  }
 
   const counts = asyncTasks?.counts;
   const deadCount = counts?.dead ?? 0;
@@ -142,9 +148,7 @@ export function SystemHealthDashboard({ showNotification }: SystemHealthDashboar
       <div className="dashboard-header">
         <div>
           <h1 className="section-title">System Health</h1>
-          <p className="section-subtitle">
-            Resilience layer + async outbox + audit chain state.
-          </p>
+          <p className="section-subtitle">Resilience layer + async outbox + audit chain state.</p>
         </div>
         <button
           type="button"
@@ -166,7 +170,9 @@ export function SystemHealthDashboard({ showNotification }: SystemHealthDashboar
           Circuit Breakers
         </h2>
         {breakers.length === 0 ? (
-          <p className="text-muted">No breakers registered yet — they're created lazily on first use.</p>
+          <p className="text-muted">
+            No breakers registered yet — they're created lazily on first use.
+          </p>
         ) : (
           <div className="stats-grid">
             {breakers.map((b) => (
@@ -175,11 +181,7 @@ export function SystemHealthDashboard({ showNotification }: SystemHealthDashboar
                 label={b.name}
                 value={b.state.toUpperCase()}
                 variant={
-                  b.state === 'open'
-                    ? 'alert'
-                    : b.state === 'half-open'
-                      ? 'warning'
-                      : 'success'
+                  b.state === 'open' ? 'alert' : b.state === 'half-open' ? 'warning' : 'success'
                 }
                 meta={
                   b.state === 'open' && b.openedAt
@@ -229,15 +231,15 @@ export function SystemHealthDashboard({ showNotification }: SystemHealthDashboar
           Schema Drift
         </h2>
         <p className="text-muted">
-          Compares the live sqlite_master state to the snapshot
-          recorded after the previous clean boot. Drift means the
-          schema changed outside the migration path — a manual ALTER
-          in production, a half-applied migration, or a feature-branch
-          schema leak.
+          Compares the live sqlite_master state to the snapshot recorded after the previous clean
+          boot. Drift means the schema changed outside the migration path — a manual ALTER in
+          production, a half-applied migration, or a feature-branch schema leak.
         </p>
         {schemaDrift ? (
           schemaDrift.firstBoot ? (
-            <p className="text-muted">First boot — baseline just recorded. Drift tracking starts next restart.</p>
+            <p className="text-muted">
+              First boot — baseline just recorded. Drift tracking starts next restart.
+            </p>
           ) : schemaDrift.ok ? (
             <div className="stats-grid mt-2">
               <StatCard
@@ -254,23 +256,29 @@ export function SystemHealthDashboard({ showNotification }: SystemHealthDashboar
                 <StatCard label="Removed" value={schemaDrift.removed.length} variant="alert" />
                 <StatCard label="Modified" value={schemaDrift.modified.length} variant="alert" />
               </div>
-              {(schemaDrift.added.length
-                || schemaDrift.removed.length
-                || schemaDrift.modified.length) > 0 ? (
-                  <div className="dashboard-subtle mt-2">
-                    <ul className="text-small">
-                      {schemaDrift.added.slice(0, 10).map((o) => (
-                        <li key={`a:${o.type}:${o.name}`}>+ {o.type} <strong>{o.name}</strong></li>
-                      ))}
-                      {schemaDrift.removed.slice(0, 10).map((o) => (
-                        <li key={`r:${o.type}:${o.name}`}>− {o.type} <strong>{o.name}</strong></li>
-                      ))}
-                      {schemaDrift.modified.slice(0, 10).map((o) => (
-                        <li key={`m:${o.type}:${o.name}`}>~ {o.type} <strong>{o.name}</strong></li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
+              {(schemaDrift.added.length ||
+                schemaDrift.removed.length ||
+                schemaDrift.modified.length) > 0 ? (
+                <div className="dashboard-subtle mt-2">
+                  <ul className="text-small">
+                    {schemaDrift.added.slice(0, 10).map((o) => (
+                      <li key={`a:${o.type}:${o.name}`}>
+                        + {o.type} <strong>{o.name}</strong>
+                      </li>
+                    ))}
+                    {schemaDrift.removed.slice(0, 10).map((o) => (
+                      <li key={`r:${o.type}:${o.name}`}>
+                        − {o.type} <strong>{o.name}</strong>
+                      </li>
+                    ))}
+                    {schemaDrift.modified.slice(0, 10).map((o) => (
+                      <li key={`m:${o.type}:${o.name}`}>
+                        ~ {o.type} <strong>{o.name}</strong>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
             </>
           )
         ) : (
@@ -284,9 +292,8 @@ export function SystemHealthDashboard({ showNotification }: SystemHealthDashboar
           Audit Chain
         </h2>
         <p className="text-muted">
-          Walks every audit_logs row, recomputes its hash from current
-          content, and confirms the prev_hash links are intact. A
-          non-zero break count means someone or something mutated a
+          Walks every audit_logs row, recomputes its hash from current content, and confirms the
+          prev_hash links are intact. A non-zero break count means someone or something mutated a
           historical row.
         </p>
         <button
@@ -296,7 +303,9 @@ export function SystemHealthDashboard({ showNotification }: SystemHealthDashboar
           disabled={auditVerifying}
         >
           {auditVerifying ? (
-            <><RefreshCw size={16} className="animate-spin" /> Verifying...</>
+            <>
+              <RefreshCw size={16} className="animate-spin" /> Verifying...
+            </>
           ) : (
             <>Verify chain</>
           )}

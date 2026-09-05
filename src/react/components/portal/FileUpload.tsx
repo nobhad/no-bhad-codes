@@ -145,7 +145,9 @@ export function FileUpload({
       e.stopPropagation();
       setIsDragOver(false);
 
-      if (disabled || loading) return;
+      if (disabled || loading) {
+        return;
+      }
 
       const files = e.dataTransfer.files;
       if (files.length > 0) {
@@ -272,12 +274,7 @@ export function FileUploadProgress({
 }: FileUploadProgressProps) {
   return (
     <div
-      className={cn(
-        'file-upload-item',
-        error && 'has-error',
-        complete && 'is-complete',
-        className
-      )}
+      className={cn('file-upload-item', error && 'has-error', complete && 'is-complete', className)}
     >
       <div className="file-upload-item-icon">
         <File className="icon-lg" />
@@ -293,16 +290,11 @@ export function FileUploadProgress({
 
         {!complete && !error && (
           <div className="file-upload-progress-track">
-            <div
-              className="file-upload-progress-bar"
-              style={{ width: `${progress}%` }}
-            />
+            <div className="file-upload-progress-bar" style={{ width: `${progress}%` }} />
           </div>
         )}
 
-        {error && errorMessage && (
-          <span className="file-upload-item-error">{errorMessage}</span>
-        )}
+        {error && errorMessage && <span className="file-upload-item-error">{errorMessage}</span>}
       </div>
 
       {!complete && onCancel && (

@@ -90,10 +90,10 @@ function usePortalHelp(_getAuthToken?: () => string | null) {
   /** Fetch featured articles */
   const fetchFeatured = useCallback(async () => {
     try {
-      const response = await apiFetch(
-        `${API_ENDPOINTS.KNOWLEDGE_BASE}/featured?limit=6`
-      );
-      if (!response.ok) throw new Error('Failed to load featured articles');
+      const response = await apiFetch(`${API_ENDPOINTS.KNOWLEDGE_BASE}/featured?limit=6`);
+      if (!response.ok) {
+        throw new Error('Failed to load featured articles');
+      }
       const data = unwrapApiData<Record<string, unknown>>(await response.json());
       setFeaturedArticles((data.articles as KBArticle[]) || []);
     } catch (err) {
@@ -104,10 +104,10 @@ function usePortalHelp(_getAuthToken?: () => string | null) {
   /** Fetch categories */
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await apiFetch(
-        `${API_ENDPOINTS.KNOWLEDGE_BASE}/categories`
-      );
-      if (!response.ok) throw new Error('Failed to load categories');
+      const response = await apiFetch(`${API_ENDPOINTS.KNOWLEDGE_BASE}/categories`);
+      if (!response.ok) {
+        throw new Error('Failed to load categories');
+      }
       const data = unwrapApiData<Record<string, unknown>>(await response.json());
       const expandedCategories: ExpandedCategory[] = ((data.categories as KBCategory[]) || []).map(
         (cat: KBCategory) => ({
@@ -142,49 +142,48 @@ function usePortalHelp(_getAuthToken?: () => string | null) {
   }, [loadInitialData]);
 
   /** Toggle category expansion and load articles */
-  const toggleCategory = useCallback(async (categorySlug: string) => {
-    const existing = categories.find(c => c.slug === categorySlug);
+  const toggleCategory = useCallback(
+    async (categorySlug: string) => {
+      const existing = categories.find((c) => c.slug === categorySlug);
 
-    // If already expanded, collapse and return early
-    if (existing && existing.articles.length > 0) {
-      setCategories(prev =>
-        prev.map(c =>
-          c.slug === categorySlug ? { ...c, articles: [], isLoading: false } : c
-        )
-      );
-      return;
-    }
+      // If already expanded, collapse and return early
+      if (existing && existing.articles.length > 0) {
+        setCategories((prev) =>
+          prev.map((c) => (c.slug === categorySlug ? { ...c, articles: [], isLoading: false } : c))
+        );
+        return;
+      }
 
-    // Mark as loading
-    setCategories(prev =>
-      prev.map(c =>
-        c.slug === categorySlug ? { ...c, isLoading: true } : c
-      )
-    );
+      // Mark as loading
+      setCategories((prev) =>
+        prev.map((c) => (c.slug === categorySlug ? { ...c, isLoading: true } : c))
+      );
 
-    // Fetch articles for this category
-    try {
-      const response = await apiFetch(
-        `${API_ENDPOINTS.KNOWLEDGE_BASE}/categories/${categorySlug}`
-      );
-      if (!response.ok) throw new Error('Failed to load category articles');
-      const data = unwrapApiData<Record<string, unknown>>(await response.json());
-      setCategories(prev =>
-        prev.map(c =>
-          c.slug === categorySlug
-            ? { ...c, articles: (data.articles as KBArticle[]) || [], isLoading: false }
-            : c
-        )
-      );
-    } catch (err) {
-      logger.error('Error fetching category articles:', err);
-      setCategories(prev =>
-        prev.map(c =>
-          c.slug === categorySlug ? { ...c, isLoading: false } : c
-        )
-      );
-    }
-  }, [categories]);
+      // Fetch articles for this category
+      try {
+        const response = await apiFetch(
+          `${API_ENDPOINTS.KNOWLEDGE_BASE}/categories/${categorySlug}`
+        );
+        if (!response.ok) {
+          throw new Error('Failed to load category articles');
+        }
+        const data = unwrapApiData<Record<string, unknown>>(await response.json());
+        setCategories((prev) =>
+          prev.map((c) =>
+            c.slug === categorySlug
+              ? { ...c, articles: (data.articles as KBArticle[]) || [], isLoading: false }
+              : c
+          )
+        );
+      } catch (err) {
+        logger.error('Error fetching category articles:', err);
+        setCategories((prev) =>
+          prev.map((c) => (c.slug === categorySlug ? { ...c, isLoading: false } : c))
+        );
+      }
+    },
+    [categories]
+  );
 
   /** View article detail */
   const viewArticle = useCallback(async (categorySlug: string, articleSlug: string) => {
@@ -193,7 +192,9 @@ function usePortalHelp(_getAuthToken?: () => string | null) {
       const response = await apiFetch(
         `${API_ENDPOINTS.KNOWLEDGE_BASE}/articles/${categorySlug}/${articleSlug}`
       );
-      if (!response.ok) throw new Error('Failed to load article');
+      if (!response.ok) {
+        throw new Error('Failed to load article');
+      }
       const data = unwrapApiData<Record<string, unknown>>(await response.json());
       setSelectedArticle(data.article as KBArticle);
       setViewMode('article');
@@ -229,7 +230,9 @@ function usePortalHelp(_getAuthToken?: () => string | null) {
         const response = await apiFetch(
           `${API_ENDPOINTS.KNOWLEDGE_BASE}/search?q=${encodeURIComponent(query.trim())}`
         );
-        if (!response.ok) throw new Error('Search failed');
+        if (!response.ok) {
+          throw new Error('Search failed');
+        }
         const data = unwrapApiData<Record<string, unknown>>(await response.json());
         setSearchResults((data.results as KBArticle[]) || []);
       } catch (err) {
@@ -334,11 +337,17 @@ interface CategoriesSidebarProps {
 function CategoriesSidebar({ categories, onToggle, onArticleClick }: CategoriesSidebarProps) {
   const listRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_DEFAULT);
 
-  if (categories.length === 0) return null;
+  if (categories.length === 0) {
+    return null;
+  }
 
   return (
     <div ref={listRef} className="subsection">
-      <div className="data-table-header"><h3><span className="title-full">Categories</span></h3></div>
+      <div className="data-table-header">
+        <h3>
+          <span className="title-full">Categories</span>
+        </h3>
+      </div>
       <div className="subsection">
         {categories.map((category) => {
           const isExpanded = category.articles.length > 0 || category.isLoading;
@@ -393,11 +402,17 @@ interface FeaturedArticlesProps {
 function FeaturedArticles({ articles, onArticleClick }: FeaturedArticlesProps) {
   const gridRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_MEDIUM);
 
-  if (articles.length === 0) return null;
+  if (articles.length === 0) {
+    return null;
+  }
 
   return (
     <div className="subsection">
-      <div className="data-table-header"><h3><span className="title-full">Featured Articles</span></h3></div>
+      <div className="data-table-header">
+        <h3>
+          <span className="title-full">Featured Articles</span>
+        </h3>
+      </div>
       <div ref={gridRef} className="subsection">
         {articles.map((article) => (
           <button
@@ -411,9 +426,7 @@ function FeaturedArticles({ articles, onArticleClick }: FeaturedArticlesProps) {
             </div>
             <div className="help-featured-card-content">
               <p className="help-featured-card-title">{article.title}</p>
-              {article.summary && (
-                <p className="help-featured-card-summary">{article.summary}</p>
-              )}
+              {article.summary && <p className="help-featured-card-summary">{article.summary}</p>}
             </div>
           </button>
         ))}
@@ -449,7 +462,11 @@ function SearchResults({ results, query, isSearching, onArticleClick }: SearchRe
   return (
     <div className="help-search-results">
       <div className="data-table-header">
-        <h3><span className="title-full">{results.length} result{results.length !== 1 ? 's' : ''} for &ldquo;{query}&rdquo;</span></h3>
+        <h3>
+          <span className="title-full">
+            {results.length} result{results.length !== 1 ? 's' : ''} for &ldquo;{query}&rdquo;
+          </span>
+        </h3>
       </div>
       <div ref={listRef} className="subsection">
         {results.map((article) => (
@@ -464,9 +481,7 @@ function SearchResults({ results, query, isSearching, onArticleClick }: SearchRe
             </span>
             <div className="help-result-content">
               <p className="help-result-title">{article.title}</p>
-              {article.summary && (
-                <p className="help-result-category">{article.summary}</p>
-              )}
+              {article.summary && <p className="help-result-category">{article.summary}</p>}
             </div>
           </button>
         ))}
@@ -499,9 +514,7 @@ function ArticleDetail({ article, onBack }: ArticleDetailProps) {
           </button>
           <h1>{article.title}</h1>
         </div>
-        {article.summary && (
-          <p className="text-secondary">{article.summary}</p>
-        )}
+        {article.summary && <p className="text-secondary">{article.summary}</p>}
         {article.content && (
           <div
             className="help-article-body"
@@ -523,26 +536,23 @@ function ContactSection({ onNavigate }: ContactSectionProps) {
     <div className="help-contact-section">
       <div className="help-contact-content">
         <div className="help-contact-text">
-          <div className="data-table-header"><h3><span className="title-full">Still Need Help?</span></h3></div>
+          <div className="data-table-header">
+            <h3>
+              <span className="title-full">Still Need Help?</span>
+            </h3>
+          </div>
           <p className="help-contact-description">
             Can&apos;t find what you&apos;re looking for? Reach out and I&apos;ll be happy to help.
           </p>
         </div>
         <div className="help-contact-actions">
           {onNavigate && (
-            <button
-              type="button"
-              className="btn-primary"
-              onClick={() => onNavigate('messages')}
-            >
+            <button type="button" className="btn-primary" onClick={() => onNavigate('messages')}>
               {SendIcon && <SendIcon className="icon-sm" />}
               <span>Send a Message</span>
             </button>
           )}
-          <a
-            href={`mailto:${BUSINESS_INFO.email}`}
-            className="btn-secondary"
-          >
+          <a href={`mailto:${BUSINESS_INFO.email}`} className="btn-secondary">
             {MailIcon && <MailIcon className="icon-sm" />}
             <span>Email Me</span>
           </a>
@@ -560,10 +570,7 @@ function ContactSection({ onNavigate }: ContactSectionProps) {
  * PortalHelp Component
  * Knowledge base help center with browse, search, and article detail views
  */
-export function PortalHelp({
-  getAuthToken,
-  onNavigate
-}: PortalHelpProps) {
+export function PortalHelp({ getAuthToken, onNavigate }: PortalHelpProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const {
     viewMode,
@@ -588,11 +595,7 @@ export function PortalHelp({
       <TableLayout
         title="HELP CENTER"
         actions={
-          <SearchBar
-            query={searchQuery}
-            onChange={handleSearchChange}
-            onClear={clearSearch}
-          />
+          <SearchBar query={searchQuery} onChange={handleSearchChange} onClear={clearSearch} />
         }
       >
         {isLoading && viewMode === 'browse' ? (
@@ -624,10 +627,7 @@ export function PortalHelp({
                     onArticleClick={viewArticle}
                   />
                 ) : (
-                  <FeaturedArticles
-                    articles={featuredArticles}
-                    onArticleClick={viewArticle}
-                  />
+                  <FeaturedArticles articles={featuredArticles} onArticleClick={viewArticle} />
                 )}
               </div>
             </div>

@@ -34,8 +34,15 @@ interface MilestoneEditFormProps {
  * Inline form for editing a milestone's title, description, due date,
  * and managing its deliverable items (add/remove/rename).
  */
-export function MilestoneEditForm({ milestone, onSave, onCancel, showNotification }: MilestoneEditFormProps) {
-  const [formState, setFormState] = useState<MilestoneEditFormState>(() => milestoneToFormState(milestone));
+export function MilestoneEditForm({
+  milestone,
+  onSave,
+  onCancel,
+  showNotification
+}: MilestoneEditFormProps) {
+  const [formState, setFormState] = useState<MilestoneEditFormState>(() =>
+    milestoneToFormState(milestone)
+  );
   const [newDeliverableText, setNewDeliverableText] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -49,7 +56,9 @@ export function MilestoneEditForm({ milestone, onSave, onCancel, showNotificatio
   // Deliverable list management
   const addDeliverable = useCallback(() => {
     const text = newDeliverableText.trim();
-    if (!text) return;
+    if (!text) {
+      return;
+    }
     setFormState((prev) => ({
       ...prev,
       deliverables: [...prev.deliverables, { text, completed: false }]
@@ -96,9 +105,7 @@ export function MilestoneEditForm({ milestone, onSave, onCancel, showNotificatio
 
   return (
     <div className="panel">
-      <h4 className="heading tasks-form-heading">
-        Edit Milestone
-      </h4>
+      <h4 className="heading tasks-form-heading">Edit Milestone</h4>
 
       <div className="layout-stack">
         <PortalInput

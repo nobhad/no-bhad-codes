@@ -13,11 +13,7 @@ import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Folder, MessageSquare, Receipt, Users, X } from 'lucide-react';
 import { SIDEBAR_ICONS } from '../../app/portal-icons';
-import {
-  useNavItems,
-  usePortalRole,
-  useSwitchTab
-} from '../../stores/portal-store';
+import { useNavItems, usePortalRole, useSwitchTab } from '../../stores/portal-store';
 import { KEYS, isKeyCombo } from '../../../constants/keyboard';
 import { TIMING } from '../../../constants/timing';
 import { API_ENDPOINTS } from '../../../constants/api-endpoints';
@@ -81,9 +77,7 @@ function filterItems(items: CommandItem[], query: string): CommandItem[] {
   const lower = query.trim().toLowerCase();
   const matched = lower
     ? items.filter(
-        (item) =>
-          item.label.toLowerCase().includes(lower) ||
-          item.id.toLowerCase().includes(lower)
+        (item) => item.label.toLowerCase().includes(lower) || item.id.toLowerCase().includes(lower)
       )
     : items;
   return matched.slice(0, MAX_VISIBLE_ITEMS);
@@ -135,15 +129,9 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
   const switchTab = useSwitchTab();
   const navigate = useNavigate();
 
-  const commandItems = React.useMemo(
-    () => buildCommandItems(navItems),
-    [navItems]
-  );
+  const commandItems = React.useMemo(() => buildCommandItems(navItems), [navItems]);
 
-  const filtered = React.useMemo(
-    () => filterItems(commandItems, query),
-    [commandItems, query]
-  );
+  const filtered = React.useMemo(() => filterItems(commandItems, query), [commandItems, query]);
 
   // Total items = page results + entity results
   const totalItems = filtered.length + entityResults.length;
@@ -165,10 +153,10 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
     setEntityLoading(true);
     searchTimerRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(
-          `${API_ENDPOINTS.SEARCH}?q=${encodeURIComponent(query.trim())}`,
-          { credentials: 'include', signal: controller.signal }
-        );
+        const res = await fetch(`${API_ENDPOINTS.SEARCH}?q=${encodeURIComponent(query.trim())}`, {
+          credentials: 'include',
+          signal: controller.signal
+        });
         if (res.ok) {
           const data = await res.json();
           const results = data?.data?.results ?? data?.results ?? [];
@@ -177,7 +165,9 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
           setEntityResults([]);
         }
       } catch (err) {
-        if ((err as Error).name === 'AbortError') return;
+        if ((err as Error).name === 'AbortError') {
+          return;
+        }
         setEntityResults([]);
       } finally {
         if (!controller.signal.aborted) {
@@ -187,7 +177,9 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
     }, TIMING.SEARCH_DEBOUNCE);
 
     return () => {
-      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
       controller.abort();
     };
   }, [query]);
@@ -218,7 +210,9 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
 
   // Scroll selected item into view
   React.useEffect(() => {
-    if (!listRef.current) return;
+    if (!listRef.current) {
+      return;
+    }
     const selected = listRef.current.children[selectedIndex] as HTMLElement;
     selected?.scrollIntoView({ block: 'nearest' });
   }, [selectedIndex]);
@@ -243,31 +237,31 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent) => {
       switch (e.key) {
-      case KEYS.ARROW_DOWN:
-        e.preventDefault();
-        setSelectedIndex((prev) =>
-          prev < totalItems - 1 ? prev + 1 : 0
-        );
-        break;
-      case KEYS.ARROW_UP:
-        e.preventDefault();
-        setSelectedIndex((prev) =>
-          prev > 0 ? prev - 1 : totalItems - 1
-        );
-        break;
-      case KEYS.ENTER:
-        e.preventDefault();
-        if (selectedIndex < filtered.length) {
-          if (filtered[selectedIndex]) handleSelect(filtered[selectedIndex]);
-        } else {
-          const entityIndex = selectedIndex - filtered.length;
-          if (entityResults[entityIndex]) handleEntitySelect(entityResults[entityIndex]);
-        }
-        break;
-      case KEYS.ESCAPE:
-        e.preventDefault();
-        onClose();
-        break;
+        case KEYS.ARROW_DOWN:
+          e.preventDefault();
+          setSelectedIndex((prev) => (prev < totalItems - 1 ? prev + 1 : 0));
+          break;
+        case KEYS.ARROW_UP:
+          e.preventDefault();
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : totalItems - 1));
+          break;
+        case KEYS.ENTER:
+          e.preventDefault();
+          if (selectedIndex < filtered.length) {
+            if (filtered[selectedIndex]) {
+              handleSelect(filtered[selectedIndex]);
+            }
+          } else {
+            const entityIndex = selectedIndex - filtered.length;
+            if (entityResults[entityIndex]) {
+              handleEntitySelect(entityResults[entityIndex]);
+            }
+          }
+          break;
+        case KEYS.ESCAPE:
+          e.preventDefault();
+          onClose();
+          break;
       }
     },
     [filtered, entityResults, selectedIndex, totalItems, handleSelect, handleEntitySelect, onClose]
@@ -277,12 +271,7 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
   const shortcutHint = isMac ? '\u2318K' : 'Ctrl+K';
 
   return (
-    <div
-      className="command-palette-overlay"
-      ref={overlayRef}
-      onClick={onClose}
-      role="presentation"
-    >
+    <div className="command-palette-overlay" ref={overlayRef} onClick={onClose} role="presentation">
       <div
         className="command-palette"
         id={COMMAND_PALETTE_ID}
@@ -345,7 +334,9 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
           {filtered.length > 0 && (
             <>
               {query.trim().length >= ENTITY_SEARCH_MIN_LENGTH && (
-                <li className="command-palette-section-label" role="presentation">Pages</li>
+                <li className="command-palette-section-label" role="presentation">
+                  Pages
+                </li>
               )}
               {filtered.map((item, index) => {
                 const IconComponent = SIDEBAR_ICONS[item.icon];
@@ -362,15 +353,10 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
                     onMouseEnter={() => setSelectedIndex(index)}
                   >
                     {IconComponent && (
-                      <IconComponent
-                        className="command-palette-item-icon"
-                        aria-hidden="true"
-                      />
+                      <IconComponent className="command-palette-item-icon" aria-hidden="true" />
                     )}
                     <span className="command-palette-item-label">{item.label}</span>
-                    {item.group && (
-                      <span className="command-palette-item-group">{item.group}</span>
-                    )}
+                    {item.group && <span className="command-palette-item-group">{item.group}</span>}
                     {item.shortcut && (
                       <kbd className="command-palette-item-shortcut">{item.shortcut}</kbd>
                     )}
@@ -383,7 +369,9 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
           {/* Entity results */}
           {entityResults.length > 0 && (
             <>
-              <li className="command-palette-section-label" role="presentation">Results</li>
+              <li className="command-palette-section-label" role="presentation">
+                Results
+              </li>
               {entityResults.map((entity, index) => {
                 const globalIndex = filtered.length + index;
                 const isSelected = globalIndex === selectedIndex;
@@ -426,7 +414,8 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
         {/* Footer hint */}
         <div className="command-palette-footer">
           <span className="command-palette-hint">
-            <kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate
+            <kbd>&uarr;</kbd>
+            <kbd>&darr;</kbd> navigate
           </span>
           <span className="command-palette-hint">
             <kbd>&crarr;</kbd> select
@@ -449,10 +438,9 @@ interface CommandPaletteProps {
   onClose: () => void;
 }
 
-export const CommandPalette = React.memo(({
-  open,
-  onClose
-}: CommandPaletteProps) => {
-  if (!open) return null;
+export const CommandPalette = React.memo(({ open, onClose }: CommandPaletteProps) => {
+  if (!open) {
+    return null;
+  }
   return <CommandPaletteInner onClose={onClose} />;
 });

@@ -96,7 +96,9 @@ export function FilesTab({
   // Handle file selection
   const handleFileSelect = useCallback(
     async (selectedFiles: FileList | null) => {
-      if (!selectedFiles || selectedFiles.length === 0) return;
+      if (!selectedFiles || selectedFiles.length === 0) {
+        return;
+      }
 
       setIsUploading(true);
       let successCount = 0;
@@ -165,47 +167,77 @@ export function FilesTab({
   );
 
   // Handle download — uses shared utility for consistent authenticated downloads
-  const handleDownload = useCallback((file: ProjectFile) => {
-    downloadFile(file.id, file.original_name).catch(() => {
-      showNotification?.('Failed to download file', 'error');
-    });
-  }, [showNotification]);
+  const handleDownload = useCallback(
+    (file: ProjectFile) => {
+      downloadFile(file.id, file.original_name).catch(() => {
+        showNotification?.('Failed to download file', 'error');
+      });
+    },
+    [showNotification]
+  );
 
   // Text-previewable MIME types and extensions
   const isTextFile = useCallback((file: ProjectFile): boolean => {
-    const textMimes = ['text/', 'application/json', 'application/xml', 'application/javascript', 'application/x-yaml'];
-    const textExts = ['.md', '.txt', '.json', '.js', '.ts', '.tsx', '.jsx', '.css', '.html', '.xml', '.yaml', '.yml', '.csv', '.svg', '.sql', '.sh', '.env', '.log'];
-    if (textMimes.some((m) => file.file_type.startsWith(m))) return true;
+    const textMimes = [
+      'text/',
+      'application/json',
+      'application/xml',
+      'application/javascript',
+      'application/x-yaml'
+    ];
+    const textExts = [
+      '.md',
+      '.txt',
+      '.json',
+      '.js',
+      '.ts',
+      '.tsx',
+      '.jsx',
+      '.css',
+      '.html',
+      '.xml',
+      '.yaml',
+      '.yml',
+      '.csv',
+      '.svg',
+      '.sql',
+      '.sh',
+      '.env',
+      '.log'
+    ];
+    if (textMimes.some((m) => file.file_type.startsWith(m))) {
+      return true;
+    }
     return textExts.some((ext) => file.original_name.toLowerCase().endsWith(ext));
   }, []);
 
   // Handle preview — fetches text content for text files, uses iframe for others
-  const handlePreview = useCallback(async (file: ProjectFile) => {
-    setPreviewFile(file);
-    setPreviewContent(null);
+  const handlePreview = useCallback(
+    async (file: ProjectFile) => {
+      setPreviewFile(file);
+      setPreviewContent(null);
 
-    const fileUrl = buildEndpoint.fileDownload(file.id).replace('?download=true', '');
+      const fileUrl = buildEndpoint.fileDownload(file.id).replace('?download=true', '');
 
-    if (isTextFile(file)) {
-      try {
-        const response = await fetch(fileUrl, { credentials: 'include' });
-        if (response.ok) {
-          setPreviewContent(await response.text());
+      if (isTextFile(file)) {
+        try {
+          const response = await fetch(fileUrl, { credentials: 'include' });
+          if (response.ok) {
+            setPreviewContent(await response.text());
+          }
+        } catch {
+          // Failed to fetch text — will show iframe fallback
         }
-      } catch {
-        // Failed to fetch text — will show iframe fallback
       }
-    }
-  }, [isTextFile]);
+    },
+    [isTextFile]
+  );
 
   return (
     <div className="subsection">
       {/* Upload Section */}
       <div
-        className={cn(
-          'panel files-dropzone',
-          isDragging && 'is-dragging'
-        )}
+        className={cn('panel files-dropzone', isDragging && 'is-dragging')}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -237,15 +269,16 @@ export function FilesTab({
           <button
             type="button"
             className="btn-secondary"
-            onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              fileInputRef.current?.click();
+            }}
           >
             <Upload className="icon-sm" />
             Browse Files
           </button>
 
-          <p className="text-secondary pd-hint">
-            Supports images, PDFs, documents, and archives
-          </p>
+          <p className="text-secondary pd-hint">Supports images, PDFs, documents, and archives</p>
 
           {/* Category Selector */}
           <div className="layout-row gap-2 pd-mt-2" onClick={(e) => e.stopPropagation()}>
@@ -254,7 +287,8 @@ export function FilesTab({
               <PortalDropdownTrigger asChild>
                 <button className="files-category-trigger dropdown-trigger" type="button">
                   {selectedCategory
-                    ? FILE_CATEGORY_OPTIONS.find((o) => o.value === selectedCategory)?.label || selectedCategory
+                    ? FILE_CATEGORY_OPTIONS.find((o) => o.value === selectedCategory)?.label ||
+                      selectedCategory
                     : 'Select type'}
                   <ChevronDown className="dropdown-caret" />
                 </button>
@@ -265,14 +299,16 @@ export function FilesTab({
                     None
                   </PortalDropdownItem>
                 )}
-                {FILE_CATEGORY_OPTIONS.filter((opt) => opt.value !== selectedCategory).map((opt) => (
-                  <PortalDropdownItem
-                    key={opt.value}
-                    onSelect={() => setSelectedCategory(opt.value)}
-                  >
-                    {opt.label}
-                  </PortalDropdownItem>
-                ))}
+                {FILE_CATEGORY_OPTIONS.filter((opt) => opt.value !== selectedCategory).map(
+                  (opt) => (
+                    <PortalDropdownItem
+                      key={opt.value}
+                      onSelect={() => setSelectedCategory(opt.value)}
+                    >
+                      {opt.label}
+                    </PortalDropdownItem>
+                  )
+                )}
               </PortalDropdownContent>
             </PortalDropdown>
           </div>
@@ -288,10 +324,7 @@ export function FilesTab({
 
       {/* Files List */}
       {files.length === 0 ? (
-        <EmptyState
-          icon={<Inbox className="icon-lg" />}
-          message="No files uploaded yet."
-        />
+        <EmptyState icon={<Inbox className="icon-lg" />} message="No files uploaded yet." />
       ) : (
         <div className="panel contract-panel-no-padding">
           <table className="pd-full-width">
@@ -327,10 +360,7 @@ export function FilesTab({
             </thead>
             <tbody>
               {files.map((file) => (
-                <tr
-                  key={file.id}
-                  className="files-table-row"
-                >
+                <tr key={file.id} className="files-table-row">
                   <td className="pd-table-cell">
                     <div className="cell-with-icon">
                       <span style={{ flexShrink: 0 }}>{getFileIcon(file.file_type)}</span>
@@ -343,42 +373,54 @@ export function FilesTab({
                     {onUpdateCategory ? (
                       <PortalDropdown>
                         <PortalDropdownTrigger asChild>
-                          <button type="button" className="files-category-trigger dropdown-trigger" title="Change category">
-                            {FILE_CATEGORY_OPTIONS.find((c) => c.value === file.category)?.label || file.category || 'Set category'}
+                          <button
+                            type="button"
+                            className="files-category-trigger dropdown-trigger"
+                            title="Change category"
+                          >
+                            {FILE_CATEGORY_OPTIONS.find((c) => c.value === file.category)?.label ||
+                              file.category ||
+                              'Set category'}
                             <ChevronDown className="dropdown-caret" />
                           </button>
                         </PortalDropdownTrigger>
                         <PortalDropdownContent align="start">
-                          {FILE_CATEGORY_OPTIONS.filter((opt) => opt.value !== file.category).map((opt) => (
-                            <PortalDropdownItem
-                              key={opt.value}
-                              onSelect={async () => {
-                                const success = await onUpdateCategory(file.id, opt.value);
-                                if (success) showNotification?.('Category updated', 'success');
-                              }}
-                            >
-                              {opt.label}
-                            </PortalDropdownItem>
-                          ))}
+                          {FILE_CATEGORY_OPTIONS.filter((opt) => opt.value !== file.category).map(
+                            (opt) => (
+                              <PortalDropdownItem
+                                key={opt.value}
+                                onSelect={async () => {
+                                  const success = await onUpdateCategory(file.id, opt.value);
+                                  if (success) {
+                                    showNotification?.('Category updated', 'success');
+                                  }
+                                }}
+                              >
+                                {opt.label}
+                              </PortalDropdownItem>
+                            )
+                          )}
                         </PortalDropdownContent>
                       </PortalDropdown>
                     ) : (
                       <span className="text-secondary">
-                        {FILE_CATEGORY_OPTIONS.find((c) => c.value === file.category)?.label || file.category || '-'}
+                        {FILE_CATEGORY_OPTIONS.find((c) => c.value === file.category)?.label ||
+                          file.category ||
+                          '-'}
                       </span>
                     )}
                   </td>
-                  <td className="pd-table-cell text-secondary">
-                    {formatFileSize(file.file_size)}
-                  </td>
-                  <td className="pd-table-cell text-secondary">
-                    {formatDate(file.created_at)}
-                  </td>
+                  <td className="pd-table-cell text-secondary">{formatFileSize(file.file_size)}</td>
+                  <td className="pd-table-cell text-secondary">{formatDate(file.created_at)}</td>
                   <td className="pd-table-cell pd-cell-center">
                     <button
                       className="icon-btn"
                       onClick={() => handleToggleSharing(file.id)}
-                      title={file.is_shared ? 'Shared with client - click to make private' : 'Private - click to share'}
+                      title={
+                        file.is_shared
+                          ? 'Shared with client - click to make private'
+                          : 'Private - click to share'
+                      }
                       aria-label={file.is_shared ? 'Make private' : 'Share with client'}
                       disabled={togglingFileId === file.id}
                     >
@@ -430,7 +472,12 @@ export function FilesTab({
       {/* File Preview Modal */}
       <PortalModal
         open={!!previewFile}
-        onOpenChange={(open) => { if (!open) { setPreviewFile(null); setPreviewContent(null); } }}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPreviewFile(null);
+            setPreviewContent(null);
+          }
+        }}
         title={previewFile?.original_name || 'File Preview'}
         icon={<Eye />}
         size="lg"
@@ -442,35 +489,47 @@ export function FilesTab({
           ) : undefined
         }
       >
-        {previewFile && (() => {
-          const fileUrl = buildEndpoint.fileDownload(previewFile.id).replace('?download=true', '');
-          return (
-            <div style={{ minHeight: '200px' }}>
-              {previewFile.file_type.startsWith('image/') ? (
-                <img
-                  src={fileUrl}
-                  alt={previewFile.original_name}
-                  style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain', display: 'block', margin: '0 auto' }}
-                />
-              ) : previewFile.file_type === 'application/pdf' ? (
-                <PDFPreview url={fileUrl} title={previewFile.original_name} />
-              ) : previewContent !== null ? (
-                <pre className="text-sm" style={{
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                  fontFamily: 'var(--font-family-mono, monospace)',
-                  maxHeight: '70vh',
-                  overflow: 'auto',
-                  margin: 0
-                }}>
-                  {previewContent}
-                </pre>
-              ) : (
-                <PDFPreview url={fileUrl} title={previewFile.original_name} />
-              )}
-            </div>
-          );
-        })()}
+        {previewFile &&
+          (() => {
+            const fileUrl = buildEndpoint
+              .fileDownload(previewFile.id)
+              .replace('?download=true', '');
+            return (
+              <div style={{ minHeight: '200px' }}>
+                {previewFile.file_type.startsWith('image/') ? (
+                  <img
+                    src={fileUrl}
+                    alt={previewFile.original_name}
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '70vh',
+                      objectFit: 'contain',
+                      display: 'block',
+                      margin: '0 auto'
+                    }}
+                  />
+                ) : previewFile.file_type === 'application/pdf' ? (
+                  <PDFPreview url={fileUrl} title={previewFile.original_name} />
+                ) : previewContent !== null ? (
+                  <pre
+                    className="text-sm"
+                    style={{
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                      fontFamily: 'var(--font-family-mono, monospace)',
+                      maxHeight: '70vh',
+                      overflow: 'auto',
+                      margin: 0
+                    }}
+                  >
+                    {previewContent}
+                  </pre>
+                ) : (
+                  <PDFPreview url={fileUrl} title={previewFile.original_name} />
+                )}
+              </div>
+            );
+          })()}
       </PortalModal>
     </div>
   );

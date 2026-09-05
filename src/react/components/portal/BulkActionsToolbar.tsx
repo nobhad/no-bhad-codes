@@ -74,7 +74,9 @@ export function BulkActionsToolbar({
   deleteLoading = false,
   className
 }: BulkActionsToolbarProps) {
-  if (selectedCount === 0) return null;
+  if (selectedCount === 0) {
+    return null;
+  }
 
   return (
     <div className={cn('bulk-actions-toolbar', className)}>
@@ -84,11 +86,7 @@ export function BulkActionsToolbar({
         <span className="text-secondary">selected</span>
 
         {!allSelected && selectedCount < totalCount && (
-          <button
-            type="button"
-            className="btn-link"
-            onClick={onSelectAll}
-          >
+          <button type="button" className="btn-link" onClick={onSelectAll}>
             Select all {totalCount}
           </button>
         )}
@@ -137,7 +135,12 @@ export function BulkActionsToolbar({
 
         {/* Delete action */}
         {onDelete && (
-          <IconButton action="delete" title="Delete selected" onClick={onDelete} disabled={deleteLoading} />
+          <IconButton
+            action="delete"
+            title="Delete selected"
+            onClick={onDelete}
+            disabled={deleteLoading}
+          />
         )}
 
         {/* Clear selection */}

@@ -37,7 +37,9 @@ export function DateWithIcon({
   className = 'cell-with-icon text-muted',
   iconClassName = 'icon-xs'
 }: DateWithIconProps) {
-  if (!date) return null;
+  if (!date) {
+    return null;
+  }
 
   return (
     <span className={className}>

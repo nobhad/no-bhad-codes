@@ -48,13 +48,8 @@ interface LeadsTableProps {
   overviewMode?: boolean;
 }
 
-
 // Filter function
-function filterLead(
-  lead: Lead,
-  filters: Record<string, string[]>,
-  search: string
-): boolean {
+function filterLead(lead: Lead, filters: Record<string, string[]>, search: string): boolean {
   // Search filter
   if (search) {
     const searchLower = search.toLowerCase();
@@ -65,19 +60,25 @@ function filterLead(
       lead.project_name?.toLowerCase().includes(searchLower) ||
       lead.description?.toLowerCase().includes(searchLower);
 
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   // Status filter
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(lead.status)) return false;
+    if (!statusFilter.includes(lead.status)) {
+      return false;
+    }
   }
 
   // Source filter
   const sourceFilter = filters.source;
   if (sourceFilter && sourceFilter.length > 0) {
-    if (!sourceFilter.includes(lead.source ?? '')) return false;
+    if (!sourceFilter.includes(lead.source ?? '')) {
+      return false;
+    }
   }
 
   return true;
@@ -89,19 +90,18 @@ function sortLeads(a: Lead, b: Lead, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'name':
-    return multiplier * (a.contact_name || '').localeCompare(b.contact_name || '');
-  case 'company':
-    return multiplier * (a.company_name || '').localeCompare(b.company_name || '');
-  case 'status':
-    return multiplier * a.status.localeCompare(b.status);
-  case 'created_at':
-    return (
-      multiplier *
-        (new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime())
-    );
-  default:
-    return 0;
+    case 'name':
+      return multiplier * (a.contact_name || '').localeCompare(b.contact_name || '');
+    case 'company':
+      return multiplier * (a.company_name || '').localeCompare(b.company_name || '');
+    case 'status':
+      return multiplier * a.status.localeCompare(b.status);
+    case 'created_at':
+      return (
+        multiplier * (new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime())
+      );
+    default:
+      return 0;
   }
 }
 
@@ -119,7 +119,8 @@ export function LeadsTable({
   const containerRef = useFadeIn<HTMLDivElement>();
 
   // Data fetching
-  const { leads, isLoading, error, stats, refetch, updateLead, bulkUpdateStatus, bulkDelete } = useLeads();
+  const { leads, isLoading, error, stats, refetch, updateLead, bulkUpdateStatus, bulkDelete } =
+    useLeads();
 
   // Delete confirmation dialog
   const deleteDialog = useConfirmDialog();
@@ -185,7 +186,9 @@ export function LeadsTable({
   // Handle bulk status change
   const handleBulkStatusChange = useCallback(
     async (newStatus: string) => {
-      if (selection.selectedCount === 0) return;
+      if (selection.selectedCount === 0) {
+        return;
+      }
 
       setBulkActionLoading(true);
       const ids = selection.selectedItems.map((lead) => lead.id);
@@ -204,7 +207,9 @@ export function LeadsTable({
 
   // Handle bulk delete
   const handleBulkDelete = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
     const ids = selection.selectedItems.map((lead) => lead.id);
     const result = await bulkDelete(ids);
@@ -249,12 +254,9 @@ export function LeadsTable({
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
 
   // Open detail panel on row click instead of navigating
-  const handleRowClick = useCallback(
-    (lead: Lead) => {
-      setSelectedLead(lead);
-    },
-    []
-  );
+  const handleRowClick = useCallback((lead: Lead) => {
+    setSelectedLead(lead);
+  }, []);
 
   // Close detail panel
   const handleClosePanel = useCallback(() => {
@@ -296,11 +298,7 @@ export function LeadsTable({
         }
         actions={
           <>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search leads..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search leads..." />
             <FilterDropdown
               sections={LEADS_FILTER_CONFIG}
               values={filterValues}
@@ -438,8 +436,12 @@ export function LeadsTable({
                           )}
                         </span>
                       )}
-                      <span className="cell-title identity-name">{decodeHtmlEntities(lead.contact_name) || 'Unknown'}</span>
-                      <span className="cell-subtitle identity-email">{decodeHtmlEntities(lead.email)}</span>
+                      <span className="cell-title identity-name">
+                        {decodeHtmlEntities(lead.contact_name) || 'Unknown'}
+                      </span>
+                      <span className="cell-subtitle identity-email">
+                        {decodeHtmlEntities(lead.email)}
+                      </span>
                       {lead.phone && (
                         <span className="cell-subtitle identity-phone">{lead.phone}</span>
                       )}
@@ -466,7 +468,9 @@ export function LeadsTable({
                   <StatusDropdownCell
                     status={lead.status}
                     statusConfig={LEAD_STATUS_CONFIG}
-                    onStatusChange={(newStatus) => handleStatusChange(lead.id, newStatus as LeadStatus)}
+                    onStatusChange={(newStatus) =>
+                      handleStatusChange(lead.id, newStatus as LeadStatus)
+                    }
                     ariaLabel="Change lead status"
                   />
 
@@ -486,7 +490,7 @@ export function LeadsTable({
                       {lead.email && (
                         <IconButton
                           action="email"
-                          onClick={() => window.location.href = `mailto:${lead.email}`}
+                          onClick={() => (window.location.href = `mailto:${lead.email}`)}
                           title="Send email"
                         />
                       )}

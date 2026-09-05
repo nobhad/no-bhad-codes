@@ -77,7 +77,9 @@ export function PortalFeedback(_props: PortalFeedbackProps) {
     setError(null);
     try {
       const res = await apiFetch(API_ENDPOINTS.FEEDBACK_MY);
-      if (!res.ok) throw new Error('Failed to load feedback');
+      if (!res.ok) {
+        throw new Error('Failed to load feedback');
+      }
       const json = await res.json();
       setSurveys(json.data?.surveys || json.surveys || []);
     } catch (err) {
@@ -87,23 +89,27 @@ export function PortalFeedback(_props: PortalFeedbackProps) {
     }
   }, []);
 
-  useEffect(() => { fetchSurveys(); }, [fetchSurveys]);
+  useEffect(() => {
+    fetchSurveys();
+  }, [fetchSurveys]);
 
-  const { pending, completed } = useMemo(() => ({
-    pending: surveys.filter(s => s.status === 'sent'),
-    completed: surveys.filter(s => s.status === 'completed')
-  }), [surveys]);
+  const { pending, completed } = useMemo(
+    () => ({
+      pending: surveys.filter((s) => s.status === 'sent'),
+      completed: surveys.filter((s) => s.status === 'completed')
+    }),
+    [surveys]
+  );
 
-  if (isLoading) return <LoadingState message="Loading feedback..." />;
-  if (error) return <ErrorState message={error} onRetry={fetchSurveys} />;
+  if (isLoading) {
+    return <LoadingState message="Loading feedback..." />;
+  }
+  if (error) {
+    return <ErrorState message={error} onRetry={fetchSurveys} />;
+  }
 
   if (surveys.length === 0) {
-    return (
-      <EmptyState
-        icon={<MessageSquare size={32} />}
-        message="No feedback surveys yet"
-      />
-    );
+    return <EmptyState icon={<MessageSquare size={32} />} message="No feedback surveys yet" />;
   }
 
   return (
@@ -118,13 +124,11 @@ export function PortalFeedback(_props: PortalFeedbackProps) {
         <div className="portal-feedback-section">
           <h3>Pending Surveys</h3>
           <div className="portal-card-grid">
-            {pending.map(survey => (
+            {pending.map((survey) => (
               <div key={survey.id} className="portal-card">
                 <div className="portal-card-header">
                   <Clock size={16} />
-                  <StatusBadge status={STATUS_MAP.sent}>
-                    Awaiting Response
-                  </StatusBadge>
+                  <StatusBadge status={STATUS_MAP.sent}>Awaiting Response</StatusBadge>
                 </div>
                 <div className="portal-card-body">
                   <div className="portal-card-title">
@@ -134,9 +138,7 @@ export function PortalFeedback(_props: PortalFeedbackProps) {
                     <div className="text-muted text-sm">{survey.projectName}</div>
                   )}
                   {survey.sent_at && (
-                    <div className="text-muted text-sm">
-                      Sent {formatDate(survey.sent_at)}
-                    </div>
+                    <div className="text-muted text-sm">Sent {formatDate(survey.sent_at)}</div>
                   )}
                 </div>
                 <div className="portal-card-footer">
@@ -160,13 +162,11 @@ export function PortalFeedback(_props: PortalFeedbackProps) {
         <div className="portal-feedback-section">
           <h3>Completed</h3>
           <div className="portal-card-grid">
-            {completed.map(survey => (
+            {completed.map((survey) => (
               <div key={survey.id} className="portal-card">
                 <div className="portal-card-header">
                   <CheckCircle size={16} />
-                  <StatusBadge status={STATUS_MAP.completed}>
-                    Completed
-                  </StatusBadge>
+                  <StatusBadge status={STATUS_MAP.completed}>Completed</StatusBadge>
                 </div>
                 <div className="portal-card-body">
                   <div className="portal-card-title">
@@ -181,8 +181,16 @@ export function PortalFeedback(_props: PortalFeedbackProps) {
                         <Star
                           key={i}
                           size={16}
-                          fill={i < (survey.response?.overall_rating ?? 0) ? 'var(--app-color-warning)' : 'none'}
-                          stroke={i < (survey.response?.overall_rating ?? 0) ? 'var(--app-color-warning)' : 'var(--app-color-text-muted)'}
+                          fill={
+                            i < (survey.response?.overall_rating ?? 0)
+                              ? 'var(--app-color-warning)'
+                              : 'none'
+                          }
+                          stroke={
+                            i < (survey.response?.overall_rating ?? 0)
+                              ? 'var(--app-color-warning)'
+                              : 'var(--app-color-text-muted)'
+                          }
                         />
                       ))}
                     </div>

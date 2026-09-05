@@ -81,16 +81,26 @@ function ItemSubmissionForm({
   onSubmit
 }: {
   item: ContentItem;
-  onSubmit: (itemId: number, type: string, value: string | Record<string, unknown>) => Promise<void>;
+  onSubmit: (
+    itemId: number,
+    type: string,
+    value: string | Record<string, unknown>
+  ) => Promise<void>;
 }) {
   const [value, setValue] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = useCallback(async () => {
-    if (!value.trim()) return;
+    if (!value.trim()) {
+      return;
+    }
     setSubmitting(true);
     try {
-      await onSubmit(item.id, item.contentType, item.contentType === 'structured' ? JSON.parse(value) : value);
+      await onSubmit(
+        item.id,
+        item.contentType,
+        item.contentType === 'structured' ? JSON.parse(value) : value
+      );
       setValue('');
     } catch {
       // Error handled by parent
@@ -139,11 +149,7 @@ function ItemSubmissionForm({
           disabled={submitting}
         />
       )}
-      <button
-        className="btn-primary"
-        onClick={handleSubmit}
-        disabled={submitting || !value.trim()}
-      >
+      <button className="btn-primary" onClick={handleSubmit} disabled={submitting || !value.trim()}>
         <Send />
         {submitting ? 'Sending...' : 'Submit'}
       </button>
@@ -164,36 +170,60 @@ export function ContentChecklistView({ getAuthToken }: ContentChecklistViewProps
 
   const checklists = useMemo(() => data?.checklists || [], [data]);
 
-  const handleSubmit = useCallback(async (itemId: number, type: string, value: string | Record<string, unknown>) => {
-    const endpoint = type === 'structured'
-      ? `${API_ENDPOINTS.CONTENT_REQUESTS}/items/${itemId}/submit-data`
-      : `${API_ENDPOINTS.CONTENT_REQUESTS}/items/${itemId}/submit-${type}`;
+  const handleSubmit = useCallback(
+    async (itemId: number, type: string, value: string | Record<string, unknown>) => {
+      const endpoint =
+        type === 'structured'
+          ? `${API_ENDPOINTS.CONTENT_REQUESTS}/items/${itemId}/submit-data`
+          : `${API_ENDPOINTS.CONTENT_REQUESTS}/items/${itemId}/submit-${type}`;
 
-    const body = type === 'text' ? { text: value }
-      : type === 'url' ? { url: value }
-        : type === 'structured' ? { data: value }
-          : { file_id: value };
+      const body =
+        type === 'text'
+          ? { text: value }
+          : type === 'url'
+            ? { url: value }
+            : type === 'structured'
+              ? { data: value }
+              : { file_id: value };
 
-    // apiPost goes through the shared fetch wrapper that injects the
-    // CSRF header and credentials. A raw fetch here bypassed the
-    // x-csrf-token injection and would have been rejected 403 by the
-    // server's CSRF middleware on every submit.
-    const response = await apiPost(endpoint, body);
+      // apiPost goes through the shared fetch wrapper that injects the
+      // CSRF header and credentials. A raw fetch here bypassed the
+      // x-csrf-token injection and would have been rejected 403 by the
+      // server's CSRF middleware on every submit.
+      const response = await apiPost(endpoint, body);
 
-    if (!response.ok) throw new Error('Submission failed');
-    refetch();
-  }, [refetch]);
+      if (!response.ok) {
+        throw new Error('Submission failed');
+      }
+      refetch();
+    },
+    [refetch]
+  );
 
   return (
-    <TableLayout nested
+    <TableLayout
+      nested
       containerRef={containerRef}
       title="CONTENT"
       stats={
-        <TableStats items={[
-          { value: checklists.reduce((sum, c) => sum + c.completionStats.total, 0), label: 'total' },
-          { value: checklists.reduce((sum, c) => sum + c.completionStats.accepted, 0), label: 'complete', variant: 'completed' },
-          { value: checklists.reduce((sum, c) => sum + c.completionStats.pending, 0), label: 'pending', variant: 'pending' }
-        ]} />
+        <TableStats
+          items={[
+            {
+              value: checklists.reduce((sum, c) => sum + c.completionStats.total, 0),
+              label: 'total'
+            },
+            {
+              value: checklists.reduce((sum, c) => sum + c.completionStats.accepted, 0),
+              label: 'complete',
+              variant: 'completed'
+            },
+            {
+              value: checklists.reduce((sum, c) => sum + c.completionStats.pending, 0),
+              label: 'pending',
+              variant: 'pending'
+            }
+          ]}
+        />
       }
     >
       {isLoading ? (
@@ -210,9 +240,7 @@ export function ContentChecklistView({ getAuthToken }: ContentChecklistViewProps
                 <div>
                   <h3>{checklist.name}</h3>
                   {checklist.projectName && (
-                    <span className="checklist-project-name">
-                      {checklist.projectName}
-                    </span>
+                    <span className="checklist-project-name">{checklist.projectName}</span>
                   )}
                 </div>
                 <ProgressBar
@@ -234,14 +262,10 @@ export function ContentChecklistView({ getAuthToken }: ContentChecklistViewProps
                           {item.isRequired && <span className="content-item-required">*</span>}
                         </div>
                         {item.description && (
-                          <p className="content-item-description">
-                            {item.description}
-                          </p>
+                          <p className="content-item-description">{item.description}</p>
                         )}
                         {item.adminNotes && item.status === 'revision_needed' && (
-                          <div className="content-item-revision-notes">
-                            {item.adminNotes}
-                          </div>
+                          <div className="content-item-revision-notes">{item.adminNotes}</div>
                         )}
                       </div>
                       <StatusBadge status={getStatusVariant(item.status)}>

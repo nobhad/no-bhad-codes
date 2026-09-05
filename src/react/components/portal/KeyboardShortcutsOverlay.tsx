@@ -133,10 +133,7 @@ function ShortcutsInner({ onClose }: ShortcutsInnerProps) {
   const role = usePortalRole();
   const isMac = navigator.platform.toUpperCase().includes('MAC');
 
-  const groups = React.useMemo(
-    () => getShortcutGroups(role, isMac),
-    [role, isMac]
-  );
+  const groups = React.useMemo(() => getShortcutGroups(role, isMac), [role, isMac]);
 
   // Close on Escape
   React.useEffect(() => {
@@ -151,12 +148,7 @@ function ShortcutsInner({ onClose }: ShortcutsInnerProps) {
   }, [onClose]);
 
   return (
-    <div
-      className="shortcuts-overlay"
-      ref={overlayRef}
-      onClick={onClose}
-      role="presentation"
-    >
+    <div className="shortcuts-overlay" ref={overlayRef} onClick={onClose} role="presentation">
       <div
         className="shortcuts-panel"
         ref={panelRef}
@@ -184,7 +176,9 @@ function ShortcutsInner({ onClose }: ShortcutsInnerProps) {
                     <span className="shortcuts-description">{shortcut.description}</span>
                     <span className="shortcuts-keys">
                       {shortcut.keys.map((key) => (
-                        <kbd key={key} className="shortcuts-kbd">{key}</kbd>
+                        <kbd key={key} className="shortcuts-kbd">
+                          {key}
+                        </kbd>
                       ))}
                     </span>
                   </div>
@@ -197,7 +191,8 @@ function ShortcutsInner({ onClose }: ShortcutsInnerProps) {
         {/* Footer */}
         <div className="shortcuts-footer">
           <span className="shortcuts-footer-hint">
-            Press <kbd className="shortcuts-kbd">?</kbd> or <kbd className="shortcuts-kbd">Esc</kbd> to close
+            Press <kbd className="shortcuts-kbd">?</kbd> or <kbd className="shortcuts-kbd">Esc</kbd>{' '}
+            to close
           </span>
         </div>
       </div>
@@ -214,10 +209,11 @@ interface KeyboardShortcutsOverlayProps {
   onClose: () => void;
 }
 
-export const KeyboardShortcutsOverlay = React.memo(({
-  open,
-  onClose
-}: KeyboardShortcutsOverlayProps) => {
-  if (!open) return null;
-  return <ShortcutsInner onClose={onClose} />;
-});
+export const KeyboardShortcutsOverlay = React.memo(
+  ({ open, onClose }: KeyboardShortcutsOverlayProps) => {
+    if (!open) {
+      return null;
+    }
+    return <ShortcutsInner onClose={onClose} />;
+  }
+);

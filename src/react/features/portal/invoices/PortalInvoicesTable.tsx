@@ -50,12 +50,16 @@ function filterInvoice(
       invoice.invoice_number?.toLowerCase().includes(s) ||
       invoice.project_name?.toLowerCase().includes(s) ||
       String(invoice.amount_total).includes(s);
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(invoice.status)) return false;
+    if (!statusFilter.includes(invoice.status)) {
+      return false;
+    }
   }
 
   return true;
@@ -71,49 +75,39 @@ function sortInvoices(
 ): number {
   const m = sort.direction === 'asc' ? 1 : -1;
   switch (sort.column) {
-  case 'invoice_number':
-    return m * (a.invoice_number || '').localeCompare(b.invoice_number || '');
-  case 'project':
-    return m * (a.project_name || '').localeCompare(b.project_name || '');
-  case 'date':
-    return m * (new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
-  case 'amount':
-    return m * ((a.amount_total || 0) - (b.amount_total || 0));
-  case 'status':
-    return m * (a.status || '').localeCompare(b.status || '');
-  default:
-    return 0;
+    case 'invoice_number':
+      return m * (a.invoice_number || '').localeCompare(b.invoice_number || '');
+    case 'project':
+      return m * (a.project_name || '').localeCompare(b.project_name || '');
+    case 'date':
+      return m * (new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
+    case 'amount':
+      return m * ((a.amount_total || 0) - (b.amount_total || 0));
+    case 'status':
+      return m * (a.status || '').localeCompare(b.status || '');
+    default:
+      return 0;
   }
 }
 
 /**
  * PortalInvoicesTable Component
  */
-export function PortalInvoicesTable({
-  getAuthToken,
-  showNotification
-}: PortalInvoicesTableProps) {
+export function PortalInvoicesTable({ getAuthToken, showNotification }: PortalInvoicesTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const { invoices, summary, isLoading, error, refetch } = usePortalInvoices({
     getAuthToken
   });
 
   // Table filters
-  const {
-    filterValues,
-    setFilter,
-    search,
-    setSearch,
-    sort,
-    toggleSort,
-    applyFilters
-  } = useTableFilters<PortalInvoice>({
-    storageKey: 'portal_invoices',
-    filters: PORTAL_INVOICES_FILTER_CONFIG,
-    filterFn: filterInvoice,
-    sortFn: sortInvoices,
-    defaultSort: { column: 'date', direction: 'desc' }
-  });
+  const { filterValues, setFilter, search, setSearch, sort, toggleSort, applyFilters } =
+    useTableFilters<PortalInvoice>({
+      storageKey: 'portal_invoices',
+      filters: PORTAL_INVOICES_FILTER_CONFIG,
+      filterFn: filterInvoice,
+      sortFn: sortInvoices,
+      defaultSort: { column: 'date', direction: 'desc' }
+    });
 
   const filteredInvoices = useMemo(() => applyFilters(invoices), [applyFilters, invoices]);
 
@@ -177,11 +171,17 @@ export function PortalInvoicesTable({
       containerRef={containerRef}
       title="INVOICES"
       stats={
-        <TableStats items={[
-          { value: invoices.length, label: 'total' },
-          { value: formatCurrency(summary.totalOutstanding), label: 'outstanding', variant: 'pending' },
-          { value: formatCurrency(summary.totalPaid), label: 'paid', variant: 'completed' }
-        ]} />
+        <TableStats
+          items={[
+            { value: invoices.length, label: 'total' },
+            {
+              value: formatCurrency(summary.totalOutstanding),
+              label: 'outstanding',
+              variant: 'pending'
+            },
+            { value: formatCurrency(summary.totalPaid), label: 'paid', variant: 'completed' }
+          ]}
+        />
       }
       actions={
         <>
@@ -203,11 +203,46 @@ export function PortalInvoicesTable({
         <PortalTable>
           <PortalTableHeader>
             <PortalTableRow>
-              <PortalTableHead className="invoice-col" sortable sortDirection={sort?.column === 'invoice_number' ? sort.direction : null} onClick={() => toggleSort('invoice_number')}>Invoice</PortalTableHead>
-              <PortalTableHead className="project-col" sortable sortDirection={sort?.column === 'project' ? sort.direction : null} onClick={() => toggleSort('project')}>Project</PortalTableHead>
-              <PortalTableHead className="date-col" sortable sortDirection={sort?.column === 'date' ? sort.direction : null} onClick={() => toggleSort('date')}>Date</PortalTableHead>
-              <PortalTableHead className="amount-col" sortable sortDirection={sort?.column === 'amount' ? sort.direction : null} onClick={() => toggleSort('amount')}>Amount</PortalTableHead>
-              <PortalTableHead className="status-col" sortable sortDirection={sort?.column === 'status' ? sort.direction : null} onClick={() => toggleSort('status')}>Status</PortalTableHead>
+              <PortalTableHead
+                className="invoice-col"
+                sortable
+                sortDirection={sort?.column === 'invoice_number' ? sort.direction : null}
+                onClick={() => toggleSort('invoice_number')}
+              >
+                Invoice
+              </PortalTableHead>
+              <PortalTableHead
+                className="project-col"
+                sortable
+                sortDirection={sort?.column === 'project' ? sort.direction : null}
+                onClick={() => toggleSort('project')}
+              >
+                Project
+              </PortalTableHead>
+              <PortalTableHead
+                className="date-col"
+                sortable
+                sortDirection={sort?.column === 'date' ? sort.direction : null}
+                onClick={() => toggleSort('date')}
+              >
+                Date
+              </PortalTableHead>
+              <PortalTableHead
+                className="amount-col"
+                sortable
+                sortDirection={sort?.column === 'amount' ? sort.direction : null}
+                onClick={() => toggleSort('amount')}
+              >
+                Amount
+              </PortalTableHead>
+              <PortalTableHead
+                className="status-col"
+                sortable
+                sortDirection={sort?.column === 'status' ? sort.direction : null}
+                onClick={() => toggleSort('status')}
+              >
+                Status
+              </PortalTableHead>
               <PortalTableHead className="col-actions">Actions</PortalTableHead>
             </PortalTableRow>
           </PortalTableHeader>
@@ -216,9 +251,10 @@ export function PortalInvoicesTable({
               <PortalTableEmpty
                 colSpan={6}
                 icon={<Inbox className="icon-lg" />}
-                message={invoices.length === 0
-                  ? 'No invoices yet. Your first invoice will appear here once your project begins.'
-                  : 'No invoices match the current filters.'
+                message={
+                  invoices.length === 0
+                    ? 'No invoices yet. Your first invoice will appear here once your project begins.'
+                    : 'No invoices match the current filters.'
                 }
               />
             ) : (
@@ -235,7 +271,9 @@ export function PortalInvoicesTable({
                         <span className="cell-title">{invoice.project_name || 'Project'}</span>
                         {/* Stacked content for responsive */}
                         <span className="invoice-stacked">{invoice.invoice_number}</span>
-                        <span className="amount-stacked">{formatCurrency(invoice.amount_total)}</span>
+                        <span className="amount-stacked">
+                          {formatCurrency(invoice.amount_total)}
+                        </span>
                         <span className="date-stacked">{formatCardDate(invoice.created_at)}</span>
                       </div>
                     </PortalTableCell>

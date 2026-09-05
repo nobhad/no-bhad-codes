@@ -67,7 +67,9 @@ export function FormDropdown({
   const isPlaceholder = !selectedOption;
 
   const handleToggle = useCallback(() => {
-    if (!disabled) setIsOpen((prev) => !prev);
+    if (!disabled) {
+      setIsOpen((prev) => !prev);
+    }
   }, [disabled]);
 
   const handleSelect = useCallback(
@@ -83,10 +85,14 @@ export function FormDropdown({
 
   // Close on Escape
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
 
     function handleKey(e: KeyboardEvent) {
-      if (e.key === KEYS.ESCAPE) setIsOpen(false);
+      if (e.key === KEYS.ESCAPE) {
+        setIsOpen(false);
+      }
     }
 
     document.addEventListener('keydown', handleKey);
@@ -128,7 +134,9 @@ export function FormDropdown({
                 option.disabled && 'disabled'
               )}
               onClick={() => {
-                if (!option.disabled) handleSelect(option.value);
+                if (!option.disabled) {
+                  handleSelect(option.value);
+                }
               }}
             >
               {option.label}

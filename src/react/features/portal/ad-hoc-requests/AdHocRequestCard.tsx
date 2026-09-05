@@ -60,7 +60,9 @@ export function AdHocRequestCard({
   const flatRate = request.flatRate ?? 0;
 
   const handleApprove = async () => {
-    if (!onApprove) return;
+    if (!onApprove) {
+      return;
+    }
     setIsLoading(true);
     try {
       await onApprove(request.id);
@@ -71,7 +73,9 @@ export function AdHocRequestCard({
   };
 
   const handleDecline = async () => {
-    if (!onDecline) return;
+    if (!onDecline) {
+      return;
+    }
     setIsLoading(true);
     try {
       await onDecline(request.id);
@@ -91,12 +95,8 @@ export function AdHocRequestCard({
         >
           <div className="portal-card-title-group flex-col items-start">
             <div className="portal-card-meta-item gap-2">
-              <h3 className="text-primary font-semibold">
-                {request.title}
-              </h3>
-              {hasAttachment && (
-                <Paperclip className="icon-xs flex-shrink-0" />
-              )}
+              <h3 className="text-primary font-semibold">{request.title}</h3>
+              {hasAttachment && <Paperclip className="icon-xs flex-shrink-0" />}
             </div>
             <div className="portal-card-meta">
               <span className="badge">
@@ -109,17 +109,13 @@ export function AdHocRequestCard({
               >
                 {AD_HOC_REQUEST_PRIORITY_CONFIG[request.priority]?.label || request.priority}
               </span>
-              <span className="text-secondary">
-                {formatCardDate(request.createdAt)}
-              </span>
+              <span className="text-secondary">{formatCardDate(request.createdAt)}</span>
             </div>
           </div>
 
           <div className="portal-card-status-group">
             {hasQuote && (
-              <span className="text-primary font-semibold">
-                {formatCurrency(quotedPrice!)}
-              </span>
+              <span className="text-primary font-semibold">{formatCurrency(quotedPrice!)}</span>
             )}
             <button
               type="button"
@@ -130,11 +126,7 @@ export function AdHocRequestCard({
               }}
               aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
             >
-              {isExpanded ? (
-                <ChevronUp className="icon-xs" />
-              ) : (
-                <ChevronDown className="icon-xs" />
-              )}
+              {isExpanded ? <ChevronUp className="icon-xs" /> : <ChevronDown className="icon-xs" />}
             </button>
           </div>
         </div>
@@ -145,9 +137,7 @@ export function AdHocRequestCard({
             {/* Description */}
             <div>
               <label className="field-label">Description</label>
-              <p className="text-secondary mt-1 whitespace-pre-wrap">
-                {request.description}
-              </p>
+              <p className="text-secondary mt-1 whitespace-pre-wrap">{request.description}</p>
             </div>
 
             {/* Type */}
@@ -161,9 +151,7 @@ export function AdHocRequestCard({
             {request.projectName && (
               <div className="portal-card-meta-item">
                 <FileText className="icon-xs" />
-                <span>
-                  Project: {request.projectName}
-                </span>
+                <span>Project: {request.projectName}</span>
               </div>
             )}
 
@@ -198,9 +186,7 @@ export function AdHocRequestCard({
                     <div className="portal-card-detail-row">
                       <div className="portal-card-meta-item">
                         <Clock className="icon-xs" />
-                        <span>
-                          Estimated Hours
-                        </span>
+                        <span>Estimated Hours</span>
                       </div>
                       <span className="text-primary">
                         {estimatedHours}h @ {formatCurrency(hourlyRate)}/hr
@@ -213,24 +199,16 @@ export function AdHocRequestCard({
                     <div className="portal-card-detail-row">
                       <div className="portal-card-meta-item">
                         <DollarSign className="icon-xs" />
-                        <span>
-                          Flat Fee
-                        </span>
+                        <span>Flat Fee</span>
                       </div>
-                      <span className="text-primary">
-                        {formatCurrency(flatRate)}
-                      </span>
+                      <span className="text-primary">{formatCurrency(flatRate)}</span>
                     </div>
                   )}
 
                   {/* Total */}
                   <div className="portal-card-detail-row mt-2 border-t">
-                    <span className="text-primary font-semibold">
-                      Total
-                    </span>
-                    <span className="text-primary font-bold">
-                      {formatCurrency(quotedPrice!)}
-                    </span>
+                    <span className="text-primary font-semibold">Total</span>
+                    <span className="text-primary font-bold">{formatCurrency(quotedPrice!)}</span>
                   </div>
                 </div>
               </div>

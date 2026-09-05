@@ -1,10 +1,6 @@
 import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
-import {
-  Palette,
-  MessageSquare,
-  Inbox
-} from 'lucide-react';
+import { Palette, MessageSquare, Inbox } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -95,7 +91,9 @@ function filterReview(
   }
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(review.status)) return false;
+    if (!statusFilter.includes(review.status)) {
+      return false;
+    }
   }
   return true;
 }
@@ -105,18 +103,23 @@ function sortReviews(a: DesignReview, b: DesignReview, sort: SortConfig): number
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'title':
-    return multiplier * a.title.localeCompare(b.title);
-  case 'project':
-    return multiplier * a.projectName.localeCompare(b.projectName);
-  case 'submittedAt':
-    return multiplier * a.submittedAt.localeCompare(b.submittedAt);
-  default:
-    return 0;
+    case 'title':
+      return multiplier * a.title.localeCompare(b.title);
+    case 'project':
+      return multiplier * a.projectName.localeCompare(b.projectName);
+    case 'submittedAt':
+      return multiplier * a.submittedAt.localeCompare(b.submittedAt);
+    default:
+      return 0;
   }
 }
 
-export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNotification }: DesignReviewTableProps) {
+export function DesignReviewTable({
+  projectId,
+  onNavigate,
+  getAuthToken,
+  showNotification
+}: DesignReviewTableProps) {
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -153,23 +156,26 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
     sortFn: sortReviews
   });
 
-  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
-    setCreateLoading(true);
-    try {
-      const res = await apiPost(API_ENDPOINTS.ADMIN.DELIVERABLES, formData);
-      if (res.ok) {
-        showNotification?.('Submitted for review', 'success');
-        setCreateOpen(false);
-        refetch();
-      } else {
+  const handleCreate = useCallback(
+    async (formData: Record<string, unknown>) => {
+      setCreateLoading(true);
+      try {
+        const res = await apiPost(API_ENDPOINTS.ADMIN.DELIVERABLES, formData);
+        if (res.ok) {
+          showNotification?.('Submitted for review', 'success');
+          setCreateOpen(false);
+          refetch();
+        } else {
+          showNotification?.('Failed to submit', 'error');
+        }
+      } catch {
         showNotification?.('Failed to submit', 'error');
+      } finally {
+        setCreateLoading(false);
       }
-    } catch {
-      showNotification?.('Failed to submit', 'error');
-    } finally {
-      setCreateLoading(false);
-    }
-  }, [showNotification, refetch]);
+    },
+    [showNotification, refetch]
+  );
 
   // Detail panel state
   const [selectedReview, setSelectedReview] = useState<DesignReview | null>(null);
@@ -210,24 +216,38 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
     [handlePanelStatusChange]
   );
 
-  const handleCopyLink = useCallback((review: DesignReview) => {
-    const url = `${window.location.origin}/dashboard#/design-reviews/${review.id}`;
-    navigator.clipboard.writeText(url).then(() => {
-      showNotification?.('Share link copied to clipboard', 'success');
-    }).catch(() => {
-      showNotification?.('Failed to copy link', 'error');
-    });
-  }, [showNotification]);
+  const handleCopyLink = useCallback(
+    (review: DesignReview) => {
+      const url = `${window.location.origin}/dashboard#/design-reviews/${review.id}`;
+      navigator.clipboard
+        .writeText(url)
+        .then(() => {
+          showNotification?.('Share link copied to clipboard', 'success');
+        })
+        .catch(() => {
+          showNotification?.('Failed to copy link', 'error');
+        });
+    },
+    [showNotification]
+  );
 
-  const handleAddComment = useCallback((reviewId: number) => {
-    // Open the detail panel where comments can be added
-    const review = reviews.find((r) => r.id === reviewId);
-    if (review) setSelectedReview(review);
-  }, [reviews]);
+  const handleAddComment = useCallback(
+    (reviewId: number) => {
+      // Open the detail panel where comments can be added
+      const review = reviews.find((r) => r.id === reviewId);
+      if (review) {
+        setSelectedReview(review);
+      }
+    },
+    [reviews]
+  );
 
   const filteredReviews = useMemo(() => applyFilters(reviews), [applyFilters, reviews]);
 
-  const pagination = usePagination({ storageKey: 'admin_design_review_pagination', totalItems: filteredReviews.length });
+  const pagination = usePagination({
+    storageKey: 'admin_design_review_pagination',
+    totalItems: filteredReviews.length
+  });
   const paginatedReviews = filteredReviews.slice(
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
@@ -252,17 +272,17 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
         }
         actions={
           <>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search reviews..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search reviews..." />
             <FilterDropdown
               sections={DESIGN_REVIEWS_FILTER_CONFIG}
               values={filterValues}
               onChange={setFilter}
             />
-            <IconButton action="add" onClick={() => setCreateOpen(true)} title="Submit for Review" />
+            <IconButton
+              action="add"
+              onClick={() => setCreateOpen(true)}
+              title="Submit for Review"
+            />
           </>
         }
         pagination={
@@ -291,14 +311,14 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
                 sortDirection={sort?.column === 'title' ? sort.direction : null}
                 onClick={() => toggleSort('title')}
               >
-              Design
+                Design
               </PortalTableHead>
               <PortalTableHead
                 sortable
                 sortDirection={sort?.column === 'project' ? sort.direction : null}
                 onClick={() => toggleSort('project')}
               >
-              Project
+                Project
               </PortalTableHead>
               <PortalTableHead>Status</PortalTableHead>
               <PortalTableHead className="text-center">Ver</PortalTableHead>
@@ -309,7 +329,7 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
                 sortDirection={sort?.column === 'submittedAt' ? sort.direction : null}
                 onClick={() => toggleSort('submittedAt')}
               >
-              Submitted
+                Submitted
               </PortalTableHead>
               <PortalTableHead className="col-actions">Actions</PortalTableHead>
             </PortalTableRow>
@@ -324,7 +344,9 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
               <PortalTableEmpty
                 colSpan={7}
                 icon={<Inbox />}
-                message={hasActiveFilters ? 'No reviews match your filters' : 'No design reviews yet'}
+                message={
+                  hasActiveFilters ? 'No reviews match your filters' : 'No design reviews yet'
+                }
               />
             ) : (
               paginatedReviews.map((review) => (
@@ -365,18 +387,40 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
                       </span>
                     )}
                   </PortalTableCell>
-                  <PortalTableCell className="date-col">{formatDate(review.submittedAt)}</PortalTableCell>
+                  <PortalTableCell className="date-col">
+                    {formatDate(review.submittedAt)}
+                  </PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
-                      <IconButton action="view" title="View" onClick={() => setSelectedReview(review)} />
+                      <IconButton
+                        action="view"
+                        title="View"
+                        onClick={() => setSelectedReview(review)}
+                      />
                       {review.status === 'in-review' && (
                         <>
-                          <IconButton action="approve" title="Approve" onClick={() => handleApprove(review.id)} />
-                          <IconButton action="reject" title="Request Revision" onClick={() => handleRequestRevision(review.id)} />
+                          <IconButton
+                            action="approve"
+                            title="Approve"
+                            onClick={() => handleApprove(review.id)}
+                          />
+                          <IconButton
+                            action="reject"
+                            title="Request Revision"
+                            onClick={() => handleRequestRevision(review.id)}
+                          />
                         </>
                       )}
-                      <IconButton action="copy-link" title="Share Link" onClick={() => handleCopyLink(review)} />
-                      <IconButton action="message" title="Add Comment" onClick={() => handleAddComment(review.id)} />
+                      <IconButton
+                        action="copy-link"
+                        title="Share Link"
+                        onClick={() => handleCopyLink(review)}
+                      />
+                      <IconButton
+                        action="message"
+                        title="Add Comment"
+                        onClick={() => handleAddComment(review.id)}
+                      />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>

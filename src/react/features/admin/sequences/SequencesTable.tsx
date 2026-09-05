@@ -97,10 +97,7 @@ export interface SequencesTableProps {
 // COMPONENT
 // ============================================================================
 
-export function SequencesTable({
-  getAuthToken,
-  showNotification
-}: SequencesTableProps) {
+export function SequencesTable({ getAuthToken, showNotification }: SequencesTableProps) {
   const containerRef = useFadeIn();
 
   const {
@@ -112,7 +109,7 @@ export function SequencesTable({
   } = usePortalData<EmailSequence[]>({
     getAuthToken,
     url: API_ENDPOINTS.SEQUENCES,
-    transform: (raw) => (raw as Record<string, unknown>).sequences as EmailSequence[] || []
+    transform: (raw) => ((raw as Record<string, unknown>).sequences as EmailSequence[]) || []
   });
 
   const items = useMemo(() => sequences ?? [], [sequences]);
@@ -120,7 +117,9 @@ export function SequencesTable({
   // Search
   const [search, setSearch] = useState('');
   const filteredItems = useMemo(() => {
-    if (!search) return items;
+    if (!search) {
+      return items;
+    }
     const query = search.toLowerCase();
     return items.filter(
       (seq) =>
@@ -148,25 +147,22 @@ export function SequencesTable({
   }, [items]);
 
   // Toggle active/inactive
-  const handleToggleActive = useCallback(async (seq: EmailSequence) => {
-    try {
-      await portalFetch(`${API_ENDPOINTS.SEQUENCES}/${seq.id}`, {
-        method: 'PUT',
-        body: { isActive: seq.is_active ? false : true }
-      });
-      showNotification?.(
-        `Sequence ${seq.is_active ? 'deactivated' : 'activated'}`,
-        'success'
-      );
-      await refetch();
-    } catch (err) {
-      logger.error('Error toggling sequence status:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to update sequence'),
-        'error'
-      );
-    }
-  }, [portalFetch, showNotification, refetch]);
+  const handleToggleActive = useCallback(
+    async (seq: EmailSequence) => {
+      try {
+        await portalFetch(`${API_ENDPOINTS.SEQUENCES}/${seq.id}`, {
+          method: 'PUT',
+          body: { isActive: seq.is_active ? false : true }
+        });
+        showNotification?.(`Sequence ${seq.is_active ? 'deactivated' : 'activated'}`, 'success');
+        await refetch();
+      } catch (err) {
+        logger.error('Error toggling sequence status:', err);
+        showNotification?.(formatErrorMessage(err, 'Failed to update sequence'), 'error');
+      }
+    },
+    [portalFetch, showNotification, refetch]
+  );
 
   // Create new sequence
   const handleCreate = useCallback(async () => {
@@ -194,10 +190,7 @@ export function SequencesTable({
       await refetch();
     } catch (err) {
       logger.error('Error creating sequence:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to create sequence'),
-        'error'
-      );
+      showNotification?.(formatErrorMessage(err, 'Failed to create sequence'), 'error');
     } finally {
       setIsCreating(false);
     }
@@ -254,7 +247,9 @@ export function SequencesTable({
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="field-label" htmlFor="seq-trigger">Trigger Event</label>
+              <label className="field-label" htmlFor="seq-trigger">
+                Trigger Event
+              </label>
               <select
                 id="seq-trigger"
                 value={createTrigger}
@@ -270,7 +265,9 @@ export function SequencesTable({
               </select>
             </div>
             <div className="flex flex-col gap-1">
-              <label className="field-label" htmlFor="seq-desc">Description</label>
+              <label className="field-label" htmlFor="seq-desc">
+                Description
+              </label>
               <textarea
                 id="seq-desc"
                 placeholder="Brief description of this sequence..."
@@ -378,7 +375,10 @@ export function SequencesTable({
                 {expandedId === seq.id && (
                   <PortalTableRow>
                     <PortalTableCell colSpan={TABLE_COL_COUNT}>
-                      <div className="flex flex-col gap-1 py-2 px-4" style={{ background: 'var(--app-color-bg-secondary)' }}>
+                      <div
+                        className="flex flex-col gap-1 py-2 px-4"
+                        style={{ background: 'var(--app-color-bg-secondary)' }}
+                      >
                         <div className="flex items-center gap-2">
                           {expandedId === seq.id ? (
                             <ChevronUp className="icon-xs text-muted" />
@@ -389,21 +389,15 @@ export function SequencesTable({
                         </div>
                         <div className="flex gap-6 ml-5">
                           <div>
-                            <span className="text-muted text-xs">
-                              Active Enrollments
-                            </span>
+                            <span className="text-muted text-xs">Active Enrollments</span>
                             <p>{seq.enrollmentCount}</p>
                           </div>
                           <div>
-                            <span className="text-muted text-xs">
-                              Completion Rate
-                            </span>
+                            <span className="text-muted text-xs">Completion Rate</span>
                             <p>{Math.round(seq.completionRate * 100)}%</p>
                           </div>
                           <div>
-                            <span className="text-muted text-xs">
-                              Created
-                            </span>
+                            <span className="text-muted text-xs">Created</span>
                             <p>{formatDate(seq.created_at)}</p>
                           </div>
                         </div>

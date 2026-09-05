@@ -95,11 +95,7 @@ export interface DetailPanelProps<T> {
 // DETAIL PANEL COMPONENT
 // ============================================
 
-export function DetailPanel<T>({
-  entity,
-  onClose,
-  config
-}: DetailPanelProps<T>) {
+export function DetailPanel<T>({ entity, onClose, config }: DetailPanelProps<T>) {
   const [activeTab, setActiveTab] = useState<string>('');
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -115,15 +111,21 @@ export function DetailPanel<T>({
 
   // Close on Escape key
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === KEYS.ESCAPE) onClose();
+      if (e.key === KEYS.ESCAPE) {
+        onClose();
+      }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen || !entity) return null;
+  if (!isOpen || !entity) {
+    return null;
+  }
 
   const tabs = config.tabs(entity);
   const meta = config.meta?.(entity) ?? [];
@@ -170,14 +172,16 @@ export function DetailPanel<T>({
         {/* Title row */}
         <DetailHeader
           title={titleText}
-          status={config.status ? (
-            <StatusDropdown
-              status={config.status.current(entity)}
-              statusConfig={config.status.config}
-              onStatusChange={(newStatus) => config.status!.onChange(entity, newStatus)}
-              ariaLabel={`Change ${config.entityLabel.toLowerCase()} status`}
-            />
-          ) : undefined}
+          status={
+            config.status ? (
+              <StatusDropdown
+                status={config.status.current(entity)}
+                statusConfig={config.status.config}
+                onStatusChange={(newStatus) => config.status!.onChange(entity, newStatus)}
+                ariaLabel={`Change ${config.entityLabel.toLowerCase()} status`}
+              />
+            ) : undefined
+          }
           subtitle={subtitleText || undefined}
           meta={visibleMeta}
           actions={actionsNode}
@@ -232,15 +236,21 @@ export function MetaItem({
   return (
     <div className="meta-item">
       <span className="field-label">{label}</span>
-      {children || (
-        onClick ? (
-          <a href="#" className="meta-value panel-link" onClick={(e) => { e.preventDefault(); onClick(); }}>
+      {children ||
+        (onClick ? (
+          <a
+            href="#"
+            className="meta-value panel-link"
+            onClick={(e) => {
+              e.preventDefault();
+              onClick();
+            }}
+          >
             {value}
           </a>
         ) : (
           <span className="meta-value">{value}</span>
-        )
-      )}
+        ))}
     </div>
   );
 }
@@ -263,7 +273,12 @@ export function MetaGrid({
     <>
       <div className="project-detail-meta">
         {visibleFields.map((field) => (
-          <MetaItem key={field.label} label={field.label} value={field.value} onClick={field.onClick}>
+          <MetaItem
+            key={field.label}
+            label={field.label}
+            value={field.value}
+            onClick={field.onClick}
+          >
             {field.render}
           </MetaItem>
         ))}

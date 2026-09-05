@@ -70,11 +70,7 @@ const PRIORITY_COLORS: Record<Task['priority'], string> = {
   urgent: 'var(--status-danger)'
 };
 
-function filterTask(
-  task: Task,
-  filters: Record<string, string[]>,
-  search: string
-): boolean {
+function filterTask(task: Task, filters: Record<string, string[]>, search: string): boolean {
   if (search) {
     const query = search.toLowerCase();
     if (
@@ -89,12 +85,16 @@ function filterTask(
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(task.status)) return false;
+    if (!statusFilter.includes(task.status)) {
+      return false;
+    }
   }
 
   const priorityFilter = filters.priority;
   if (priorityFilter && priorityFilter.length > 0) {
-    if (!priorityFilter.includes(task.priority)) return false;
+    if (!priorityFilter.includes(task.priority)) {
+      return false;
+    }
   }
 
   return true;
@@ -105,32 +105,48 @@ function sortTasks(a: Task, b: Task, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'title':
-    return multiplier * a.title.toLowerCase().localeCompare(b.title.toLowerCase());
-  case 'status':
-    return multiplier * a.status.localeCompare(b.status);
-  case 'priority':
-    return multiplier * (PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
-  case 'assignee_name':
-    return multiplier * (a.assignee_name || '').toLowerCase().localeCompare((b.assignee_name || '').toLowerCase());
-  case 'due_date':
-    return multiplier * (a.due_date || '').localeCompare(b.due_date || '');
-  case 'created_at':
-    return multiplier * a.created_at.localeCompare(b.created_at);
-  default:
-    return 0;
+    case 'title':
+      return multiplier * a.title.toLowerCase().localeCompare(b.title.toLowerCase());
+    case 'status':
+      return multiplier * a.status.localeCompare(b.status);
+    case 'priority':
+      return multiplier * (PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
+    case 'assignee_name':
+      return (
+        multiplier *
+        (a.assignee_name || '').toLowerCase().localeCompare((b.assignee_name || '').toLowerCase())
+      );
+    case 'due_date':
+      return multiplier * (a.due_date || '').localeCompare(b.due_date || '');
+    case 'created_at':
+      return multiplier * a.created_at.localeCompare(b.created_at);
+    default:
+      return 0;
   }
 }
 
-export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getAuthToken, showNotification: _showNotification }: TasksManagerProps) {
+export function TasksManager({
+  clientId,
+  projectId,
+  assigneeId,
+  onNavigate,
+  getAuthToken,
+  showNotification: _showNotification
+}: TasksManagerProps) {
   const [viewMode, setViewMode] = React.useState<ViewMode>('list');
 
   // Build endpoint with query params
   const endpoint = useMemo(() => {
     const params = new URLSearchParams();
-    if (clientId) params.append('client_id', clientId);
-    if (projectId) params.append('project_id', projectId);
-    if (assigneeId) params.append('assignee_id', assigneeId);
+    if (clientId) {
+      params.append('client_id', clientId);
+    }
+    if (projectId) {
+      params.append('project_id', projectId);
+    }
+    if (assigneeId) {
+      params.append('assignee_id', assigneeId);
+    }
     const qs = params.toString();
     return qs ? `${API_ENDPOINTS.ADMIN.TASKS}?${qs}` : API_ENDPOINTS.ADMIN.TASKS;
   }, [clientId, projectId, assigneeId]);
@@ -164,7 +180,10 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
 
   const filteredTasks = useMemo(() => applyFilters(tasks), [applyFilters, tasks]);
 
-  const pagination = usePagination({ storageKey: 'admin_tasks_pagination', totalItems: filteredTasks.length });
+  const pagination = usePagination({
+    storageKey: 'admin_tasks_pagination',
+    totalItems: filteredTasks.length
+  });
   const paginatedTasks = filteredTasks.slice(
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
@@ -208,7 +227,9 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
   }
 
   function isOverdue(task: Task): boolean {
-    if (!task.due_date || task.status === 'completed') return false;
+    if (!task.due_date || task.status === 'completed') {
+      return false;
+    }
     return new Date(task.due_date) < new Date();
   }
 
@@ -224,7 +245,13 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
   }, [tasks]);
 
   function renderBoardView() {
-    const statusColumns: Task['status'][] = ['todo', 'in_progress', 'review', 'completed', 'blocked'];
+    const statusColumns: Task['status'][] = [
+      'todo',
+      'in_progress',
+      'review',
+      'completed',
+      'blocked'
+    ];
 
     return (
       <div className="kanban-board">
@@ -299,11 +326,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
       }
       actions={
         <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search tasks..."
-          />
+          <SearchFilter value={search} onChange={setSearch} placeholder="Search tasks..." />
           <FilterDropdown
             sections={TASKS_FILTER_CONFIG}
             values={filterValues}
@@ -325,7 +348,11 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
               <LayoutGrid className="icon-sm" />
             </button>
           </div>
-          <IconButton action="add" onClick={() => onNavigate?.('task-create')} title="Create Task" />
+          <IconButton
+            action="add"
+            onClick={() => onNavigate?.('task-create')}
+            title="Create Task"
+          />
         </>
       }
       pagination={
@@ -413,7 +440,9 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                         {task.tags.length > 0 && (
                           <div className="cell-tags">
                             {task.tags.slice(0, 3).map((tag) => (
-                              <span key={tag} className="tag-badge">{tag}</span>
+                              <span key={tag} className="tag-badge">
+                                {tag}
+                              </span>
                             ))}
                             {task.tags.length > 3 && (
                               <span className="tag-more">+{task.tags.length - 3}</span>
@@ -454,9 +483,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                   <PortalTableCell className="text-right">
                     <span className="text-secondary">
                       {task.actual_hours !== null ? `${task.actual_hours}` : ''}
-                      {task.estimated_hours !== null && (
-                        <span>/{task.estimated_hours}h</span>
-                      )}
+                      {task.estimated_hours !== null && <span>/{task.estimated_hours}h</span>}
                     </span>
                   </PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>

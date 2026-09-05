@@ -65,9 +65,7 @@ export function ContractSignModal({
   const [signingState, setSigningState] = useState<SigningState>('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const pdfUrl = contract.projectId
-    ? `/api/projects/${contract.projectId}/contract/pdf`
-    : null;
+  const pdfUrl = contract.projectId ? `/api/projects/${contract.projectId}/contract/pdf` : null;
 
   const canSubmit =
     signingState === 'idle' &&
@@ -75,38 +73,52 @@ export function ContractSignModal({
     signatureData !== null &&
     agreedToTerms;
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (!canSubmit) return;
+      if (!canSubmit) {
+        return;
+      }
 
-    setSigningState('submitting');
-    setErrorMessage('');
+      setSigningState('submitting');
+      setErrorMessage('');
 
-    try {
-      await portalFetch(`${API_ENDPOINTS.CONTRACTS}/sign`, {
-        method: 'POST',
-        body: {
-          contractId: contract.id,
-          signerName: signerName.trim(),
-          signatureData,
-          agreedToTerms
-        }
-      });
+      try {
+        await portalFetch(`${API_ENDPOINTS.CONTRACTS}/sign`, {
+          method: 'POST',
+          body: {
+            contractId: contract.id,
+            signerName: signerName.trim(),
+            signatureData,
+            agreedToTerms
+          }
+        });
 
-      setSigningState('success');
-      // Give user a moment to see success state, then close and refresh
-      setTimeout(() => {
-        onOpenChange(false);
-        onSigned();
-      }, 1500);
-    } catch (err) {
-      setSigningState('error');
-      setErrorMessage(
-        err instanceof Error ? err.message : 'Failed to sign contract. Please try again.'
-      );
-    }
-  }, [canSubmit, portalFetch, contract.id, signerName, signatureData, agreedToTerms, onOpenChange, onSigned]);
+        setSigningState('success');
+        // Give user a moment to see success state, then close and refresh
+        setTimeout(() => {
+          onOpenChange(false);
+          onSigned();
+        }, 1500);
+      } catch (err) {
+        setSigningState('error');
+        setErrorMessage(
+          err instanceof Error ? err.message : 'Failed to sign contract. Please try again.'
+        );
+      }
+    },
+    [
+      canSubmit,
+      portalFetch,
+      contract.id,
+      signerName,
+      signatureData,
+      agreedToTerms,
+      onOpenChange,
+      onSigned
+    ]
+  );
 
   // Reset state when modal opens
   React.useEffect(() => {
@@ -116,9 +128,7 @@ export function ContractSignModal({
       setAgreedToTerms(false);
       setSignatureData(null);
       setSignatureMode('draw');
-      setSignerName(
-        (user && 'contactName' in user ? user.contactName : '') || ''
-      );
+      setSignerName((user && 'contactName' in user ? user.contactName : '') || '');
     }
   }, [open, user]);
 
@@ -141,11 +151,7 @@ export function ContractSignModal({
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={!canSubmit}
-            >
+            <button type="submit" className="btn-primary" disabled={!canSubmit}>
               {signingState === 'submitting' ? (
                 <>
                   <Loader2 className="animate-spin" />
@@ -230,8 +236,8 @@ export function ContractSignModal({
               required
             />
             <label htmlFor="agree-terms-input">
-              I have read and agree to the terms outlined in the contract above. I understand
-              that by signing, I am entering into a legally binding agreement.
+              I have read and agree to the terms outlined in the contract above. I understand that
+              by signing, I am entering into a legally binding agreement.
             </label>
           </div>
         </>

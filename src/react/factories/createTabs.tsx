@@ -112,24 +112,24 @@ export function TabList<T extends string>({
       let nextIndex: number | null = null;
 
       switch (e.key) {
-      case 'ArrowRight':
-      case 'ArrowDown':
-        e.preventDefault();
-        nextIndex = (currentIndex + 1) % enabledTabs.length;
-        break;
-      case 'ArrowLeft':
-      case 'ArrowUp':
-        e.preventDefault();
-        nextIndex = (currentIndex - 1 + enabledTabs.length) % enabledTabs.length;
-        break;
-      case 'Home':
-        e.preventDefault();
-        nextIndex = 0;
-        break;
-      case 'End':
-        e.preventDefault();
-        nextIndex = enabledTabs.length - 1;
-        break;
+        case 'ArrowRight':
+        case 'ArrowDown':
+          e.preventDefault();
+          nextIndex = (currentIndex + 1) % enabledTabs.length;
+          break;
+        case 'ArrowLeft':
+        case 'ArrowUp':
+          e.preventDefault();
+          nextIndex = (currentIndex - 1 + enabledTabs.length) % enabledTabs.length;
+          break;
+        case 'Home':
+          e.preventDefault();
+          nextIndex = 0;
+          break;
+        case 'End':
+          e.preventDefault();
+          nextIndex = enabledTabs.length - 1;
+          break;
       }
 
       if (nextIndex !== null) {
@@ -155,7 +155,9 @@ export function TabList<T extends string>({
           <button
             key={tab.id}
             ref={(el) => {
-              if (el) tabRefs.current.set(tab.id, el);
+              if (el) {
+                tabRefs.current.set(tab.id, el);
+              }
             }}
             role="tab"
             id={`tab-${tab.id}`}
@@ -170,9 +172,7 @@ export function TabList<T extends string>({
           >
             {tab.label}
             {tab.badge !== undefined && tab.badge > 0 && (
-              <span className="portal-tab-badge">
-                {tab.badge > 99 ? '99+' : tab.badge}
-              </span>
+              <span className="portal-tab-badge">{tab.badge > 99 ? '99+' : tab.badge}</span>
             )}
           </button>
         );
@@ -209,13 +209,10 @@ export interface TabPanelProps {
  *   <OverviewTab {...props} />
  * </TabPanel>
  */
-export function TabPanel({
-  tabId,
-  isActive,
-  children,
-  className
-}: TabPanelProps) {
-  if (!isActive) return null;
+export function TabPanel({ tabId, isActive, children, className }: TabPanelProps) {
+  if (!isActive) {
+    return null;
+  }
 
   return (
     <div
@@ -278,22 +275,22 @@ export function SubtabList<T extends string>({
       let nextIndex: number | null = null;
 
       switch (e.key) {
-      case 'ArrowRight':
-        e.preventDefault();
-        nextIndex = (currentIndex + 1) % enabledTabs.length;
-        break;
-      case 'ArrowLeft':
-        e.preventDefault();
-        nextIndex = (currentIndex - 1 + enabledTabs.length) % enabledTabs.length;
-        break;
-      case 'Home':
-        e.preventDefault();
-        nextIndex = 0;
-        break;
-      case 'End':
-        e.preventDefault();
-        nextIndex = enabledTabs.length - 1;
-        break;
+        case 'ArrowRight':
+          e.preventDefault();
+          nextIndex = (currentIndex + 1) % enabledTabs.length;
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          nextIndex = (currentIndex - 1 + enabledTabs.length) % enabledTabs.length;
+          break;
+        case 'Home':
+          e.preventDefault();
+          nextIndex = 0;
+          break;
+        case 'End':
+          e.preventDefault();
+          nextIndex = enabledTabs.length - 1;
+          break;
       }
 
       if (nextIndex !== null) {
@@ -306,11 +303,7 @@ export function SubtabList<T extends string>({
   );
 
   return (
-    <div
-      className={cn('portal-subtabs', className)}
-      role="tablist"
-      aria-label={ariaLabel}
-    >
+    <div className={cn('portal-subtabs', className)} role="tablist" aria-label={ariaLabel}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
 
@@ -318,7 +311,9 @@ export function SubtabList<T extends string>({
           <button
             key={tab.id}
             ref={(el) => {
-              if (el) tabRefs.current.set(tab.id, el);
+              if (el) {
+                tabRefs.current.set(tab.id, el);
+              }
             }}
             role="tab"
             id={`subtab-${tab.id}`}
@@ -333,9 +328,7 @@ export function SubtabList<T extends string>({
           >
             {tab.label}
             {tab.badge !== undefined && tab.badge > 0 && (
-              <span className="portal-subtab-badge">
-                {tab.badge > 99 ? '99+' : tab.badge}
-              </span>
+              <span className="portal-subtab-badge">{tab.badge > 99 ? '99+' : tab.badge}</span>
             )}
           </button>
         );
@@ -362,13 +355,10 @@ export interface SubtabPanelProps {
 /**
  * SubtabPanel - Wrapper for subtab content with accessibility.
  */
-export function SubtabPanel({
-  tabId,
-  isActive,
-  children,
-  className
-}: SubtabPanelProps) {
-  if (!isActive) return null;
+export function SubtabPanel({ tabId, isActive, children, className }: SubtabPanelProps) {
+  if (!isActive) {
+    return null;
+  }
 
   return (
     <div
@@ -432,11 +422,7 @@ export function ViewToggle<T extends string>({
   ariaLabel = 'View mode'
 }: ViewToggleProps<T>) {
   return (
-    <div
-      className={cn('view-toggle', className)}
-      role="radiogroup"
-      aria-label={ariaLabel}
-    >
+    <div className={cn('view-toggle', className)} role="radiogroup" aria-label={ariaLabel}>
       {options.map((option) => {
         const isActive = value === option.id;
         const Icon = option.icon;
@@ -505,16 +491,16 @@ export interface UseTabsReturn<T extends string> {
  *   syncWithHash: true
  * });
  */
-export function useTabs<T extends string>(
-  options: UseTabsOptions<T>
-): UseTabsReturn<T> {
+export function useTabs<T extends string>(options: UseTabsOptions<T>): UseTabsReturn<T> {
   const { initialTab, onChange, syncWithHash = false } = options;
 
   // Get initial tab from URL hash if enabled
   const getInitialTab = (): T => {
     if (syncWithHash && typeof window !== 'undefined') {
       const hash = window.location.hash.slice(1) as T;
-      if (hash) return hash;
+      if (hash) {
+        return hash;
+      }
     }
     return initialTab;
   };
@@ -537,7 +523,9 @@ export function useTabs<T extends string>(
 
   // Listen for hash changes
   useEffect(() => {
-    if (!syncWithHash || typeof window === 'undefined') return;
+    if (!syncWithHash || typeof window === 'undefined') {
+      return;
+    }
 
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1) as T;
@@ -552,10 +540,7 @@ export function useTabs<T extends string>(
   }, [onChange, syncWithHash]);
 
   // Convenience helper
-  const isActive = useCallback(
-    (tabId: T) => activeTab === tabId,
-    [activeTab]
-  );
+  const isActive = useCallback((tabId: T) => activeTab === tabId, [activeTab]);
 
   return {
     activeTab,
@@ -666,9 +651,8 @@ export function Tabs<T extends string>({
 
   // Support controlled mode
   const currentTab = controlledActiveTab ?? activeTab;
-  const handleSetTab = controlledActiveTab !== undefined
-    ? (tabId: T) => onTabChange?.(tabId)
-    : setActiveTab;
+  const handleSetTab =
+    controlledActiveTab !== undefined ? (tabId: T) => onTabChange?.(tabId) : setActiveTab;
 
   // Render content based on children type
   const renderContent = () => {
@@ -691,11 +675,7 @@ export function Tabs<T extends string>({
         className={tabListClassName}
         ariaLabel={ariaLabel}
       />
-      <TabPanel
-        tabId={currentTab}
-        isActive={true}
-        className={tabPanelClassName}
-      >
+      <TabPanel tabId={currentTab} isActive={true} className={tabPanelClassName}>
         {renderContent()}
       </TabPanel>
     </div>
@@ -717,9 +697,7 @@ export function Tabs<T extends string>({
  *
  * type MyTab = typeof TABS[number]['id']; // 'overview' | 'files'
  */
-export function createTabs<T extends string>(
-  tabs: ReadonlyArray<TabItem<T>>
-): Array<TabItem<T>> {
+export function createTabs<T extends string>(tabs: ReadonlyArray<TabItem<T>>): Array<TabItem<T>> {
   return [...tabs];
 }
 
@@ -732,9 +710,7 @@ export function createTabs<T extends string>(
  *   files: FolderOpen
  * });
  */
-export function createTabIcons<T extends string>(
-  icons: TabIconMap<T>
-): TabIconMap<T> {
+export function createTabIcons<T extends string>(icons: TabIconMap<T>): TabIconMap<T> {
   return icons;
 }
 

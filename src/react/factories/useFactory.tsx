@@ -55,11 +55,11 @@ export function useButtonFactory(options: UseButtonFactoryOptions = {}) {
       const { action, dataId, show = true, ...rest } = config;
       const buttonContext = config.context ?? context;
 
-      if (!show) return null;
+      if (!show) {
+        return null;
+      }
 
-      const handleClick = onClick
-        ? (e: React.MouseEvent) => onClick(action, dataId, e)
-        : undefined;
+      const handleClick = onClick ? (e: React.MouseEvent) => onClick(action, dataId, e) : undefined;
 
       return (
         <IconButton
@@ -80,9 +80,7 @@ export function useButtonFactory(options: UseButtonFactoryOptions = {}) {
    */
   const renderButtons = useCallback(
     (configs: ButtonConfig[]) => {
-      return configs
-        .filter(cfg => cfg.show !== false)
-        .map(cfg => renderButton(cfg));
+      return configs.filter((cfg) => cfg.show !== false).map((cfg) => renderButton(cfg));
     },
     [renderButton]
   );
@@ -93,13 +91,11 @@ export function useButtonFactory(options: UseButtonFactoryOptions = {}) {
   const renderButtonGroup = useCallback(
     (configs: ButtonConfig[], wrapperClass?: string) => {
       const buttons = renderButtons(configs);
-      if (buttons.length === 0) return null;
+      if (buttons.length === 0) {
+        return null;
+      }
 
-      return (
-        <TableActions className={wrapperClass}>
-          {buttons}
-        </TableActions>
-      );
+      return <TableActions className={wrapperClass}>{buttons}</TableActions>;
     },
     [renderButtons]
   );
@@ -213,8 +209,8 @@ export function useTableActions<T extends { id: string | number }>(
   const renderActions = useCallback(
     (id: string | number, row?: T) => {
       const configs = actions.map(({ action, show, disabled }) => {
-        const isVisible = typeof show === 'function' ? show(row) : show ?? true;
-        const isDisabled = typeof disabled === 'function' ? disabled(row) : disabled ?? false;
+        const isVisible = typeof show === 'function' ? show(row) : (show ?? true);
+        const isDisabled = typeof disabled === 'function' ? disabled(row) : (disabled ?? false);
 
         return {
           action,
@@ -260,17 +256,10 @@ export function useButtonSet(options: UseButtonSetOptions = {}) {
   const { renderButtons } = useButtonFactory({ context, onClick });
 
   const renderSet = useCallback(
-    <T extends ButtonSetName>(
-      setName: T,
-      ...args: Parameters<(typeof BUTTON_SETS)[T]>
-    ) => {
+    <T extends ButtonSetName>(setName: T, ...args: Parameters<(typeof BUTTON_SETS)[T]>) => {
       const setFn = BUTTON_SETS[setName] as (...args: unknown[]) => ButtonConfig[];
       const configs = setFn(...args);
-      return (
-        <TableActions>
-          {renderButtons(configs)}
-        </TableActions>
-      );
+      return <TableActions>{renderButtons(configs)}</TableActions>;
     },
     [renderButtons]
   );
@@ -333,8 +322,12 @@ export function useConditionalActions<T extends { id: string | number }>(
 
   const resolveCondition = useCallback(
     (condition: ActionCondition<T> | undefined, row: T, defaultValue: boolean): boolean => {
-      if (condition === undefined) return defaultValue;
-      if (typeof condition === 'function') return condition(row);
+      if (condition === undefined) {
+        return defaultValue;
+      }
+      if (typeof condition === 'function') {
+        return condition(row);
+      }
       return condition;
     },
     []
@@ -354,12 +347,14 @@ export function useConditionalActions<T extends { id: string | number }>(
         })
       );
 
-      const visibleConfigs = configs.filter(cfg => cfg.show !== false);
-      if (visibleConfigs.length === 0) return null;
+      const visibleConfigs = configs.filter((cfg) => cfg.show !== false);
+      if (visibleConfigs.length === 0) {
+        return null;
+      }
 
       return (
         <TableActions>
-          {visibleConfigs.map(config => (
+          {visibleConfigs.map((config) => (
             <IconButton
               key={`${config.action}-${config.dataId}`}
               action={config.action}

@@ -1,9 +1,6 @@
 import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
-import {
-  ClipboardList,
-  Inbox
-} from 'lucide-react';
+import { ClipboardList, Inbox } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -83,7 +80,9 @@ const QUESTIONNAIRE_STATUS_CONFIG: Record<string, { label: string }> = {
 
 // Capitalize status label (fallback for unknown statuses)
 function getStatusLabel(status: string | undefined | null): string {
-  if (!status) return 'Unknown';
+  if (!status) {
+    return 'Unknown';
+  }
   if (QUESTIONNAIRE_STATUS_CONFIG[status]) {
     return QUESTIONNAIRE_STATUS_CONFIG[status].label;
   }
@@ -101,13 +100,18 @@ function filterQuestionnaire(
     const matchesSearch =
       questionnaire.title.toLowerCase().includes(searchLower) ||
       questionnaire.client_name.toLowerCase().includes(searchLower) ||
-      (questionnaire.project_name && questionnaire.project_name.toLowerCase().includes(searchLower));
-    if (!matchesSearch) return false;
+      (questionnaire.project_name &&
+        questionnaire.project_name.toLowerCase().includes(searchLower));
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(questionnaire.status)) return false;
+    if (!statusFilter.includes(questionnaire.status)) {
+      return false;
+    }
   }
 
   return true;
@@ -119,33 +123,47 @@ function sortQuestionnaires(a: Questionnaire, b: Questionnaire, sort: SortConfig
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'title':
-    return multiplier * a.title.localeCompare(b.title);
-  case 'client_name':
-    return multiplier * a.client_name.localeCompare(b.client_name);
-  case 'status':
-    return multiplier * a.status.localeCompare(b.status);
-  case 'due_date':
-    return multiplier * ((a.due_date || '').localeCompare(b.due_date || ''));
-  case 'completion_rate':
-    return multiplier * (a.completion_rate - b.completion_rate);
-  case 'created_at':
-    return multiplier * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-  default:
-    return 0;
+    case 'title':
+      return multiplier * a.title.localeCompare(b.title);
+    case 'client_name':
+      return multiplier * a.client_name.localeCompare(b.client_name);
+    case 'status':
+      return multiplier * a.status.localeCompare(b.status);
+    case 'due_date':
+      return multiplier * (a.due_date || '').localeCompare(b.due_date || '');
+    case 'completion_rate':
+      return multiplier * (a.completion_rate - b.completion_rate);
+    case 'created_at':
+      return multiplier * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    default:
+      return 0;
   }
 }
 
-export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNotification: _showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: QuestionnairesTableProps) {
+export function QuestionnairesTable({
+  clientId,
+  projectId,
+  getAuthToken,
+  showNotification: _showNotification,
+  onNavigate,
+  defaultPageSize = 25,
+  overviewMode = false
+}: QuestionnairesTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
   // Build endpoint URL with query params — fetches responses (not templates)
   const endpoint = useMemo(() => {
     const params = new URLSearchParams();
-    if (clientId) params.append('client_id', clientId);
-    if (projectId) params.append('project_id', projectId);
+    if (clientId) {
+      params.append('client_id', clientId);
+    }
+    if (projectId) {
+      params.append('project_id', projectId);
+    }
     const query = params.toString();
-    return query ? `${API_ENDPOINTS.QUESTIONNAIRES_RESPONSES}?${query}` : API_ENDPOINTS.QUESTIONNAIRES_RESPONSES;
+    return query
+      ? `${API_ENDPOINTS.QUESTIONNAIRES_RESPONSES}?${query}`
+      : API_ENDPOINTS.QUESTIONNAIRES_RESPONSES;
   }, [clientId, projectId]);
 
   // Data fetching via useListFetch
@@ -176,7 +194,10 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
   });
 
   // Apply filters
-  const filteredQuestionnaires = useMemo(() => applyFilters(questionnaires), [applyFilters, questionnaires]);
+  const filteredQuestionnaires = useMemo(
+    () => applyFilters(questionnaires),
+    [applyFilters, questionnaires]
+  );
 
   const { exportCsv, isExporting } = useExport({
     config: QUESTIONNAIRES_EXPORT_CONFIG,
@@ -205,43 +226,62 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
   });
 
   // Status change handler
-  const handleStatusChange = useCallback(async (questionnaireId: number, newStatus: string) => {
-    await executeUpdateWithToast(
-      'questionnaire status',
-      () => apiFetch(buildEndpoint.questionnaire(questionnaireId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      }),
-      () => setData((prev) => prev ? {
-        ...prev,
-        items: prev.items.map((q) =>
-          q.id === questionnaireId
-            ? { ...q, status: newStatus as Questionnaire['status'] }
-            : q
-        )
-      } : prev)
-    );
-  }, [setData]);
+  const handleStatusChange = useCallback(
+    async (questionnaireId: number, newStatus: string) => {
+      await executeUpdateWithToast(
+        'questionnaire status',
+        () =>
+          apiFetch(buildEndpoint.questionnaire(questionnaireId), {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+          }),
+        () =>
+          setData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  items: prev.items.map((q) =>
+                    q.id === questionnaireId
+                      ? { ...q, status: newStatus as Questionnaire['status'] }
+                      : q
+                  )
+                }
+              : prev
+          )
+      );
+    },
+    [setData]
+  );
 
-  const handleSendQuestionnaire = useCallback(async (id: number) => {
-    await executeWithToast(
-      () => apiPost(buildEndpoint.questionnaireSend(id)),
-      { success: 'Questionnaire sent', error: 'Failed to send questionnaire' },
-      () => refetch()
-    );
-  }, [refetch]);
+  const handleSendQuestionnaire = useCallback(
+    async (id: number) => {
+      await executeWithToast(
+        () => apiPost(buildEndpoint.questionnaireSend(id)),
+        { success: 'Questionnaire sent', error: 'Failed to send questionnaire' },
+        () => refetch()
+      );
+    },
+    [refetch]
+  );
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
     const ids = selection.selectedItems.map((q) => q.id);
     await executeWithToast(
       () => apiPost(API_ENDPOINTS.QUESTIONNAIRES_BULK_DELETE, { ids }),
-      { success: `Deleted ${ids.length} questionnaire${ids.length !== 1 ? 's' : ''}`, error: 'Failed to delete questionnaires' },
+      {
+        success: `Deleted ${ids.length} questionnaire${ids.length !== 1 ? 's' : ''}`,
+        error: 'Failed to delete questionnaires'
+      },
       () => {
-        setData((prev) => prev ? { ...prev, items: prev.items.filter((q) => !ids.includes(q.id)) } : prev);
+        setData((prev) =>
+          prev ? { ...prev, items: prev.items.filter((q) => !ids.includes(q.id)) } : prev
+        );
         selection.clearSelection();
       }
     );
@@ -261,7 +301,9 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
   // Handle bulk status change
   const handleBulkStatusChange = useCallback(
     async (newStatus: string) => {
-      if (selection.selectedCount === 0) return;
+      if (selection.selectedCount === 0) {
+        return;
+      }
 
       for (const q of selection.selectedItems) {
         await handleStatusChange(q.id, newStatus);
@@ -280,7 +322,9 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
   );
 
   function isOverdue(questionnaire: Questionnaire): boolean {
-    if (!questionnaire.due_date || questionnaire.status === 'completed') return false;
+    if (!questionnaire.due_date || questionnaire.status === 'completed') {
+      return false;
+    }
     return new Date(questionnaire.due_date) < new Date();
   }
 
@@ -290,9 +334,10 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
     const sent = questionnaires.filter((q) => q.status === 'sent').length;
     const inProgress = questionnaires.filter((q) => q.status === 'in_progress').length;
     const completed = questionnaires.filter((q) => q.status === 'completed').length;
-    const avgCompletion = total > 0
-      ? Math.round(questionnaires.reduce((sum, q) => sum + q.completion_rate, 0) / total)
-      : 0;
+    const avgCompletion =
+      total > 0
+        ? Math.round(questionnaires.reduce((sum, q) => sum + q.completion_rate, 0) / total)
+        : 0;
 
     return { total, draft, sent, inProgress, completed, avgCompletion };
   }, [questionnaires]);
@@ -355,7 +400,11 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
               disabled={isExporting || filteredQuestionnaires.length === 0}
               title="Export to CSV"
             />
-            <IconButton action="add" title="Create Questionnaire" onClick={() => onNavigate?.('questionnaire-create')} />
+            <IconButton
+              action="add"
+              title="Create Questionnaire"
+              onClick={() => onNavigate?.('questionnaire-create')}
+            />
           </>
         }
         bulkActions={
@@ -364,7 +413,9 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
             totalCount={filteredQuestionnaires.length}
             onClearSelection={selection.clearSelection}
             onSelectAll={() => selection.selectMany(filteredQuestionnaires)}
-            allSelected={selection.allSelected && selection.selectedCount === filteredQuestionnaires.length}
+            allSelected={
+              selection.allSelected && selection.selectedCount === filteredQuestionnaires.length
+            }
             statusOptions={bulkStatusOptions}
             onStatusChange={handleBulkStatusChange}
             onDelete={handleBulkDelete}
@@ -404,7 +455,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                 sortDirection={sort?.column === 'title' ? sort.direction : null}
                 onClick={() => toggleSort('title')}
               >
-              Questionnaire
+                Questionnaire
               </PortalTableHead>
               <PortalTableHead className="client-col">Client</PortalTableHead>
               <PortalTableHead className="status-col">Status</PortalTableHead>
@@ -414,7 +465,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                 sortDirection={sort?.column === 'due_date' ? sort.direction : null}
                 onClick={() => toggleSort('due_date')}
               >
-              Due Date
+                Due Date
               </PortalTableHead>
               <PortalTableHead className="progress-col">Progress</PortalTableHead>
               <PortalTableHead className="col-actions">Actions</PortalTableHead>
@@ -430,7 +481,11 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
               <PortalTableEmpty
                 colSpan={7}
                 icon={<Inbox />}
-                message={hasActiveFilters ? 'No questionnaires match your filters' : 'No questionnaires yet'}
+                message={
+                  hasActiveFilters
+                    ? 'No questionnaires match your filters'
+                    : 'No questionnaires yet'
+                }
               />
             ) : (
               paginatedQuestionnaires.map((questionnaire) => (
@@ -452,7 +507,9 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                       <ClipboardList className="icon-sm" />
                       <div className="cell-content">
                         <span className="cell-title">
-                          {decodeHtmlEntities(questionnaire.questionnaire_name || questionnaire.title)}
+                          {decodeHtmlEntities(
+                            questionnaire.questionnaire_name || questionnaire.title
+                          )}
                         </span>
                         {questionnaire.project_name && (
                           <span className="cell-subtitle">
@@ -523,7 +580,9 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                       )}
                       <IconButton
                         action="view"
-                        onClick={() => onNavigate?.('questionnaire-detail', String(questionnaire.id))}
+                        onClick={() =>
+                          onNavigate?.('questionnaire-detail', String(questionnaire.id))
+                        }
                       />
                     </div>
                   </PortalTableCell>

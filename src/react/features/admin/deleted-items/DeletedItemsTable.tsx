@@ -104,13 +104,17 @@ function filterDeletedItem(
       item.name.toLowerCase().includes(query) ||
       item.description?.toLowerCase().includes(query) ||
       item.type.toLowerCase().includes(query);
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   // Type filter
   const typeFilter = filters.type;
   if (typeFilter && typeFilter.length > 0) {
-    if (!typeFilter.includes(item.type)) return false;
+    if (!typeFilter.includes(item.type)) {
+      return false;
+    }
   }
 
   return true;
@@ -122,29 +126,37 @@ function sortDeletedItems(a: DeletedItem, b: DeletedItem, sort: SortConfig): num
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'name':
-    return a.name.localeCompare(b.name) * multiplier;
-  case 'type':
-    return a.type.localeCompare(b.type) * multiplier;
-  case 'deletedAt':
-    return (new Date(a.deletedAt).getTime() - new Date(b.deletedAt).getTime()) * multiplier;
-  case 'expiresAt':
-    return (new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime()) * multiplier;
-  default:
-    return 0;
+    case 'name':
+      return a.name.localeCompare(b.name) * multiplier;
+    case 'type':
+      return a.type.localeCompare(b.type) * multiplier;
+    case 'deletedAt':
+      return (new Date(a.deletedAt).getTime() - new Date(b.deletedAt).getTime()) * multiplier;
+    case 'expiresAt':
+      return (new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime()) * multiplier;
+    default:
+      return 0;
   }
 }
 
-export function DeletedItemsTable({ getAuthToken, showNotification: _showNotification, onNavigate: _onNavigate, defaultPageSize = 25, overviewMode = false }: DeletedItemsTableProps) {
+export function DeletedItemsTable({
+  getAuthToken,
+  showNotification: _showNotification,
+  onNavigate: _onNavigate,
+  defaultPageSize = 25,
+  overviewMode = false
+}: DeletedItemsTableProps) {
   const containerRef = useFadeIn();
 
   // Fetch deleted items via factory hook
-  const { data, isLoading, error, refetch, setData } = useListFetch<DeletedItem, DeletedItemsStats>({
-    endpoint: API_ENDPOINTS.ADMIN.DELETED_ITEMS,
-    getAuthToken,
-    defaultStats: DEFAULT_STATS,
-    itemsKey: 'items'
-  });
+  const { data, isLoading, error, refetch, setData } = useListFetch<DeletedItem, DeletedItemsStats>(
+    {
+      endpoint: API_ENDPOINTS.ADMIN.DELETED_ITEMS,
+      getAuthToken,
+      defaultStats: DEFAULT_STATS,
+      itemsKey: 'items'
+    }
+  );
   const items = useMemo(() => data?.items ?? [], [data]);
   const stats = useMemo(() => data?.stats ?? DEFAULT_STATS, [data]);
 
@@ -195,28 +207,40 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
     [setFilter]
   );
 
-  const handleRestore = useCallback(async (itemId: string) => {
-    await executeWithToast(
-      () => apiPost(buildEndpoint.adminDeletedItemRestore(itemId)),
-      { success: 'Item restored', error: 'Failed to restore item' },
-      () => setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => item.id !== itemId) } : prev)
-    );
-  }, [setData]);
+  const handleRestore = useCallback(
+    async (itemId: string) => {
+      await executeWithToast(
+        () => apiPost(buildEndpoint.adminDeletedItemRestore(itemId)),
+        { success: 'Item restored', error: 'Failed to restore item' },
+        () =>
+          setData((prev) =>
+            prev ? { ...prev, items: prev.items.filter((item) => item.id !== itemId) } : prev
+          )
+      );
+    },
+    [setData]
+  );
 
-  const handlePermanentDelete = useCallback(async (itemId: string) => {
-    if (
-      !confirm(
-        'Are you sure you want to permanently delete this item? This action cannot be undone.'
-      )
-    ) {
-      return;
-    }
-    await executeDeleteWithToast(
-      'item',
-      () => apiDelete(buildEndpoint.adminDeletedItem(itemId)),
-      () => setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => item.id !== itemId) } : prev)
-    );
-  }, [setData]);
+  const handlePermanentDelete = useCallback(
+    async (itemId: string) => {
+      if (
+        !confirm(
+          'Are you sure you want to permanently delete this item? This action cannot be undone.'
+        )
+      ) {
+        return;
+      }
+      await executeDeleteWithToast(
+        'item',
+        () => apiDelete(buildEndpoint.adminDeletedItem(itemId)),
+        () =>
+          setData((prev) =>
+            prev ? { ...prev, items: prev.items.filter((item) => item.id !== itemId) } : prev
+          )
+      );
+    },
+    [setData]
+  );
 
   const handleEmptyTrash = useCallback(async () => {
     if (
@@ -229,17 +253,17 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
     await executeWithToast(
       () => apiDelete(API_ENDPOINTS.ADMIN.DELETED_ITEMS_EMPTY),
       { success: 'Trash emptied', error: 'Failed to empty trash' },
-      () => setData((prev) => prev ? { ...prev, items: [] } : prev)
+      () => setData((prev) => (prev ? { ...prev, items: [] } : prev))
     );
   }, [setData]);
 
   // Bulk restore
   const handleBulkRestore = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
-    if (
-      !confirm(`Are you sure you want to restore ${selection.selectedCount} item(s)?`)
-    ) {
+    if (!confirm(`Are you sure you want to restore ${selection.selectedCount} item(s)?`)) {
       return;
     }
 
@@ -247,9 +271,16 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
     const ids = Array.from(selection.selectedIds);
     await executeWithToast(
       () => apiPost(API_ENDPOINTS.ADMIN.DELETED_ITEMS_BULK_RESTORE, { ids }),
-      { success: `Restored ${ids.length} item${ids.length !== 1 ? 's' : ''}`, error: 'Failed to restore items' },
+      {
+        success: `Restored ${ids.length} item${ids.length !== 1 ? 's' : ''}`,
+        error: 'Failed to restore items'
+      },
       () => {
-        setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => !selection.selectedIds.has(item.id)) } : prev);
+        setData((prev) =>
+          prev
+            ? { ...prev, items: prev.items.filter((item) => !selection.selectedIds.has(item.id)) }
+            : prev
+        );
         selection.clearSelection();
       }
     );
@@ -258,7 +289,9 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
 
   // Bulk permanent delete
   const handleBulkDelete = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
     if (
       !confirm(
@@ -272,9 +305,16 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
     const ids = Array.from(selection.selectedIds);
     await executeWithToast(
       () => apiDelete(API_ENDPOINTS.ADMIN.DELETED_ITEMS_BULK_DELETE),
-      { success: `Deleted ${ids.length} item${ids.length !== 1 ? 's' : ''}`, error: 'Failed to delete items' },
+      {
+        success: `Deleted ${ids.length} item${ids.length !== 1 ? 's' : ''}`,
+        error: 'Failed to delete items'
+      },
       () => {
-        setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => !selection.selectedIds.has(item.id)) } : prev);
+        setData((prev) =>
+          prev
+            ? { ...prev, items: prev.items.filter((item) => !selection.selectedIds.has(item.id)) }
+            : prev
+        );
         selection.clearSelection();
       }
     );
@@ -289,12 +329,16 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
   }
 
   function getDaysUntilExpiry(expiresAt: string): string {
-    const days = Math.ceil(
-      (new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-    );
-    if (days < 0) return 'Expired';
-    if (days === 0) return 'Today';
-    if (days === 1) return '1 day';
+    const days = Math.ceil((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    if (days < 0) {
+      return 'Expired';
+    }
+    if (days === 0) {
+      return 'Today';
+    }
+    if (days === 1) {
+      return '1 day';
+    }
     return `${days} days`;
   }
 
@@ -328,11 +372,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
       }
       actions={
         <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search deleted items..."
-          />
+          <SearchFilter value={search} onChange={setSearch} placeholder="Search deleted items..." />
           <FilterDropdown
             sections={filterSections}
             values={filterValues}
@@ -375,8 +415,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
           <div className="table-warning-banner">
             <AlertTriangle className="icon-sm" />
             <span>
-              {stats.expiringIn7Days} item(s) will be permanently deleted within the next 7
-              days.
+              {stats.expiringIn7Days} item(s) will be permanently deleted within the next 7 days.
             </span>
           </div>
         ) : undefined
@@ -404,7 +443,9 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
           <PortalTableRow>
             <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
               <Checkbox
-                checked={selection.allSelected ? true : selection.someSelected ? 'indeterminate' : false}
+                checked={
+                  selection.allSelected ? true : selection.someSelected ? 'indeterminate' : false
+                }
                 onCheckedChange={selection.toggleSelectAll}
                 aria-label="Select all"
               />
@@ -415,7 +456,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
               sortDirection={sort?.column === 'name' ? sort.direction : null}
               onClick={() => toggleSort('name')}
             >
-                Item
+              Item
             </PortalTableHead>
             <PortalTableHead
               className="type-col"
@@ -423,7 +464,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
               sortDirection={sort?.column === 'type' ? sort.direction : null}
               onClick={() => toggleSort('type')}
             >
-                Type
+              Type
             </PortalTableHead>
             <PortalTableHead className="user-col">Deleted By</PortalTableHead>
             <PortalTableHead
@@ -432,7 +473,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
               sortDirection={sort?.column === 'deletedAt' ? sort.direction : null}
               onClick={() => toggleSort('deletedAt')}
             >
-                Deleted
+              Deleted
             </PortalTableHead>
             <PortalTableHead
               className="date-col"
@@ -440,7 +481,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
               sortDirection={sort?.column === 'expiresAt' ? sort.direction : null}
               onClick={() => toggleSort('expiresAt')}
             >
-                Expires In
+              Expires In
             </PortalTableHead>
             <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
@@ -459,14 +500,8 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
             />
           ) : (
             paginatedItems.map((item) => (
-              <PortalTableRow
-                key={item.id}
-                selected={selection.isSelected(item)}
-              >
-                <PortalTableCell
-                  className="col-checkbox"
-                  onClick={(e) => e.stopPropagation()}
-                >
+              <PortalTableRow key={item.id} selected={selection.isSelected(item)}>
+                <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selection.isSelected(item)}
                     onCheckedChange={() => selection.toggleSelection(item)}
@@ -486,9 +521,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
                 </PortalTableCell>
                 <PortalTableCell className="type-cell">{item.type}</PortalTableCell>
                 <PortalTableCell className="user-cell">{item.deletedBy}</PortalTableCell>
-                <PortalTableCell className="date-col">
-                  {formatDate(item.deletedAt)}
-                </PortalTableCell>
+                <PortalTableCell className="date-col">{formatDate(item.deletedAt)}</PortalTableCell>
                 <PortalTableCell className="date-col">
                   <span className={cn(isExpiringSoon(item.expiresAt) && 'text-danger')}>
                     <span className="cell-with-icon">
@@ -499,10 +532,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
                 </PortalTableCell>
                 <PortalTableCell className="col-actions">
                   <div className="action-group">
-                    <IconButton
-                      action="restore"
-                      onClick={() => handleRestore(item.id)}
-                    />
+                    <IconButton action="restore" onClick={() => handleRestore(item.id)} />
                     <IconButton
                       action="delete"
                       title="Delete Permanently"

@@ -107,17 +107,15 @@ interface ClientOption {
 // Filter / Sort helpers
 // ============================================
 
-function filterSurvey(
-  survey: Survey,
-  filters: Record<string, string[]>,
-  search: string
-): boolean {
+function filterSurvey(survey: Survey, filters: Record<string, string[]>, search: string): boolean {
   if (search) {
     const term = search.toLowerCase();
     const matches =
       survey.clientName?.toLowerCase().includes(term) ||
       survey.projectName?.toLowerCase().includes(term);
-    if (!matches) return false;
+    if (!matches) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
@@ -134,8 +132,10 @@ function filterSurvey(
 }
 
 function sortSurveys(a: Survey, b: Survey): number {
-  return new Date(b.sent_at || b.completed_at || '').getTime() -
-         new Date(a.sent_at || a.completed_at || '').getTime();
+  return (
+    new Date(b.sent_at || b.completed_at || '').getTime() -
+    new Date(a.sent_at || a.completed_at || '').getTime()
+  );
 }
 
 // ============================================
@@ -143,7 +143,9 @@ function sortSurveys(a: Survey, b: Survey): number {
 // ============================================
 
 function renderStars(rating: number | null | undefined): React.ReactNode {
-  if (rating == null) return '—';
+  if (rating == null) {
+    return '—';
+  }
   return (
     <span className="star-rating" title={`${rating}/5`}>
       {Array.from({ length: TOTAL_STARS }, (_, i) => (
@@ -178,20 +180,14 @@ export function FeedbackTable() {
   });
 
   // Filters
-  const {
-    filterValues,
-    setFilter,
-    search,
-    setSearch,
-    applyFilters,
-    hasActiveFilters
-  } = useTableFilters<Survey>({
-    storageKey: 'admin_feedback',
-    filters: FILTER_CONFIG,
-    filterFn: filterSurvey,
-    sortFn: sortSurveys,
-    defaultSort: { column: 'date', direction: 'desc' }
-  });
+  const { filterValues, setFilter, search, setSearch, applyFilters, hasActiveFilters } =
+    useTableFilters<Survey>({
+      storageKey: 'admin_feedback',
+      filters: FILTER_CONFIG,
+      filterFn: filterSurvey,
+      sortFn: sortSurveys,
+      defaultSort: { column: 'date', direction: 'desc' }
+    });
 
   // Fetch surveys
   const fetchSurveys = useCallback(async () => {
@@ -199,7 +195,9 @@ export function FeedbackTable() {
     setError(null);
     try {
       const res = await apiFetch(API_ENDPOINTS.FEEDBACK_SURVEYS);
-      if (!res.ok) throw new Error('Failed to load surveys');
+      if (!res.ok) {
+        throw new Error('Failed to load surveys');
+      }
       const json = await res.json();
       setSurveys(json.data?.surveys || json.surveys || []);
     } catch (err) {
@@ -211,21 +209,28 @@ export function FeedbackTable() {
 
   // Fetch clients for send form
   const fetchClients = useCallback(async () => {
-    if (fetchedClients.current) return;
+    if (fetchedClients.current) {
+      return;
+    }
     fetchedClients.current = true;
     try {
       const res = await apiFetch(API_ENDPOINTS.CLIENTS);
       if (res.ok) {
         const json = await res.json();
-        const list = (json.data?.clients || json.clients || []) as Array<{ id: number; name: string }>;
-        setClients(list.map(c => ({ value: String(c.id), label: c.name })));
+        const list = (json.data?.clients || json.clients || []) as Array<{
+          id: number;
+          name: string;
+        }>;
+        setClients(list.map((c) => ({ value: String(c.id), label: c.name })));
       }
     } catch {
       // Non-critical
     }
   }, []);
 
-  useEffect(() => { fetchSurveys(); }, [fetchSurveys]);
+  useEffect(() => {
+    fetchSurveys();
+  }, [fetchSurveys]);
 
   const filteredSurveys = useMemo(() => applyFilters(surveys), [applyFilters, surveys]);
 
@@ -244,12 +249,14 @@ export function FeedbackTable() {
   // Stats
   const stats = useMemo(() => {
     const total = surveys.length;
-    const completed = surveys.filter(s => s.status === 'completed').length;
-    const pending = surveys.filter(s => s.status === 'sent').length;
-    const withRating = surveys.filter(s => s.response?.overall_rating);
-    const avgRating = withRating.length > 0
-      ? withRating.reduce((sum, s) => sum + (s.response?.overall_rating || 0), 0) / withRating.length
-      : 0;
+    const completed = surveys.filter((s) => s.status === 'completed').length;
+    const pending = surveys.filter((s) => s.status === 'sent').length;
+    const withRating = surveys.filter((s) => s.response?.overall_rating);
+    const avgRating =
+      withRating.length > 0
+        ? withRating.reduce((sum, s) => sum + (s.response?.overall_rating || 0), 0) /
+          withRating.length
+        : 0;
 
     return [
       { value: total, label: 'total' },
@@ -288,7 +295,7 @@ export function FeedbackTable() {
   }, [sendForm, fetchSurveys]);
 
   const handleOpenSend = useCallback(() => {
-    setShowSendForm(prev => !prev);
+    setShowSendForm((prev) => !prev);
     fetchClients();
   }, [fetchClients]);
 
@@ -296,19 +303,10 @@ export function FeedbackTable() {
     <TableLayout
       containerRef={containerRef as React.RefObject<HTMLDivElement>}
       title="FEEDBACK SURVEYS"
-      stats={
-        <TableStats
-          items={stats}
-          tooltip={`${surveys.length} Surveys`}
-        />
-      }
+      stats={<TableStats items={stats} tooltip={`${surveys.length} Surveys`} />}
       actions={
         <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search surveys..."
-          />
+          <SearchFilter value={search} onChange={setSearch} placeholder="Search surveys..." />
           <FilterDropdown
             sections={FILTER_CONFIG}
             values={{
@@ -317,11 +315,7 @@ export function FeedbackTable() {
             }}
             onChange={(key, value) => setFilter(key, value)}
           />
-          <IconButton
-            action="add"
-            onClick={handleOpenSend}
-            title="Send survey"
-          />
+          <IconButton action="add" onClick={handleOpenSend} title="Send survey" />
           <IconButton
             action="refresh"
             onClick={fetchSurveys}
@@ -353,30 +347,38 @@ export function FeedbackTable() {
         <div className="inline-create-form">
           <div className="inline-form-grid">
             <div className="form-field">
-              <label className="form-label" htmlFor="survey-client">Client</label>
+              <label className="form-label" htmlFor="survey-client">
+                Client
+              </label>
               <select
                 id="survey-client"
                 className="form-input"
                 value={sendForm.clientId}
-                onChange={e => setSendForm(prev => ({ ...prev, clientId: e.target.value }))}
+                onChange={(e) => setSendForm((prev) => ({ ...prev, clientId: e.target.value }))}
               >
                 <option value="">Select Client</option>
-                {clients.map(c => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
+                {clients.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div className="form-field">
-              <label className="form-label" htmlFor="survey-type">Type</label>
+              <label className="form-label" htmlFor="survey-type">
+                Type
+              </label>
               <select
                 id="survey-type"
                 className="form-input"
                 value={sendForm.surveyType}
-                onChange={e => setSendForm(prev => ({ ...prev, surveyType: e.target.value }))}
+                onChange={(e) => setSendForm((prev) => ({ ...prev, surveyType: e.target.value }))}
               >
-                {TYPE_FILTER_OPTIONS.filter(o => o.value !== 'all').map(o => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
+                {TYPE_FILTER_OPTIONS.filter((o) => o.value !== 'all').map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -420,10 +422,12 @@ export function FeedbackTable() {
               message={hasActiveFilters ? 'No surveys match your filters' : 'No surveys yet'}
             />
           ) : (
-            paginatedSurveys.map(survey => (
+            paginatedSurveys.map((survey) => (
               <PortalTableRow key={survey.id}>
                 <PortalTableCell className="client-cell">{survey.clientName}</PortalTableCell>
-                <PortalTableCell className="client-cell">{survey.projectName || '—'}</PortalTableCell>
+                <PortalTableCell className="client-cell">
+                  {survey.projectName || '—'}
+                </PortalTableCell>
                 <PortalTableCell className="status-col">
                   <StatusBadge status="qualified">
                     {SURVEY_TYPE_LABELS[survey.survey_type] || survey.survey_type}

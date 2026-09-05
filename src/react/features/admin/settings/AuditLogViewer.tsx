@@ -1,11 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  Filter
-} from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
@@ -75,7 +70,11 @@ function getActionLabel(action: string): string {
   return ACTION_LABELS[action] || action.replace(/_/g, ' ');
 }
 
-export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: _showNotification, overviewMode = false }: AuditLogViewerProps) {
+export function AuditLogViewer({
+  getAuthToken: _getAuthToken,
+  showNotification: _showNotification,
+  overviewMode = false
+}: AuditLogViewerProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -96,12 +95,20 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
       const params = new URLSearchParams();
       params.set('limit', String(overviewMode ? OVERVIEW_PAGE_SIZE : PAGE_SIZE));
       params.set('offset', String(page * PAGE_SIZE));
-      if (filterAction) params.set('action', filterAction);
-      if (filterEntity) params.set('entityType', filterEntity);
-      if (filterUser) params.set('userEmail', filterUser);
+      if (filterAction) {
+        params.set('action', filterAction);
+      }
+      if (filterEntity) {
+        params.set('entityType', filterEntity);
+      }
+      if (filterUser) {
+        params.set('userEmail', filterUser);
+      }
 
       const response = await apiFetch(`${API_ENDPOINTS.ADMIN.AUDIT_LOG}?${params}`);
-      if (!response.ok) throw new Error('Failed to load audit log');
+      if (!response.ok) {
+        throw new Error('Failed to load audit log');
+      }
       const result = unwrapApiData<{ data: AuditEntry[]; count: number }>(await response.json());
       setEntries(result.data);
       setTotalCount(result.count);
@@ -112,7 +119,9 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
     }
   }, [page, filterAction, filterEntity, filterUser, overviewMode]);
 
-  useEffect(() => { loadLogs(); }, [loadLogs]);
+  useEffect(() => {
+    loadLogs();
+  }, [loadLogs]);
 
   const handleApplyFilters = () => {
     setPage(0);
@@ -134,10 +143,12 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
       containerRef={containerRef as React.Ref<HTMLDivElement>}
       title="AUDIT LOG"
       stats={
-        <TableStats items={[
-          { value: totalCount, label: 'entries' },
-          { value: `Page ${page + 1}/${totalPages}`, label: '' }
-        ]} />
+        <TableStats
+          items={[
+            { value: totalCount, label: 'entries' },
+            { value: `Page ${page + 1}/${totalPages}`, label: '' }
+          ]}
+        />
       }
       actions={
         !overviewMode ? (
@@ -198,9 +209,13 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
               />
             </div>
             <div className="audit-filter-actions">
-              <button className="btn-primary" onClick={handleApplyFilters}>Apply</button>
+              <button className="btn-primary" onClick={handleApplyFilters}>
+                Apply
+              </button>
               {hasFilters && (
-                <button className="btn-secondary" onClick={handleClearFilters}>Clear</button>
+                <button className="btn-secondary" onClick={handleClearFilters}>
+                  Clear
+                </button>
               )}
             </div>
           </div>
@@ -232,14 +247,12 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
               <tbody>
                 {entries.map((entry) => (
                   <tr key={entry.id} className="audit-tr">
-                    <td className="audit-td audit-td-time">
-                      {formatDate(entry.created_at)}
-                    </td>
-                    <td className="audit-td audit-td-user">
-                      {entry.user_email || 'System'}
-                    </td>
+                    <td className="audit-td audit-td-time">{formatDate(entry.created_at)}</td>
+                    <td className="audit-td audit-td-user">{entry.user_email || 'System'}</td>
                     <td className="audit-td">
-                      <span className={`audit-action-badge audit-action-${entry.action.split('_')[0]}`}>
+                      <span
+                        className={`audit-action-badge audit-action-${entry.action.split('_')[0]}`}
+                      >
                         {getActionLabel(entry.action)}
                       </span>
                     </td>
@@ -274,7 +287,7 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
               <button
                 className="audit-page-btn"
                 disabled={page === 0}
-                onClick={() => setPage(p => Math.max(0, p - 1))}
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
               >
                 <ChevronLeft className="icon-sm" />
               </button>
@@ -284,7 +297,7 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
               <button
                 className="audit-page-btn"
                 disabled={page >= totalPages - 1}
-                onClick={() => setPage(p => p + 1)}
+                onClick={() => setPage((p) => p + 1)}
               >
                 <ChevronRight className="icon-sm" />
               </button>

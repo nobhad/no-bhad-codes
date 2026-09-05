@@ -5,12 +5,7 @@
 
 import * as React from 'react';
 import { useState, useCallback, useMemo } from 'react';
-import {
-  Folder,
-  File,
-  Image,
-  FileText
-} from 'lucide-react';
+import { Folder, File, Image, FileText } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
@@ -212,36 +207,41 @@ interface FolderTreeProps {
   onSelectFolder: (folderId: string) => void;
 }
 
-const FolderTree = React.memo(({ folders, selectedFolder, totalCount, onSelectFolder }: FolderTreeProps) => {
-  return (
-    <div className="folder-tree">
-      {/* All Files */}
-      <button
-        type="button"
-        className={cn('folder-item', selectedFolder === 'all' && 'is-active')}
-        onClick={() => onSelectFolder('all')}
-      >
-        <Folder className="icon-sm" />
-        <span className="flex-1">All Files</span>
-        <span className="text-secondary">{totalCount}</span>
-      </button>
-
-      {/* Folder categories */}
-      {folders.map((folder) => (
+const FolderTree = React.memo(
+  ({ folders, selectedFolder, totalCount, onSelectFolder }: FolderTreeProps) => {
+    return (
+      <div className="folder-tree">
+        {/* All Files */}
         <button
-          key={folder.id}
           type="button"
-          className={cn('folder-item folder-item-nested', selectedFolder === folder.id && 'is-active')}
-          onClick={() => onSelectFolder(folder.id)}
+          className={cn('folder-item', selectedFolder === 'all' && 'is-active')}
+          onClick={() => onSelectFolder('all')}
         >
           <Folder className="icon-sm" />
-          <span className="flex-1">{folder.name}</span>
-          <span className="text-secondary">{folder.count}</span>
+          <span className="flex-1">All Files</span>
+          <span className="text-secondary">{totalCount}</span>
         </button>
-      ))}
-    </div>
-  );
-});
+
+        {/* Folder categories */}
+        {folders.map((folder) => (
+          <button
+            key={folder.id}
+            type="button"
+            className={cn(
+              'folder-item folder-item-nested',
+              selectedFolder === folder.id && 'is-active'
+            )}
+            onClick={() => onSelectFolder(folder.id)}
+          >
+            <Folder className="icon-sm" />
+            <span className="flex-1">{folder.name}</span>
+            <span className="text-secondary">{folder.count}</span>
+          </button>
+        ))}
+      </div>
+    );
+  }
+);
 
 // ============================================================================
 // MAIN COMPONENT
@@ -271,7 +271,10 @@ export function PortalFilesManager({
   });
 
   // Exclude intake files — they appear in the Documents tab instead
-  const files = useMemo(() => (filesData?.files ?? []).filter((f) => f.category !== 'intake'), [filesData?.files]);
+  const files = useMemo(
+    () => (filesData?.files ?? []).filter((f) => f.category !== 'intake'),
+    [filesData?.files]
+  );
   const projects = useMemo(() => filesData?.projects ?? [], [filesData?.projects]);
 
   // Local state for upload, filters, and delete
@@ -288,9 +291,13 @@ export function PortalFilesManager({
 
   const setFilter = useCallback((key: string, value: string) => {
     setFilterValues((prev) => {
-      if (value === 'all') return { ...prev, [key]: [] };
+      if (value === 'all') {
+        return { ...prev, [key]: [] };
+      }
       const current = prev[key] ?? [];
-      const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
+      const next = current.includes(value)
+        ? current.filter((v) => v !== value)
+        : [...current, value];
       return { ...prev, [key]: next };
     });
   }, []);
@@ -349,7 +356,9 @@ export function PortalFilesManager({
     if (fileTypeFilter.length > 0) {
       result = result.filter((file) => {
         return fileTypeFilter.some((selectedFileType) => {
-          if (selectedFileType === 'image') return file.mimetype.startsWith('image/');
+          if (selectedFileType === 'image') {
+            return file.mimetype.startsWith('image/');
+          }
           if (selectedFileType === 'document') {
             return (
               file.mimetype.includes('pdf') ||
@@ -378,7 +387,8 @@ export function PortalFilesManager({
   const paginatedFiles = pagination.paginate(filteredFiles);
 
   // Check if any filters are active
-  const hasActiveFilters = searchQuery !== '' || Object.values(filterValues).some((v) => Array.isArray(v) && v.length > 0);
+  const hasActiveFilters =
+    searchQuery !== '' || Object.values(filterValues).some((v) => Array.isArray(v) && v.length > 0);
 
   // fetchFiles is provided by usePortalData as refetch
 
@@ -397,7 +407,9 @@ export function PortalFilesManager({
         // Raw fetch for FormData — add CSRF protection manually
         const csrfToken = getCsrfToken();
         const headers: Record<string, string> = {};
-        if (csrfToken) headers[CSRF_HEADER_NAME] = csrfToken;
+        if (csrfToken) {
+          headers[CSRF_HEADER_NAME] = csrfToken;
+        }
 
         const response = await fetch(API_ENDPOINTS.FILES_MULTIPLE, {
           method: 'POST',
@@ -439,11 +451,14 @@ export function PortalFilesManager({
   }, []);
 
   // Handle file download
-  const handleDownload = useCallback((file: PortalFile) => {
-    downloadFile(file.id, file.originalName || file.filename).catch(() => {
-      showNotification?.('Failed to download file', 'error');
-    });
-  }, [showNotification]);
+  const handleDownload = useCallback(
+    (file: PortalFile) => {
+      downloadFile(file.id, file.originalName || file.filename).catch(() => {
+        showNotification?.('Failed to download file', 'error');
+      });
+    },
+    [showNotification]
+  );
 
   // Handle file delete
   const handleDeleteClick = useCallback(
@@ -455,7 +470,9 @@ export function PortalFilesManager({
   );
 
   const handleDeleteConfirm = useCallback(async () => {
-    if (!fileToDelete) return;
+    if (!fileToDelete) {
+      return;
+    }
 
     try {
       await portalFetch(buildEndpoint.fileDelete(fileToDelete.id), { method: 'DELETE' });
@@ -487,18 +504,25 @@ export function PortalFilesManager({
       />
 
       {/* Files table */}
-      <TableLayout nested
+      <TableLayout
+        nested
         containerRef={containerRef}
         title="FILES"
         stats={
-          <TableStats items={[
-            { value: files.length, label: 'total' },
-            { value: filteredFiles.length, label: 'shown' }
-          ]} />
+          <TableStats
+            items={[
+              { value: files.length, label: 'total' },
+              { value: filteredFiles.length, label: 'shown' }
+            ]}
+          />
         }
         actions={
           <>
-            <SearchFilter value={searchQuery} onChange={setSearchQuery} placeholder="Search files..." />
+            <SearchFilter
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search files..."
+            />
             <FilterDropdown
               sections={filterSections}
               values={filterValues}
@@ -576,18 +600,14 @@ export function PortalFilesManager({
                         <PortalTableRow key={file.id}>
                           <PortalTableCell className="name-cell" label="File">
                             <div className="file-cell-name">
-                              <span className="text-secondary">
-                                {getFileIcon(file.mimetype)}
-                              </span>
+                              <span className="text-secondary">{getFileIcon(file.mimetype)}</span>
                               <span className="file-name" title={displayName}>
                                 {displayName}
                               </span>
                             </div>
                           </PortalTableCell>
                           <PortalTableCell className="size-cell" label="Size">
-                            <span className="text-secondary">
-                              {formatFileSize(file.size)}
-                            </span>
+                            <span className="text-secondary">{formatFileSize(file.size)}</span>
                           </PortalTableCell>
                           <PortalTableCell className="date-col" label="Uploaded">
                             <span className="text-secondary">
@@ -632,17 +652,17 @@ export function PortalFilesManager({
                       onClick={pagination.prevPage}
                       disabled={!pagination.canGoPrev}
                     >
-                          Previous
+                      Previous
                     </PortalButton>
                     <span className="text-secondary files-pagination-page">
-                          Page {pagination.page} of {pagination.totalPages}
+                      Page {pagination.page} of {pagination.totalPages}
                     </span>
                     <PortalButton
                       variant="ghost"
                       onClick={pagination.nextPage}
                       disabled={!pagination.canGoNext}
                     >
-                          Next
+                      Next
                     </PortalButton>
                   </div>
                 </div>

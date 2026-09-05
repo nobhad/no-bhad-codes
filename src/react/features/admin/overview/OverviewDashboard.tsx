@@ -69,10 +69,14 @@ function formatDate(dateStr: string): string {
 
 function getPriorityColor(priority: string): string {
   switch (priority) {
-  case 'urgent': return 'var(--status-cancelled)';
-  case 'high': return 'var(--status-pending)';
-  case 'medium': return 'var(--color-text-primary)';
-  default: return 'var(--color-text-tertiary)';
+    case 'urgent':
+      return 'var(--status-cancelled)';
+    case 'high':
+      return 'var(--status-pending)';
+    case 'medium':
+      return 'var(--color-text-primary)';
+    default:
+      return 'var(--color-text-tertiary)';
   }
 }
 
@@ -86,9 +90,13 @@ const TasksKanban = React.memo(({ tasks }: { tasks: TaskItem[] }) => {
   // Group tasks by status in a single pass instead of filtering per column
   const tasksByStatus = React.useMemo(() => {
     const grouped: Record<string, TaskItem[]> = {};
-    for (const col of KANBAN_COLUMNS) grouped[col.id] = [];
+    for (const col of KANBAN_COLUMNS) {
+      grouped[col.id] = [];
+    }
     for (const task of tasks) {
-      if (grouped[task.status]) grouped[task.status].push(task);
+      if (grouped[task.status]) {
+        grouped[task.status].push(task);
+      }
     }
     return grouped;
   }, [tasks]);
@@ -103,7 +111,14 @@ const TasksKanban = React.memo(({ tasks }: { tasks: TaskItem[] }) => {
             <div className="kanban-items">
               {columnTasks.map((task) => (
                 <div key={task.id} className="kanban-card">
-                  <span className="dashboard-status-dot" data-priority={task.priority} style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
+                  <span
+                    className="dashboard-status-dot"
+                    data-priority={task.priority}
+                    style={{
+                      background: getPriorityColor(task.priority),
+                      borderColor: getPriorityColor(task.priority)
+                    }}
+                  />
                   <div>
                     <div className="activity-text">{task.title}</div>
                     <div className="activity-time">{task.projectName}</div>
@@ -121,15 +136,27 @@ const TasksKanban = React.memo(({ tasks }: { tasks: TaskItem[] }) => {
   );
 });
 
-export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: OverviewDashboardProps) {
+export function OverviewDashboard({
+  onNavigate,
+  getAuthToken: _getAuthToken
+}: OverviewDashboardProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tasksView, setTasksView] = useState<'list' | 'kanban'>('list');
 
-  const [attention, setAttention] = useState({ overdueInvoices: 0, pendingContracts: 0, unreadMessages: 0 });
-  const [snapshot, setSnapshot] = useState({ activeProjects: 0, totalClients: 0, revenueMTD: 0, conversionRate: 0 });
+  const [attention, setAttention] = useState({
+    overdueInvoices: 0,
+    pendingContracts: 0,
+    unreadMessages: 0
+  });
+  const [snapshot, setSnapshot] = useState({
+    activeProjects: 0,
+    totalClients: 0,
+    revenueMTD: 0,
+    conversionRate: 0
+  });
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
   const [activeProjects, setActiveProjects] = useState<ProjectItem[]>([]);
   const [upcomingTasks, setUpcomingTasks] = useState<TaskItem[]>([]);
@@ -139,10 +166,25 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
     setError(null);
     try {
       const response = await apiFetch(API_ENDPOINTS.ADMIN.DASHBOARD);
-      if (!response.ok) throw new Error('Failed to load dashboard data');
+      if (!response.ok) {
+        throw new Error('Failed to load dashboard data');
+      }
       const payload = unwrapApiData<Record<string, unknown>>(await response.json());
-      setAttention((payload.attention as typeof attention) || { overdueInvoices: 0, pendingContracts: 0, unreadMessages: 0 });
-      setSnapshot((payload.snapshot as typeof snapshot) || { activeProjects: 0, totalClients: 0, revenueMTD: 0, conversionRate: 0 });
+      setAttention(
+        (payload.attention as typeof attention) || {
+          overdueInvoices: 0,
+          pendingContracts: 0,
+          unreadMessages: 0
+        }
+      );
+      setSnapshot(
+        (payload.snapshot as typeof snapshot) || {
+          activeProjects: 0,
+          totalClients: 0,
+          revenueMTD: 0,
+          conversionRate: 0
+        }
+      );
       setRecentActivity((payload.recentActivity as ActivityItem[]) || []);
       setActiveProjects((payload.activeProjects as ProjectItem[]) || []);
       setUpcomingTasks((payload.upcomingTasks as TaskItem[]) || []);
@@ -157,18 +199,43 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
     loadDashboardData();
   }, [loadDashboardData]);
 
-  const attentionItems = useMemo(() => [
-    { type: 'overdue_invoice', count: attention.overdueInvoices, label: 'Overdue Invoices', icon: <AlertTriangle />, action: () => onNavigate?.('invoices') },
-    { type: 'pending_contract', count: attention.pendingContracts, label: 'Pending Contracts', icon: <FileText />, action: () => onNavigate?.('contracts') },
-    { type: 'unread_message', count: attention.unreadMessages, label: 'Unread Messages', icon: <Mail />, action: () => onNavigate?.('messages') }
-  ].filter(item => item.count > 0), [attention, onNavigate]);
+  const attentionItems = useMemo(
+    () =>
+      [
+        {
+          type: 'overdue_invoice',
+          count: attention.overdueInvoices,
+          label: 'Overdue Invoices',
+          icon: <AlertTriangle />,
+          action: () => onNavigate?.('invoices')
+        },
+        {
+          type: 'pending_contract',
+          count: attention.pendingContracts,
+          label: 'Pending Contracts',
+          icon: <FileText />,
+          action: () => onNavigate?.('contracts')
+        },
+        {
+          type: 'unread_message',
+          count: attention.unreadMessages,
+          label: 'Unread Messages',
+          icon: <Mail />,
+          action: () => onNavigate?.('messages')
+        }
+      ].filter((item) => item.count > 0),
+    [attention, onNavigate]
+  );
 
-  const snapshotMetrics = useMemo(() => [
-    { label: 'Active Projects', value: snapshot.activeProjects, icon: <Briefcase /> },
-    { label: 'Total Clients', value: snapshot.totalClients, icon: <Users /> },
-    { label: 'Revenue MTD', value: formatCurrency(snapshot.revenueMTD), icon: <DollarSign /> },
-    { label: 'Conversion Rate', value: `${snapshot.conversionRate}%`, icon: <TrendingUp /> }
-  ], [snapshot]);
+  const snapshotMetrics = useMemo(
+    () => [
+      { label: 'Active Projects', value: snapshot.activeProjects, icon: <Briefcase /> },
+      { label: 'Total Clients', value: snapshot.totalClients, icon: <Users /> },
+      { label: 'Revenue MTD', value: formatCurrency(snapshot.revenueMTD), icon: <DollarSign /> },
+      { label: 'Conversion Rate', value: `${snapshot.conversionRate}%`, icon: <TrendingUp /> }
+    ],
+    [snapshot]
+  );
 
   if (isLoading) {
     return <LoadingState message="Loading dashboard..." />;
@@ -201,7 +268,10 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
 
       {/* Attention Items */}
       {attentionItems.length > 0 && (
-        <div className="overview-stats-strip" style={{ gridTemplateColumns: `repeat(${attentionItems.length}, 1fr)` }}>
+        <div
+          className="overview-stats-strip"
+          style={{ gridTemplateColumns: `repeat(${attentionItems.length}, 1fr)` }}
+        >
           {attentionItems.map((item) => (
             <StatCard
               key={item.type}
@@ -232,20 +302,24 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
             </div>
             <div className="panel-body">
               {activeProjects.length === 0 ? (
-                <EmptyState
-                  icon={<Briefcase className="icon-xl" />}
-                  message="No active projects"
-                />
+                <EmptyState icon={<Briefcase className="icon-xl" />} message="No active projects" />
               ) : (
                 <ul className="activity-feed">
                   {activeProjects.slice(0, 5).map((project) => (
-                    <li key={project.id} className="activity-feed-item ovdash-clickable" onClick={() => onNavigate?.('project-detail', String(project.id))}>
+                    <li
+                      key={project.id}
+                      className="activity-feed-item ovdash-clickable"
+                      onClick={() => onNavigate?.('project-detail', String(project.id))}
+                    >
                       <div className="activity-body">
                         <span className="activity-text">{project.name}</span>
                       </div>
                       <div className="progress-cell">
                         <div className="progress-bar ovdash-progress-width">
-                          <div className="progress-fill" style={{ width: `${project.progress}%` }} />
+                          <div
+                            className="progress-fill"
+                            style={{ width: `${project.progress}%` }}
+                          />
                         </div>
                         <span className="progress-pct">{project.progress}%</span>
                       </div>
@@ -268,7 +342,11 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
                   <span className="field-label">Upcoming Tasks</span>
                 </button>
                 <div className="view-toggle">
-                  <button onClick={() => setTasksView('list')} className="is-active" title="List view">
+                  <button
+                    onClick={() => setTasksView('list')}
+                    className="is-active"
+                    title="List view"
+                  >
                     <List className="icon-sm" />
                   </button>
                   <button onClick={() => setTasksView('kanban')} title="Kanban view">
@@ -278,20 +356,26 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
               </div>
               <div className="panel-body">
                 {upcomingTasks.length === 0 ? (
-                  <EmptyState
-                    icon={<Clock className="icon-xl" />}
-                    message="No upcoming tasks"
-                  />
+                  <EmptyState icon={<Clock className="icon-xl" />} message="No upcoming tasks" />
                 ) : (
                   <ul className="activity-feed">
                     {upcomingTasks.slice(0, 5).map((task) => (
                       <li key={task.id} className="activity-feed-item">
-                        <span className="dashboard-status-dot" data-priority={task.priority} style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
+                        <span
+                          className="dashboard-status-dot"
+                          data-priority={task.priority}
+                          style={{
+                            background: getPriorityColor(task.priority),
+                            borderColor: getPriorityColor(task.priority)
+                          }}
+                        />
                         <div className="activity-body">
                           <span className="activity-text">{task.title}</span>
                           <span className="activity-time">{task.projectName}</span>
                         </div>
-                        {task.dueDate && <span className="due-cell">{formatDate(task.dueDate)}</span>}
+                        {task.dueDate && (
+                          <span className="due-cell">{formatDate(task.dueDate)}</span>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -335,10 +419,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
             </div>
             <div className="panel-body--compact">
               {recentActivity.length === 0 ? (
-                <EmptyState
-                  icon={<Inbox className="icon-xl" />}
-                  message="No recent activity"
-                />
+                <EmptyState icon={<Inbox className="icon-xl" />} message="No recent activity" />
               ) : (
                 <ul className="activity-feed">
                   {recentActivity.slice(0, 8).map((activity) => (
@@ -372,17 +453,18 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
               <button onClick={() => setTasksView('list')} title="List view">
                 <List className="icon-sm" />
               </button>
-              <button onClick={() => setTasksView('kanban')} className="is-active" title="Kanban view">
+              <button
+                onClick={() => setTasksView('kanban')}
+                className="is-active"
+                title="Kanban view"
+              >
                 <LayoutGrid className="icon-sm" />
               </button>
             </div>
           </div>
           <div className="panel-body">
             {upcomingTasks.length === 0 ? (
-              <EmptyState
-                icon={<Clock className="icon-xl" />}
-                message="No upcoming tasks"
-              />
+              <EmptyState icon={<Clock className="icon-xl" />} message="No upcoming tasks" />
             ) : (
               <TasksKanban tasks={upcomingTasks} />
             )}

@@ -33,7 +33,9 @@ export function TrafficSessions(_props: TrafficViewProps) {
         `${API_ENDPOINTS.ANALYTICS_SESSIONS}?page=${params}&limit=${PAGE_SIZE}&days=${DEFAULT_DAYS}`,
         { signal }
       );
-      if (!res.ok) throw new Error('Failed to load sessions');
+      if (!res.ok) {
+        throw new Error('Failed to load sessions');
+      }
       return unwrapApiData<TrafficSessionsResponse>(await res.json());
     },
     params: page,
@@ -59,31 +61,32 @@ export function TrafficSessions(_props: TrafficViewProps) {
   const location = (city: string, country: string) =>
     [city, country].filter(Boolean).join(', ') || '—';
 
-  const paginationControls = totalPages > 1 ? (
-    <div className="traffic-pagination">
-      <button
-        type="button"
-        className="traffic-page-btn"
-        onClick={goPrev}
-        disabled={page <= 1 || isLoading}
-        aria-label="Previous page"
-      >
-        <ChevronLeft className="icon-sm" />
-      </button>
-      <span className="traffic-page-info">
-        Page {page} of {totalPages}
-      </span>
-      <button
-        type="button"
-        className="traffic-page-btn"
-        onClick={goNext}
-        disabled={page >= totalPages || isLoading}
-        aria-label="Next page"
-      >
-        <ChevronRight className="icon-sm" />
-      </button>
-    </div>
-  ) : undefined;
+  const paginationControls =
+    totalPages > 1 ? (
+      <div className="traffic-pagination">
+        <button
+          type="button"
+          className="traffic-page-btn"
+          onClick={goPrev}
+          disabled={page <= 1 || isLoading}
+          aria-label="Previous page"
+        >
+          <ChevronLeft className="icon-sm" />
+        </button>
+        <span className="traffic-page-info">
+          Page {page} of {totalPages}
+        </span>
+        <button
+          type="button"
+          className="traffic-page-btn"
+          onClick={goNext}
+          disabled={page >= totalPages || isLoading}
+          aria-label="Next page"
+        >
+          <ChevronRight className="icon-sm" />
+        </button>
+      </div>
+    ) : undefined;
 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">

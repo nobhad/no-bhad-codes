@@ -34,11 +34,8 @@ const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB default
 /**
  * Check if a conditional rule is satisfied
  */
-function isRuleSatisfied(
-  rule: ConditionalRule,
-  answers: QuestionAnswer[]
-): boolean {
-  const answer = answers.find(a => a.questionId === rule.questionId);
+function isRuleSatisfied(rule: ConditionalRule, answers: QuestionAnswer[]): boolean {
+  const answer = answers.find((a) => a.questionId === rule.questionId);
   if (!answer || answer.value === null || answer.value === undefined) {
     return false;
   }
@@ -47,55 +44,52 @@ function isRuleSatisfied(
   const ruleValue = rule.value;
 
   switch (rule.operator) {
-  case 'equals':
-    if (Array.isArray(answerValue)) {
-      return answerValue.includes(String(ruleValue));
-    }
-    return String(answerValue) === String(ruleValue);
+    case 'equals':
+      if (Array.isArray(answerValue)) {
+        return answerValue.includes(String(ruleValue));
+      }
+      return String(answerValue) === String(ruleValue);
 
-  case 'not_equals':
-    if (Array.isArray(answerValue)) {
-      return !answerValue.includes(String(ruleValue));
-    }
-    return String(answerValue) !== String(ruleValue);
+    case 'not_equals':
+      if (Array.isArray(answerValue)) {
+        return !answerValue.includes(String(ruleValue));
+      }
+      return String(answerValue) !== String(ruleValue);
 
-  case 'contains':
-    if (Array.isArray(answerValue)) {
-      return answerValue.some(v => String(v).includes(String(ruleValue)));
-    }
-    return String(answerValue).includes(String(ruleValue));
+    case 'contains':
+      if (Array.isArray(answerValue)) {
+        return answerValue.some((v) => String(v).includes(String(ruleValue)));
+      }
+      return String(answerValue).includes(String(ruleValue));
 
-  case 'not_contains':
-    if (Array.isArray(answerValue)) {
-      return !answerValue.some(v => String(v).includes(String(ruleValue)));
-    }
-    return !String(answerValue).includes(String(ruleValue));
+    case 'not_contains':
+      if (Array.isArray(answerValue)) {
+        return !answerValue.some((v) => String(v).includes(String(ruleValue)));
+      }
+      return !String(answerValue).includes(String(ruleValue));
 
-  case 'greater_than':
-    return Number(answerValue) > Number(ruleValue);
+    case 'greater_than':
+      return Number(answerValue) > Number(ruleValue);
 
-  case 'less_than':
-    return Number(answerValue) < Number(ruleValue);
+    case 'less_than':
+      return Number(answerValue) < Number(ruleValue);
 
-  default:
-    return false;
+    default:
+      return false;
   }
 }
 
 /**
  * Check if a question should be visible based on conditional rules
  */
-function isQuestionVisible(
-  question: PortalQuestion,
-  answers: QuestionAnswer[]
-): boolean {
+function isQuestionVisible(question: PortalQuestion, answers: QuestionAnswer[]): boolean {
   // No conditional rules means always visible
   if (!question.conditionalRules || question.conditionalRules.length === 0) {
     return true;
   }
 
   // All rules must be satisfied (AND logic)
-  return question.conditionalRules.every(rule => isRuleSatisfied(rule, answers));
+  return question.conditionalRules.every((rule) => isRuleSatisfied(rule, answers));
 }
 
 /**
@@ -105,7 +99,7 @@ function getAnswerValue(
   questionId: string,
   answers: QuestionAnswer[]
 ): string | number | string[] | null {
-  const answer = answers.find(a => a.questionId === questionId);
+  const answer = answers.find((a) => a.questionId === questionId);
   return answer?.value ?? null;
 }
 
@@ -113,8 +107,12 @@ function getAnswerValue(
  * Format file size for display
  */
 function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
@@ -191,10 +189,12 @@ function MultiselectInput({ question, value, onChange, disabled }: QuestionInput
   const selectedValues = Array.isArray(value) ? value : [];
 
   const handleToggle = (optionValue: string) => {
-    if (disabled) return;
+    if (disabled) {
+      return;
+    }
 
     const newValues = selectedValues.includes(optionValue)
-      ? selectedValues.filter(v => v !== optionValue)
+      ? selectedValues.filter((v) => v !== optionValue)
       : [...selectedValues, optionValue];
 
     onChange(newValues.length > 0 ? newValues : null);
@@ -252,7 +252,9 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
 
   // Parse file metadata if available
   const fileMetadata = useMemo(() => {
-    if (!value || typeof value !== 'string') return null;
+    if (!value || typeof value !== 'string') {
+      return null;
+    }
     try {
       return JSON.parse(value);
     } catch {
@@ -282,7 +284,9 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
     e.preventDefault();
     setDragActive(false);
 
-    if (disabled) return;
+    if (disabled) {
+      return;
+    }
 
     const file = e.dataTransfer.files?.[0];
     if (file) {
@@ -310,12 +314,8 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
         <div className="portal-card qform-file-selected">
           <div className="qform-file-info">
             <Check className="icon-xs qform-check-success" />
-            <span className="qform-file-name">
-              {fileMetadata.filename}
-            </span>
-            <span className="qform-file-size">
-              ({formatFileSize(fileMetadata.fileSize)})
-            </span>
+            <span className="qform-file-name">{fileMetadata.filename}</span>
+            <span className="qform-file-size">({formatFileSize(fileMetadata.fileSize)})</span>
           </div>
           {!disabled && (
             <button
@@ -331,7 +331,10 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
       ) : (
         <div
           onDrop={handleDrop}
-          onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragActive(true);
+          }}
           onDragLeave={() => setDragActive(false)}
           onClick={() => !disabled && fileInputRef.current?.click()}
           className={cn(
@@ -342,9 +345,7 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
         >
           <Upload className="icon-sm" />
           <div className="qform-dropzone-text">
-            <span className="qform-dropzone-label">
-              Drop file here or click to upload
-            </span>
+            <span className="qform-dropzone-label">Drop file here or click to upload</span>
             <div className="qform-dropzone-hint">
               {question.acceptedFileTypes && `Accepted: ${question.acceptedFileTypes}`}
               {question.acceptedFileTypes && ' | '}
@@ -411,7 +412,7 @@ export function QuestionnaireForm({
    */
   const visibleQuestions = useMemo(() => {
     return questionnaire.questions
-      .filter(q => isQuestionVisible(q, answers))
+      .filter((q) => isQuestionVisible(q, answers))
       .sort((a, b) => a.order - b.order);
   }, [questionnaire.questions, answers]);
 
@@ -419,10 +420,12 @@ export function QuestionnaireForm({
    * Calculate progress
    */
   const progress = useMemo(() => {
-    const requiredQuestions = visibleQuestions.filter(q => q.required);
-    if (requiredQuestions.length === 0) return 100;
+    const requiredQuestions = visibleQuestions.filter((q) => q.required);
+    if (requiredQuestions.length === 0) {
+      return 100;
+    }
 
-    const answeredRequired = requiredQuestions.filter(q => {
+    const answeredRequired = requiredQuestions.filter((q) => {
       const answer = getAnswerValue(q.id, answers);
       return answer !== null && answer !== undefined && answer !== '';
     });
@@ -434,12 +437,14 @@ export function QuestionnaireForm({
    * Save answers to API
    */
   const saveAnswers = useCallback(async () => {
-    if (isReadOnly) return;
+    if (isReadOnly) {
+      return;
+    }
 
     setIsSaving(true);
 
-    const result = await executeSilent(
-      () => apiPost(buildEndpoint.questionnaireResponseSave(response.id), {
+    const result = await executeSilent(() =>
+      apiPost(buildEndpoint.questionnaireResponseSave(response.id), {
         answers,
         progress
       })
@@ -459,7 +464,9 @@ export function QuestionnaireForm({
    * Debounced auto-save on answer change
    */
   useEffect(() => {
-    if (isReadOnly || !hasUnsavedChanges) return;
+    if (isReadOnly || !hasUnsavedChanges) {
+      return;
+    }
 
     // Clear existing timeout
     if (saveTimeoutRef.current) {
@@ -481,32 +488,38 @@ export function QuestionnaireForm({
   /**
    * Handle answer change
    */
-  const handleAnswerChange = useCallback((questionId: string, value: string | number | string[] | null) => {
-    setAnswers(prev => {
-      const existing = prev.find(a => a.questionId === questionId);
-      if (existing) {
-        return prev.map(a =>
-          a.questionId === questionId ? { ...a, value } : a
-        );
-      }
-      return [...prev, { questionId, value }];
-    });
-    setHasUnsavedChanges(true);
-  }, []);
+  const handleAnswerChange = useCallback(
+    (questionId: string, value: string | number | string[] | null) => {
+      setAnswers((prev) => {
+        const existing = prev.find((a) => a.questionId === questionId);
+        if (existing) {
+          return prev.map((a) => (a.questionId === questionId ? { ...a, value } : a));
+        }
+        return [...prev, { questionId, value }];
+      });
+      setHasUnsavedChanges(true);
+    },
+    []
+  );
 
   /**
    * Handle form submission
    */
   const handleSubmit = async () => {
     // Validate required questions
-    const missingRequired = visibleQuestions.filter(q => {
-      if (!q.required) return false;
+    const missingRequired = visibleQuestions.filter((q) => {
+      if (!q.required) {
+        return false;
+      }
       const answer = getAnswerValue(q.id, answers);
       return answer === null || answer === undefined || answer === '';
     });
 
     if (missingRequired.length > 0) {
-      showNotification?.(`Please answer all required questions (${missingRequired.length} remaining)`, 'warning');
+      showNotification?.(
+        `Please answer all required questions (${missingRequired.length} remaining)`,
+        'warning'
+      );
       return;
     }
 
@@ -539,13 +552,9 @@ export function QuestionnaireForm({
             <ArrowLeft className="icon-xs" />
           </button>
           <div>
-            <h2 className="heading qform-heading">
-              {questionnaire.title}
-            </h2>
+            <h2 className="heading qform-heading">{questionnaire.title}</h2>
             {questionnaire.description && (
-              <p className="qform-description">
-                {questionnaire.description}
-              </p>
+              <p className="qform-description">{questionnaire.description}</p>
             )}
           </div>
         </div>
@@ -564,11 +573,7 @@ export function QuestionnaireForm({
               Saved
             </div>
           )}
-          {!isSaving && hasUnsavedChanges && (
-            <div className="qform-unsaved">
-              Unsaved changes
-            </div>
-          )}
+          {!isSaving && hasUnsavedChanges && <div className="qform-unsaved">Unsaved changes</div>}
         </div>
       </div>
 
@@ -576,14 +581,9 @@ export function QuestionnaireForm({
       {!isReadOnly && (
         <div className="qform-progress-row">
           <div className="progress-bar-sm flex-1">
-            <div
-              className="progress-fill"
-              style={{ width: `${progress}%` }}
-            />
+            <div className="progress-fill" style={{ width: `${progress}%` }} />
           </div>
-          <span className="qform-progress-text">
-            {progress}%
-          </span>
+          <span className="qform-progress-text">{progress}%</span>
         </div>
       )}
 
@@ -594,27 +594,16 @@ export function QuestionnaireForm({
           const value = getAnswerValue(question.id, answers);
 
           return (
-            <div
-              key={question.id}
-              className="portal-card"
-            >
+            <div key={question.id} className="portal-card">
               {/* Question label */}
               <div className="qform-question-label-row">
-                <span className="qform-question-number">
-                  {index + 1}.
-                </span>
+                <span className="qform-question-number">{index + 1}.</span>
                 <div className="qform-question-label-container">
                   <label className="field-label">
                     {question.text}
-                    {question.required && (
-                      <span className="form-required">*</span>
-                    )}
+                    {question.required && <span className="form-required">*</span>}
                   </label>
-                  {question.helpText && (
-                    <p className="qform-question-help">
-                      {question.helpText}
-                    </p>
-                  )}
+                  {question.helpText && <p className="qform-question-help">{question.helpText}</p>}
                 </div>
               </div>
 

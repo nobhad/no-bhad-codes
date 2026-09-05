@@ -1,14 +1,6 @@
 import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
-import {
-  FileText,
-  Inbox,
-  CheckCircle,
-  Clock,
-  XCircle,
-  Eye,
-  Send
-} from 'lucide-react';
+import { FileText, Inbox, CheckCircle, Clock, XCircle, Eye, Send } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -113,16 +105,24 @@ function filterContract(
   if (search) {
     const searchLower = search.toLowerCase();
     const matchesSearch =
-      (contract.templateName?.toLowerCase().includes(searchLower) || false) ||
-      (contract.clientName?.toLowerCase().includes(searchLower) || false) ||
-      (contract.clientEmail?.toLowerCase().includes(searchLower) || false) ||
-      (contract.projectName?.toLowerCase().includes(searchLower) || false);
-    if (!matchesSearch) return false;
+      contract.templateName?.toLowerCase().includes(searchLower) ||
+      false ||
+      contract.clientName?.toLowerCase().includes(searchLower) ||
+      false ||
+      contract.clientEmail?.toLowerCase().includes(searchLower) ||
+      false ||
+      contract.projectName?.toLowerCase().includes(searchLower) ||
+      false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(contract.status)) return false;
+    if (!statusFilter.includes(contract.status)) {
+      return false;
+    }
   }
 
   return true;
@@ -134,24 +134,31 @@ function sortContracts(a: Contract, b: Contract, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'title':
-    return multiplier * (a.templateName || '').localeCompare(b.templateName || '');
-  case 'client':
-    return multiplier * (a.clientName || '').localeCompare(b.clientName || '');
-  case 'createdAt':
-    return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-  default:
-    return 0;
+    case 'title':
+      return multiplier * (a.templateName || '').localeCompare(b.templateName || '');
+    case 'client':
+      return multiplier * (a.clientName || '').localeCompare(b.clientName || '');
+    case 'createdAt':
+      return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    default:
+      return 0;
   }
 }
 
-export function ContractsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ContractsTableProps) {
+export function ContractsTable({
+  getAuthToken,
+  showNotification,
+  onNavigate,
+  defaultPageSize = 25,
+  overviewMode = false
+}: ContractsTableProps) {
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [previewContract, setPreviewContract] = useState<Contract | null>(null);
-  const { clientOptions: entityClients, projectOptions: entityProjects } = useEntityOptions(createOpen);
+  const { clientOptions: entityClients, projectOptions: entityProjects } =
+    useEntityOptions(createOpen);
 
   const { data, isLoading, error, refetch, setData } = useListFetch<Contract, ContractStats>({
     endpoint: API_ENDPOINTS.CONTRACTS,
@@ -210,66 +217,92 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
   });
 
   // Status change handler
-  const handleStatusChange = useCallback(async (contractId: number, newStatus: string) => {
-    try {
-      const response = await apiFetch(buildEndpoint.contract(contractId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
+  const handleStatusChange = useCallback(
+    async (contractId: number, newStatus: string) => {
+      try {
+        const response = await apiFetch(buildEndpoint.contract(contractId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
 
-      if (!response.ok) throw new Error('Failed to update contract');
+        if (!response.ok) {
+          throw new Error('Failed to update contract');
+        }
 
-      setData((prev) => prev ? {
-        ...prev,
-        items: prev.items.map((contract) =>
-          contract.id === contractId
-            ? { ...contract, status: newStatus as Contract['status'] }
-            : contract
-        )
-      } : prev);
-      showNotification?.('Contract status updated', 'success');
-    } catch (err) {
-      logger.error('Failed to update contract status:', err);
-      showNotification?.('Failed to update contract status', 'error');
-    }
-  }, [showNotification, setData]);
+        setData((prev) =>
+          prev
+            ? {
+                ...prev,
+                items: prev.items.map((contract) =>
+                  contract.id === contractId
+                    ? { ...contract, status: newStatus as Contract['status'] }
+                    : contract
+                )
+              }
+            : prev
+        );
+        showNotification?.('Contract status updated', 'success');
+      } catch (err) {
+        logger.error('Failed to update contract status:', err);
+        showNotification?.('Failed to update contract status', 'error');
+      }
+    },
+    [showNotification, setData]
+  );
 
-  const handleSendContract = useCallback(async (contractId: number) => {
-    try {
-      const response = await apiPost(buildEndpoint.contractSend(contractId));
+  const handleSendContract = useCallback(
+    async (contractId: number) => {
+      try {
+        const response = await apiPost(buildEndpoint.contractSend(contractId));
 
-      if (!response.ok) throw new Error('Failed to send contract');
+        if (!response.ok) {
+          throw new Error('Failed to send contract');
+        }
 
-      setData((prev) => prev ? {
-        ...prev,
-        items: prev.items.map((contract) =>
-          contract.id === contractId
-            ? { ...contract, status: 'sent', sentAt: new Date().toISOString() }
-            : contract
-        )
-      } : prev);
-      showNotification?.('Contract sent', 'success');
-    } catch (err) {
-      logger.error('Failed to send contract:', err);
-      showNotification?.('Failed to send contract', 'error');
-    }
-  }, [showNotification, setData]);
+        setData((prev) =>
+          prev
+            ? {
+                ...prev,
+                items: prev.items.map((contract) =>
+                  contract.id === contractId
+                    ? { ...contract, status: 'sent', sentAt: new Date().toISOString() }
+                    : contract
+                )
+              }
+            : prev
+        );
+        showNotification?.('Contract sent', 'success');
+      } catch (err) {
+        logger.error('Failed to send contract:', err);
+        showNotification?.('Failed to send contract', 'error');
+      }
+    },
+    [showNotification, setData]
+  );
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
     const ids = selection.selectedItems.map((c) => c.id);
     try {
       const response = await apiPost(API_ENDPOINTS.CONTRACTS_BULK_DELETE, { ids });
 
-      if (!response.ok) throw new Error('Failed to delete contracts');
+      if (!response.ok) {
+        throw new Error('Failed to delete contracts');
+      }
 
-      setData((prev) => prev ? {
-        ...prev,
-        items: prev.items.filter((c) => !ids.includes(c.id))
-      } : prev);
+      setData((prev) =>
+        prev
+          ? {
+              ...prev,
+              items: prev.items.filter((c) => !ids.includes(c.id))
+            }
+          : prev
+      );
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} contract${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
@@ -292,7 +325,9 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
   // Handle bulk status change
   const handleBulkStatusChange = useCallback(
     async (newStatus: string) => {
-      if (selection.selectedCount === 0) return;
+      if (selection.selectedCount === 0) {
+        return;
+      }
 
       for (const contract of selection.selectedItems) {
         await handleStatusChange(contract.id, newStatus);
@@ -314,35 +349,46 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
   const clientOptions = useMemo(() => {
     const map = new Map<string, string>();
     entityClients.forEach((o) => map.set(o.value, o.label));
-    contracts.forEach((c) => { if (c.clientId && c.clientName) map.set(String(c.clientId), c.clientName); });
+    contracts.forEach((c) => {
+      if (c.clientId && c.clientName) {
+        map.set(String(c.clientId), c.clientName);
+      }
+    });
     return Array.from(map, ([value, label]) => ({ value, label }));
   }, [contracts, entityClients]);
 
   const projectOptions = useMemo(() => {
     const map = new Map<string, string>();
     entityProjects.forEach((o) => map.set(o.value, o.label));
-    contracts.forEach((c) => { if (c.projectId && c.projectName) map.set(String(c.projectId), c.projectName); });
+    contracts.forEach((c) => {
+      if (c.projectId && c.projectName) {
+        map.set(String(c.projectId), c.projectName);
+      }
+    });
     return Array.from(map, ([value, label]) => ({ value, label }));
   }, [contracts, entityProjects]);
 
   // Create handler
-  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
-    setCreateLoading(true);
-    try {
-      const res = await apiPost(API_ENDPOINTS.CONTRACTS, { ...formData, status: 'draft' });
-      if (res.ok) {
-        showNotification?.('Contract created successfully', 'success');
-        setCreateOpen(false);
-        refetch();
-      } else {
+  const handleCreate = useCallback(
+    async (formData: Record<string, unknown>) => {
+      setCreateLoading(true);
+      try {
+        const res = await apiPost(API_ENDPOINTS.CONTRACTS, { ...formData, status: 'draft' });
+        if (res.ok) {
+          showNotification?.('Contract created successfully', 'success');
+          setCreateOpen(false);
+          refetch();
+        } else {
+          showNotification?.('Failed to create contract', 'error');
+        }
+      } catch {
         showNotification?.('Failed to create contract', 'error');
+      } finally {
+        setCreateLoading(false);
       }
-    } catch {
-      showNotification?.('Failed to create contract', 'error');
-    } finally {
-      setCreateLoading(false);
-    }
-  }, [showNotification, refetch]);
+    },
+    [showNotification, refetch]
+  );
 
   // Detail panel handlers
   const handleRowClick = useCallback((contract: Contract) => {
@@ -382,11 +428,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
         }
         actions={
           <>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search contracts..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search contracts..." />
             <FilterDropdown
               sections={CONTRACTS_FILTER_CONFIG}
               values={filterValues}
@@ -407,7 +449,9 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
             totalCount={filteredContracts.length}
             onClearSelection={selection.clearSelection}
             onSelectAll={() => selection.selectMany(filteredContracts)}
-            allSelected={selection.allSelected && selection.selectedCount === filteredContracts.length}
+            allSelected={
+              selection.allSelected && selection.selectedCount === filteredContracts.length
+            }
             statusOptions={bulkStatusOptions}
             onStatusChange={handleBulkStatusChange}
             onDelete={handleBulkDelete}
@@ -447,7 +491,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                 sortDirection={sort?.column === 'title' ? sort.direction : null}
                 onClick={() => toggleSort('title')}
               >
-              Contract
+                Contract
               </PortalTableHead>
               <PortalTableHead
                 className="client-col"
@@ -455,12 +499,10 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                 sortDirection={sort?.column === 'client' ? sort.direction : null}
                 onClick={() => toggleSort('client')}
               >
-              Client
+                Client
               </PortalTableHead>
               <PortalTableHead className="project-col">Project</PortalTableHead>
-              <PortalTableHead className="email-col">
-              Email
-              </PortalTableHead>
+              <PortalTableHead className="email-col">Email</PortalTableHead>
               <PortalTableHead className="status-col">Status</PortalTableHead>
               <PortalTableHead
                 className="date-col"
@@ -468,7 +510,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                 sortDirection={sort?.column === 'createdAt' ? sort.direction : null}
                 onClick={() => toggleSort('createdAt')}
               >
-              Created
+                Created
               </PortalTableHead>
               <PortalTableHead className="col-actions">Actions</PortalTableHead>
             </PortalTableRow>
@@ -497,14 +539,16 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                     <Checkbox
                       checked={selection.isSelected(contract)}
                       onCheckedChange={() => selection.toggleSelection(contract)}
-                      aria-label={`Select ${contract.templateName || `Contract ${  contract.id}`}`}
+                      aria-label={`Select ${contract.templateName || `Contract ${contract.id}`}`}
                     />
                   </PortalTableCell>
                   <PortalTableCell className="contract-cell">
                     <div className="cell-with-icon">
                       <FileText className="icon-sm" />
                       <div className="cell-content">
-                        <span className="cell-title">{contract.templateName || `Contract #${contract.id}`}</span>
+                        <span className="cell-title">
+                          {contract.templateName || `Contract #${contract.id}`}
+                        </span>
                         {contract.templateType && (
                           <span className="cell-subtitle">{contract.templateType}</span>
                         )}
@@ -535,16 +579,16 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                       </span>
                     )}
                   </PortalTableCell>
-                  <PortalTableCell className="email-cell">
-                    {contract.clientEmail}
-                  </PortalTableCell>
+                  <PortalTableCell className="email-cell">{contract.clientEmail}</PortalTableCell>
                   <StatusDropdownCell
                     status={contract.status}
                     statusConfig={CONTRACT_STATUS_CONFIG}
                     onStatusChange={(newStatus) => handleStatusChange(contract.id, newStatus)}
                     ariaLabel="Change contract status"
                   />
-                  <PortalTableCell className="date-col">{formatDate(contract.createdAt)}</PortalTableCell>
+                  <PortalTableCell className="date-col">
+                    {formatDate(contract.createdAt)}
+                  </PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
                       {contract.status === 'draft' && (
@@ -554,8 +598,21 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                           onClick={() => handleSendContract(contract.id)}
                         />
                       )}
-                      <IconButton action="view" title="Preview PDF" onClick={() => setPreviewContract(contract)} />
-                      <IconButton action="download" title="Download" onClick={() => downloadFromUrl(buildEndpoint.contractPdf(contract.projectId), `contract-${contract.projectName || contract.id}.pdf`)} />
+                      <IconButton
+                        action="view"
+                        title="Preview PDF"
+                        onClick={() => setPreviewContract(contract)}
+                      />
+                      <IconButton
+                        action="download"
+                        title="Download"
+                        onClick={() =>
+                          downloadFromUrl(
+                            buildEndpoint.contractPdf(contract.projectId),
+                            `contract-${contract.projectName || contract.id}.pdf`
+                          )
+                        }
+                      />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>
@@ -580,7 +637,12 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
         onSend={(id) => handleSendContract(id)}
         onDownload={(id) => {
           const c = data?.items.find((item) => item.id === id);
-          if (c) downloadFromUrl(buildEndpoint.contractPdf(c.projectId), `contract-${c.projectName || c.id}.pdf`);
+          if (c) {
+            downloadFromUrl(
+              buildEndpoint.contractPdf(c.projectId),
+              `contract-${c.projectName || c.id}.pdf`
+            );
+          }
         }}
         showNotification={showNotification}
       />
@@ -588,7 +650,11 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
       {/* PDF Preview Modal */}
       <PortalModal
         open={!!previewContract}
-        onOpenChange={(open) => { if (!open) setPreviewContract(null); }}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPreviewContract(null);
+          }
+        }}
         title={previewContract?.templateName || 'Contract Preview'}
         icon={<Eye />}
         size="lg"

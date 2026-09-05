@@ -7,7 +7,11 @@
 import * as React from 'react';
 import { useMemo, useCallback, useState } from 'react';
 import { DetailPanel, MetaGrid, Timeline } from '@react/factories/createDetailPanel';
-import type { DetailPanelConfig, PanelMetaField, TimelineEvent } from '@react/factories/createDetailPanel';
+import type {
+  DetailPanelConfig,
+  PanelMetaField,
+  TimelineEvent
+} from '@react/factories/createDetailPanel';
 import { IconButton } from '@react/factories';
 import { InlineEdit } from '@react/components/portal/InlineEdit';
 import { formatDate } from '@react/utils/formatDate';
@@ -43,7 +47,9 @@ function parseCurrencyInput(value: string): string {
 
 function formatCurrencyDisplay(value: string): string {
   const num = parseFloat(value);
-  if (isNaN(num)) return value;
+  if (isNaN(num)) {
+    return value;
+  }
   return formatCurrency(num);
 }
 
@@ -74,7 +80,9 @@ export function InvoiceDetailPanel({
 
   const handleSaveField = useCallback(
     async (field: string, value: string): Promise<boolean> => {
-      if (!invoice) return false;
+      if (!invoice) {
+        return false;
+      }
       try {
         const res = await apiPut(buildEndpoint.invoice(invoice.id), { [field]: value });
         if (res.ok) {
@@ -93,7 +101,9 @@ export function InvoiceDetailPanel({
   );
 
   const handleSend = useCallback(async () => {
-    if (!invoice || !onSend) return;
+    if (!invoice || !onSend) {
+      return;
+    }
     setIsSending(true);
     await onSend(invoice.id);
     setIsSending(false);
@@ -106,8 +116,7 @@ export function InvoiceDetailPanel({
 
       title: (inv) => inv.invoice_number || `Invoice #${inv.id}`,
 
-      subtitle: (inv) =>
-        inv.project_name || inv.client_name || undefined,
+      subtitle: (inv) => inv.project_name || inv.client_name || undefined,
 
       status: {
         current: (inv) => inv.status,
@@ -169,7 +178,9 @@ export function InvoiceDetailPanel({
                 {
                   label: 'Project',
                   value: inv.project_name,
-                  onClick: inv.project_id ? () => handleNavigateToProject(inv.project_id) : undefined,
+                  onClick: inv.project_id
+                    ? () => handleNavigateToProject(inv.project_id)
+                    : undefined,
                   visible: !!inv.project_name
                 },
                 {
@@ -193,7 +204,11 @@ export function InvoiceDetailPanel({
                   label: 'Amount',
                   render: isDraftInv ? (
                     <InlineEdit
-                      value={String(typeof inv.amount_total === 'string' ? inv.amount_total : inv.amount_total || 0)}
+                      value={String(
+                        typeof inv.amount_total === 'string'
+                          ? inv.amount_total
+                          : inv.amount_total || 0
+                      )}
                       type="currency"
                       formatDisplay={formatCurrencyDisplay}
                       parseInput={parseCurrencyInput}
@@ -214,7 +229,11 @@ export function InvoiceDetailPanel({
                       placeholder="Set due date"
                     />
                   ) : undefined,
-                  value: isDraftInv ? undefined : (inv.due_date ? formatDate(inv.due_date) : undefined),
+                  value: isDraftInv
+                    ? undefined
+                    : inv.due_date
+                      ? formatDate(inv.due_date)
+                      : undefined,
                   visible: true
                 },
                 {
@@ -231,7 +250,7 @@ export function InvoiceDetailPanel({
                       placeholder="Add notes"
                     />
                   ) : undefined,
-                  value: isDraftInv ? undefined : (inv.notes || undefined),
+                  value: isDraftInv ? undefined : inv.notes || undefined,
                   visible: isDraftInv || !!inv.notes
                 }
               ];
@@ -257,7 +276,16 @@ export function InvoiceDetailPanel({
         return tabs;
       }
     }),
-    [onStatusChange, onSend, onMarkPaid, onDownloadPdf, handleSend, isSending, handleSaveField, handleNavigateToProject]
+    [
+      onStatusChange,
+      onSend,
+      onMarkPaid,
+      onDownloadPdf,
+      handleSend,
+      isSending,
+      handleSaveField,
+      handleNavigateToProject
+    ]
   );
 
   return <DetailPanel entity={invoice} onClose={onClose} config={config} />;

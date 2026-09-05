@@ -38,25 +38,28 @@ export function PortalSubtabs() {
 
   const activeGroup = currentGroup || currentTab;
 
-  const handleSubtabClick = React.useCallback((subtabId: string, groupForTab: string) => {
-    if (subtabId === 'overview') {
-      switchTab(groupForTab);
-      navigate(`/${groupForTab}`);
-      setSubtab('overview');
-      return;
-    }
+  const handleSubtabClick = React.useCallback(
+    (subtabId: string, groupForTab: string) => {
+      if (subtabId === 'overview') {
+        switchTab(groupForTab);
+        navigate(`/${groupForTab}`);
+        setSubtab('overview');
+        return;
+      }
 
-    const currentPath = location.pathname.replace(/^\//, '');
-    if (currentPath !== groupForTab) {
-      // Navigation will change pathname, triggering the useEffect below.
-      // Store the intended subtab so the effect applies it instead of resetting.
-      pendingSubtab.current = subtabId;
-      switchTab(groupForTab);
-      navigate(`/${groupForTab}`);
-    } else {
-      setSubtab(subtabId);
-    }
-  }, [switchTab, navigate, location.pathname, setSubtab]);
+      const currentPath = location.pathname.replace(/^\//, '');
+      if (currentPath !== groupForTab) {
+        // Navigation will change pathname, triggering the useEffect below.
+        // Store the intended subtab so the effect applies it instead of resetting.
+        pendingSubtab.current = subtabId;
+        switchTab(groupForTab);
+        navigate(`/${groupForTab}`);
+      } else {
+        setSubtab(subtabId);
+      }
+    },
+    [switchTab, navigate, location.pathname, setSubtab]
+  );
 
   // Reset to overview on pathname change, but apply pending subtab if set
   React.useEffect(() => {
@@ -69,22 +72,21 @@ export function PortalSubtabs() {
   }, [location.pathname, setSubtab]);
 
   // Find the subtab group that matches the current active group
-  const activeSubtabGroup = subtabGroups.find(
-    (group) => group.forTab === activeGroup
-  );
+  const activeSubtabGroup = subtabGroups.find((group) => group.forTab === activeGroup);
 
   // Detail views (client-detail, project-detail) have their own internal tabs
-  if (DETAIL_VIEW_TABS[currentTab]) return null;
+  if (DETAIL_VIEW_TABS[currentTab]) {
+    return null;
+  }
 
-  if (!activeSubtabGroup) return null;
+  if (!activeSubtabGroup) {
+    return null;
+  }
 
   return (
     <div className="portal-header-subtabs">
       <div className="header-subtabs">
-        <div
-          className="portal-subtabs header-subtab-group"
-          data-for-tab={activeSubtabGroup.forTab}
-        >
+        <div className="portal-subtabs header-subtab-group" data-for-tab={activeSubtabGroup.forTab}>
           {activeSubtabGroup.subtabs.map((subtab) => {
             const isActive = subtab.id === activeSubtab;
 
@@ -102,11 +104,7 @@ export function PortalSubtabs() {
         </div>
       </div>
       {/* Page-specific actions rendered inline on the right */}
-      {actions && (
-        <div className="header-subtab-actions">
-          {actions}
-        </div>
-      )}
+      {actions && <div className="header-subtab-actions">{actions}</div>}
     </div>
   );
 }

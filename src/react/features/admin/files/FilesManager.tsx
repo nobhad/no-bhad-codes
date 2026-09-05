@@ -1,14 +1,6 @@
 import * as React from 'react';
 import { useState, useMemo } from 'react';
-import {
-  Folder,
-  File,
-  FileText,
-  FileImage,
-  FileVideo,
-  FileAudio,
-  Inbox
-} from 'lucide-react';
+import { Folder, File, FileText, FileImage, FileVideo, FileAudio, Inbox } from 'lucide-react';
 import { EmptyState, IconButton } from '@react/factories';
 import { formatDateShort } from '@react/utils/formatDate';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
@@ -85,11 +77,7 @@ interface FilesManagerProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-function filterFile(
-  file: FileItem,
-  filters: Record<string, string[]>,
-  search: string
-): boolean {
+function filterFile(file: FileItem, filters: Record<string, string[]>, search: string): boolean {
   if (search) {
     const query = search.toLowerCase();
     if (
@@ -106,14 +94,15 @@ function filterFile(
     const matchesType =
       (typeFilter.includes('folder') && file.type === 'folder') ||
       (typeFilter.includes('image') && file.mimeType?.startsWith('image/') === true) ||
-      (typeFilter.includes('document') && (
-        file.mimeType?.includes('pdf') ||
-        file.mimeType?.includes('document') ||
-        file.mimeType?.includes('text')
-      )) ||
+      (typeFilter.includes('document') &&
+        (file.mimeType?.includes('pdf') ||
+          file.mimeType?.includes('document') ||
+          file.mimeType?.includes('text'))) ||
       (typeFilter.includes('video') && file.mimeType?.startsWith('video/') === true) ||
       (typeFilter.includes('audio') && file.mimeType?.startsWith('audio/') === true);
-    if (!matchesType) return false;
+    if (!matchesType) {
+      return false;
+    }
   }
 
   return true;
@@ -124,22 +113,32 @@ function sortFiles(a: FileItem, b: FileItem, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   // Folders always first
-  if (a.type === 'folder' && b.type !== 'folder') return -1;
-  if (a.type !== 'folder' && b.type === 'folder') return 1;
+  if (a.type === 'folder' && b.type !== 'folder') {
+    return -1;
+  }
+  if (a.type !== 'folder' && b.type === 'folder') {
+    return 1;
+  }
 
   switch (column) {
-  case 'name':
-    return multiplier * a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-  case 'size':
-    return multiplier * ((a.size || 0) - (b.size || 0));
-  case 'updatedAt':
-    return multiplier * a.updatedAt.localeCompare(b.updatedAt);
-  default:
-    return 0;
+    case 'name':
+      return multiplier * a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    case 'size':
+      return multiplier * ((a.size || 0) - (b.size || 0));
+    case 'updatedAt':
+      return multiplier * a.updatedAt.localeCompare(b.updatedAt);
+    default:
+      return 0;
   }
 }
 
-export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, showNotification }: FilesManagerProps) {
+export function FilesManager({
+  projectId,
+  clientId,
+  onNavigate,
+  getAuthToken,
+  showNotification
+}: FilesManagerProps) {
   const containerRef = useFadeIn();
 
   // View state
@@ -149,8 +148,12 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
   // Build dynamic endpoint with query params
   const filesEndpoint = useMemo(() => {
     const params = new URLSearchParams();
-    if (projectId) params.set('projectId', projectId);
-    if (clientId) params.set('clientId', clientId);
+    if (projectId) {
+      params.set('projectId', projectId);
+    }
+    if (clientId) {
+      params.set('clientId', clientId);
+    }
     return `${API_ENDPOINTS.ADMIN.FILES}?${params}`;
   }, [projectId, clientId]);
 
@@ -183,34 +186,53 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
 
   const filteredFiles = useMemo(() => applyFilters(files), [applyFilters, files]);
 
-  const pagination = usePagination({ storageKey: 'admin_files_pagination', totalItems: filteredFiles.length });
+  const pagination = usePagination({
+    storageKey: 'admin_files_pagination',
+    totalItems: filteredFiles.length
+  });
   const paginatedFiles = filteredFiles.slice(
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
   );
 
   function getFileIcon(file: FileItem): React.ReactNode {
-    if (file.type === 'folder') return FILE_ICONS.folder;
-    if (file.mimeType?.startsWith('image/')) return FILE_ICONS.image;
-    if (file.mimeType?.startsWith('video/')) return FILE_ICONS.video;
-    if (file.mimeType?.startsWith('audio/')) return FILE_ICONS.audio;
+    if (file.type === 'folder') {
+      return FILE_ICONS.folder;
+    }
+    if (file.mimeType?.startsWith('image/')) {
+      return FILE_ICONS.image;
+    }
+    if (file.mimeType?.startsWith('video/')) {
+      return FILE_ICONS.video;
+    }
+    if (file.mimeType?.startsWith('audio/')) {
+      return FILE_ICONS.audio;
+    }
     if (
       file.mimeType?.includes('pdf') ||
       file.mimeType?.includes('document') ||
       file.mimeType?.includes('text')
-    ) {return FILE_ICONS.document;}
+    ) {
+      return FILE_ICONS.document;
+    }
     return FILE_ICONS.default;
   }
 
   async function handleDelete(fileId: number) {
-    if (!confirm('Are you sure you want to delete this file?')) return;
+    if (!confirm('Are you sure you want to delete this file?')) {
+      return;
+    }
 
     try {
       const response = await apiDelete(buildEndpoint.adminFile(fileId));
 
-      if (!response.ok) throw new Error('Failed to delete file');
+      if (!response.ok) {
+        throw new Error('Failed to delete file');
+      }
 
-      setData((prev) => prev ? { ...prev, items: prev.items.filter((f) => f.id !== fileId) } : prev);
+      setData((prev) =>
+        prev ? { ...prev, items: prev.items.filter((f) => f.id !== fileId) } : prev
+      );
       showNotification?.('File deleted successfully', 'success');
     } catch (err) {
       logger.error('Failed to delete file:', err);
@@ -225,21 +247,27 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
     try {
       const response = await apiPost(buildEndpoint.fileAction(file.id, action));
 
-      if (!response.ok) throw new Error(`Failed to ${action} file`);
+      if (!response.ok) {
+        throw new Error(`Failed to ${action} file`);
+      }
 
       // Update local state
-      setData((prev) => prev ? {
-        ...prev,
-        items: prev.items.map((f) =>
-          f.id === file.id
-            ? {
-              ...f,
-              sharedWithClient: !isCurrentlyShared,
-              sharedAt: !isCurrentlyShared ? new Date().toISOString() : undefined
+      setData((prev) =>
+        prev
+          ? {
+              ...prev,
+              items: prev.items.map((f) =>
+                f.id === file.id
+                  ? {
+                      ...f,
+                      sharedWithClient: !isCurrentlyShared,
+                      sharedAt: !isCurrentlyShared ? new Date().toISOString() : undefined
+                    }
+                  : f
+              )
             }
-            : f
-        )
-      } : prev);
+          : prev
+      );
 
       showNotification?.(
         isCurrentlyShared ? 'File access revoked from client' : 'File shared with client',
@@ -267,11 +295,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
       }
       actions={
         <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search files..."
-          />
+          <SearchFilter value={search} onChange={setSearch} placeholder="Search files..." />
           <FilterDropdown
             sections={FILES_FILTER_CONFIG}
             values={filterValues}
@@ -369,7 +393,10 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          onNavigate?.('projects', file.projectId != null ? String(file.projectId) : undefined);
+                          onNavigate?.(
+                            'projects',
+                            file.projectId != null ? String(file.projectId) : undefined
+                          );
                         }}
                         className="link-btn"
                       >
@@ -381,7 +408,11 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
                     {file.type !== 'folder' && file.projectId && (
                       <span
                         className={`status-badge ${file.sharedWithClient ? 'status-active' : 'status-muted'}`}
-                        title={file.sharedWithClient && file.sharedAt ? `Shared on ${formatDateShort(file.sharedAt)}` : 'Not shared'}
+                        title={
+                          file.sharedWithClient && file.sharedAt
+                            ? `Shared on ${formatDateShort(file.sharedAt)}`
+                            : 'Not shared'
+                        }
                       >
                         {file.sharedWithClient ? 'Yes' : 'No'}
                       </span>
@@ -390,7 +421,9 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
                   <PortalTableCell className="text-right">
                     {file.type !== 'folder' && formatFileSize(file.size || 0)}
                   </PortalTableCell>
-                  <PortalTableCell className="date-col">{formatDateShort(file.updatedAt)}</PortalTableCell>
+                  <PortalTableCell className="date-col">
+                    {formatDateShort(file.updatedAt)}
+                  </PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
                       {file.type !== 'folder' && (
@@ -400,7 +433,9 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
                           {file.projectId && (
                             <IconButton
                               icon={file.sharedWithClient ? 'unshare' : 'share'}
-                              title={file.sharedWithClient ? 'Revoke client access' : 'Share with client'}
+                              title={
+                                file.sharedWithClient ? 'Revoke client access' : 'Share with client'
+                              }
                               onClick={() => handleToggleShare(file)}
                               className={file.sharedWithClient ? 'status-active' : undefined}
                             />
@@ -489,7 +524,9 @@ function FilesGrid({
 }
 
 function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 B';
+  if (bytes === 0) {
+    return '0 B';
+  }
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));

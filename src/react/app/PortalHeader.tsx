@@ -42,16 +42,21 @@ function ProjectSelector() {
 
   const activeProject = projects.find((p) => p.id === activeProjectId);
 
-  const handleSelect = React.useCallback((projectId: number) => {
-    setActiveProject(projectId);
-    setIsOpen(false);
-  }, [setActiveProject]);
+  const handleSelect = React.useCallback(
+    (projectId: number) => {
+      setActiveProject(projectId);
+      setIsOpen(false);
+    },
+    [setActiveProject]
+  );
 
   // Close on outside click
   useClickOutside(dropdownRef, () => setIsOpen(false), isOpen);
 
   // Only show when client has multiple projects
-  if (projectCount <= 1) return null;
+  if (projectCount <= 1) {
+    return null;
+  }
 
   return (
     <div className="project-selector" ref={dropdownRef}>
@@ -63,9 +68,7 @@ function ProjectSelector() {
         aria-haspopup="listbox"
         aria-label="Select project"
       >
-        <span className="project-selector-name">
-          {activeProject?.name ?? 'Select Project'}
-        </span>
+        <span className="project-selector-name">{activeProject?.name ?? 'Select Project'}</span>
         <ChevronDown className="icon-xs" aria-hidden="true" />
       </button>
       {isOpen && (
@@ -109,7 +112,9 @@ function HeaderBreadcrumbs() {
         <span className="breadcrumb-current">Dashboard</span>
       ) : (
         <>
-          <Link className="breadcrumb-link" to="/dashboard">Dashboard</Link>
+          <Link className="breadcrumb-link" to="/dashboard">
+            Dashboard
+          </Link>
           <ChevronRight className="breadcrumb-separator" aria-hidden="true" />
         </>
       )}
@@ -117,7 +122,9 @@ function HeaderBreadcrumbs() {
       {/* Group crumb (when inside a group subtab) */}
       {!isDashboard && isSubtab && groupLabel && (
         <>
-          <Link className="breadcrumb-link" to={`/${currentGroup}`}>{groupLabel}</Link>
+          <Link className="breadcrumb-link" to={`/${currentGroup}`}>
+            {groupLabel}
+          </Link>
           <ChevronRight className="breadcrumb-separator" aria-hidden="true" />
         </>
       )}
@@ -125,15 +132,15 @@ function HeaderBreadcrumbs() {
       {/* Parent list crumb for detail views (e.g., Clients, Projects) */}
       {!isDashboard && detailConfig && (
         <>
-          <Link className="breadcrumb-link" to={`/${detailConfig.parentTab}`}>{detailConfig.parentLabel}</Link>
+          <Link className="breadcrumb-link" to={`/${detailConfig.parentTab}`}>
+            {detailConfig.parentLabel}
+          </Link>
           <ChevronRight className="breadcrumb-separator" aria-hidden="true" />
         </>
       )}
 
       {/* Current page */}
-      {!isDashboard && (
-        <span className="breadcrumb-current">{pageTitle}</span>
-      )}
+      {!isDashboard && <span className="breadcrumb-current">{pageTitle}</span>}
     </div>
   );
 }
@@ -162,10 +169,7 @@ export function PortalHeader({ onSearchOpen }: PortalHeaderProps = {}) {
             aria-label="Toggle sidebar"
             onClick={toggleSidebar}
           >
-            <PanelLeft
-              className="sidebar-toggle-icon"
-              aria-hidden="true"
-            />
+            <PanelLeft className="sidebar-toggle-icon" aria-hidden="true" />
           </button>
 
           <HeaderBreadcrumbs />
@@ -191,11 +195,7 @@ export function PortalHeader({ onSearchOpen }: PortalHeaderProps = {}) {
               aria-label="Toggle dark/light theme"
               onClick={toggleTheme}
             >
-              {theme === 'light' ? (
-                <Sun aria-hidden="true" />
-              ) : (
-                <Moon aria-hidden="true" />
-              )}
+              {theme === 'light' ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
             </button>
           </div>
         </div>

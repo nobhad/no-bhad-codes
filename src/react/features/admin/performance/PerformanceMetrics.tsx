@@ -75,7 +75,10 @@ const KPI_ICONS: Record<string, React.ReactNode> = {
   target: <Target className="icon-lg" />
 };
 
-export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: PerformanceMetricsProps) {
+export function PerformanceMetrics({
+  onNavigate,
+  getAuthToken: _getAuthToken
+}: PerformanceMetricsProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +95,9 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
     setError(null);
     try {
       const response = await apiFetch(`${API_ENDPOINTS.ADMIN.PERFORMANCE}?period=${period}`);
-      if (!response.ok) throw new Error('Failed to load performance data');
+      if (!response.ok) {
+        throw new Error('Failed to load performance data');
+      }
       const payload = unwrapApiData<PerformanceData>(await response.json());
       setData(payload);
     } catch (err) {
@@ -111,9 +116,15 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
   }
 
   function getProgressColor(progress: number, isOnTrack: boolean): string {
-    if (!isOnTrack) return 'var(--status-cancelled)';
-    if (progress >= 75) return 'var(--status-completed)';
-    if (progress >= 50) return 'var(--status-active)';
+    if (!isOnTrack) {
+      return 'var(--status-cancelled)';
+    }
+    if (progress >= 75) {
+      return 'var(--status-completed)';
+    }
+    if (progress >= 50) {
+      return 'var(--status-active)';
+    }
     return 'var(--status-pending)';
   }
 
@@ -154,8 +165,11 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
           <LoadingState message="Loading performance data..." />
         ) : (
           data.kpis.map((kpi) => {
-            const changePercent = formatPercentage(((kpi.value - kpi.previousValue) / kpi.previousValue) * 100);
-            const targetLabel = kpi.unit === '$' ? formatCurrency(kpi.target) : `${kpi.target}${kpi.unit}`;
+            const changePercent = formatPercentage(
+              ((kpi.value - kpi.previousValue) / kpi.previousValue) * 100
+            );
+            const targetLabel =
+              kpi.unit === '$' ? formatCurrency(kpi.target) : `${kpi.target}${kpi.unit}`;
             return (
               <StatCard
                 key={kpi.id}
@@ -222,9 +236,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
                       <div>{project.name}</div>
                       <div>{project.clientName}</div>
                     </div>
-                    <span className="badge">
-                      {project.onTrack ? 'On Track' : 'At Risk'}
-                    </span>
+                    <span className="badge">{project.onTrack ? 'On Track' : 'At Risk'}</span>
                   </div>
                   <div className="source-row">
                     <span>Budget: {formatCurrency(project.budget)}</span>

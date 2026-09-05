@@ -1,15 +1,6 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import {
-  Plus,
-  Eye,
-  Send,
-  Check,
-  Download,
-  Trash2,
-  Inbox,
-  ChevronDown
-} from 'lucide-react';
+import { Plus, Eye, Send, Check, Download, Trash2, Inbox, ChevronDown } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { EmptyState } from '@react/components/portal/EmptyState';
 import {
@@ -72,8 +63,12 @@ interface InvoicesTabProps {
  * Check if an invoice is overdue
  */
 function isOverdue(invoice: Invoice): boolean {
-  if (invoice.status === 'paid' || invoice.status === 'cancelled') return false;
-  if (!invoice.due_date) return false;
+  if (invoice.status === 'paid' || invoice.status === 'cancelled') {
+    return false;
+  }
+  if (!invoice.due_date) {
+    return false;
+  }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -87,7 +82,9 @@ function isOverdue(invoice: Invoice): boolean {
  * Get display status considering overdue
  */
 function getDisplayStatus(invoice: Invoice): InvoiceStatus {
-  if (isOverdue(invoice)) return 'overdue';
+  if (isOverdue(invoice)) {
+    return 'overdue';
+  }
   return invoice.status;
 }
 
@@ -121,7 +118,9 @@ export function InvoicesTab({
 
   const deleteConfirm = useDeleteConfirm<Invoice>({
     onDelete: async (invoice) => {
-      if (!onDeleteInvoice) return false;
+      if (!onDeleteInvoice) {
+        return false;
+      }
       const success = await onDeleteInvoice(invoice.id);
       if (success) {
         showNotification?.(NOTIFICATIONS.invoice.DELETED, 'success');
@@ -136,7 +135,9 @@ export function InvoicesTab({
 
   // Filter invoices
   const filteredInvoices = useMemo(() => {
-    if (statusFilter === 'all') return invoices;
+    if (statusFilter === 'all') {
+      return invoices;
+    }
     if (statusFilter === 'overdue') {
       return invoices.filter((inv) => isOverdue(inv));
     }
@@ -172,7 +173,9 @@ export function InvoicesTab({
   // Handle send invoice
   const handleSend = useCallback(
     async (invoiceId: number) => {
-      if (!onSendInvoice) return;
+      if (!onSendInvoice) {
+        return;
+      }
       setActionLoading({ type: 'send', id: invoiceId });
       const success = await onSendInvoice(invoiceId);
       setActionLoading(null);
@@ -187,32 +190,42 @@ export function InvoicesTab({
   );
 
   // Open payment recording modal
-  const handleOpenPaymentModal = useCallback((invoice: Invoice) => {
-    setPaymentInvoice(invoice);
-    const amount = typeof invoice.amount_total === 'string' ? parseFloat(invoice.amount_total) : invoice.amount_total || 0;
-    const paid = typeof invoice.amount_paid === 'string' ? parseFloat(invoice.amount_paid) : invoice.amount_paid || 0;
-    setPaymentMethod('check');
-    setPaymentReference('');
-    setPaymentDate(new Date().toISOString().split('T')[0]);
-    setPaymentNotes('');
-    // Store remaining amount for the form (used by label)
-    setPaymentInvoice({ ...invoice, amount_total: amount - paid } as Invoice);
-    paymentModal.open();
-  }, [paymentModal]);
+  const handleOpenPaymentModal = useCallback(
+    (invoice: Invoice) => {
+      setPaymentInvoice(invoice);
+      const amount =
+        typeof invoice.amount_total === 'string'
+          ? parseFloat(invoice.amount_total)
+          : invoice.amount_total || 0;
+      const paid =
+        typeof invoice.amount_paid === 'string'
+          ? parseFloat(invoice.amount_paid)
+          : invoice.amount_paid || 0;
+      setPaymentMethod('check');
+      setPaymentReference('');
+      setPaymentDate(new Date().toISOString().split('T')[0]);
+      setPaymentNotes('');
+      // Store remaining amount for the form (used by label)
+      setPaymentInvoice({ ...invoice, amount_total: amount - paid } as Invoice);
+      paymentModal.open();
+    },
+    [paymentModal]
+  );
 
   // Record payment via API
   const handleRecordPayment = useCallback(async () => {
-    if (!paymentInvoice) return;
+    if (!paymentInvoice) {
+      return;
+    }
     setIsRecordingPayment(true);
 
     try {
-      const amount = typeof paymentInvoice.amount_total === 'string'
-        ? parseFloat(paymentInvoice.amount_total)
-        : paymentInvoice.amount_total || 0;
+      const amount =
+        typeof paymentInvoice.amount_total === 'string'
+          ? parseFloat(paymentInvoice.amount_total)
+          : paymentInvoice.amount_total || 0;
 
-      const refWithDate = paymentReference
-        ? `${paymentReference} (${paymentDate})`
-        : paymentDate;
+      const refWithDate = paymentReference ? `${paymentReference} (${paymentDate})` : paymentDate;
 
       const res = await apiPost(
         `${API_ENDPOINTS.INVOICES}/${paymentInvoice.id}/record-payment-with-history`,
@@ -237,12 +250,23 @@ export function InvoicesTab({
     } finally {
       setIsRecordingPayment(false);
     }
-  }, [paymentInvoice, paymentMethod, paymentReference, paymentDate, paymentNotes, paymentModal, showNotification, onRefresh]);
+  }, [
+    paymentInvoice,
+    paymentMethod,
+    paymentReference,
+    paymentDate,
+    paymentNotes,
+    paymentModal,
+    showNotification,
+    onRefresh
+  ]);
 
   // Handle download PDF
   const handleDownloadPdf = useCallback(
     async (invoiceId: number) => {
-      if (!onDownloadPdf) return;
+      if (!onDownloadPdf) {
+        return;
+      }
       setActionLoading({ type: 'download', id: invoiceId });
       try {
         await onDownloadPdf(invoiceId);
@@ -262,20 +286,13 @@ export function InvoicesTab({
         <div className="detail-meta">
           <div>
             <span className="text-secondary">Outstanding: </span>
-            <span
-              className={cn(
-                'pd-highlight-value',
-                totalOutstanding === 0 && 'text-secondary'
-              )}
-            >
+            <span className={cn('pd-highlight-value', totalOutstanding === 0 && 'text-secondary')}>
               {formatCurrency(totalOutstanding)}
             </span>
           </div>
           <div>
             <span className="text-secondary">Paid: </span>
-            <span className="pd-highlight-value">
-              {formatCurrency(totalPaid)}
-            </span>
+            <span className="pd-highlight-value">{formatCurrency(totalPaid)}</span>
           </div>
         </div>
 
@@ -354,12 +371,15 @@ export function InvoicesTab({
                     onClick={() => setSelectedInvoice(invoice)}
                     role="button"
                     tabIndex={0}
-                    onKeyDown={(e) => { if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) { e.preventDefault(); setSelectedInvoice(invoice); } }}
+                    onKeyDown={(e) => {
+                      if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) {
+                        e.preventDefault();
+                        setSelectedInvoice(invoice);
+                      }
+                    }}
                   >
                     <td className="pd-table-cell">
-                      <span className="pd-highlight-value">
-                        {invoice.invoice_number}
-                      </span>
+                      <span className="pd-highlight-value">{invoice.invoice_number}</span>
                     </td>
                     <td className="pd-table-cell">
                       <span className="pd-highlight-value">
@@ -373,22 +393,23 @@ export function InvoicesTab({
                     </td>
                     <td className="pd-table-cell">
                       <span
-                        className={cn(
-                          isOverdue(invoice)
-                            ? 'pd-highlight-value'
-                            : 'text-secondary'
-                        )}
+                        className={cn(isOverdue(invoice) ? 'pd-highlight-value' : 'text-secondary')}
                       >
                         {formatDate(invoice.due_date)}
                       </span>
                     </td>
-                    <td className="pd-table-cell pd-cell-right" onClick={(e) => e.stopPropagation()}>
+                    <td
+                      className="pd-table-cell pd-cell-right"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <div className="action-group">
                         {canSend && (
                           <button
                             className="icon-btn"
                             onClick={() => handleSend(invoice.id)}
-                            disabled={actionLoading?.type === 'send' && actionLoading?.id === invoice.id}
+                            disabled={
+                              actionLoading?.type === 'send' && actionLoading?.id === invoice.id
+                            }
                             title="Send invoice"
                             aria-label="Send invoice"
                           >
@@ -422,7 +443,9 @@ export function InvoicesTab({
                           <button
                             className="icon-btn"
                             onClick={() => handleDownloadPdf(invoice.id)}
-                            disabled={actionLoading?.type === 'download' && actionLoading?.id === invoice.id}
+                            disabled={
+                              actionLoading?.type === 'download' && actionLoading?.id === invoice.id
+                            }
                             title="Download PDF"
                             aria-label="Download PDF"
                           >
@@ -453,12 +476,23 @@ export function InvoicesTab({
       {/* Record Payment Modal */}
       <PortalModal
         open={paymentModal.isOpen}
-        onOpenChange={(open) => { if (!open) { paymentModal.close(); setPaymentInvoice(null); } }}
+        onOpenChange={(open) => {
+          if (!open) {
+            paymentModal.close();
+            setPaymentInvoice(null);
+          }
+        }}
         title="Record Payment"
         icon={<Check />}
         footer={
           <div className="action-group">
-            <button className="btn-secondary" onClick={() => { paymentModal.close(); setPaymentInvoice(null); }}>
+            <button
+              className="btn-secondary"
+              onClick={() => {
+                paymentModal.close();
+                setPaymentInvoice(null);
+              }}
+            >
               Cancel
             </button>
             <button
@@ -474,7 +508,8 @@ export function InvoicesTab({
         {paymentInvoice && (
           <div className="form-stack">
             <p className="text-secondary">
-              Recording payment of {formatCurrency(paymentInvoice.amount_total)} for {paymentInvoice.invoice_number}
+              Recording payment of {formatCurrency(paymentInvoice.amount_total)} for{' '}
+              {paymentInvoice.invoice_number}
             </p>
 
             <div className="form-field">
@@ -485,7 +520,9 @@ export function InvoicesTab({
                 onChange={(e) => setPaymentMethod(e.target.value)}
               >
                 {PAYMENT_METHODS.map((m) => (
-                  <option key={m.value} value={m.value}>{m.label}</option>
+                  <option key={m.value} value={m.value}>
+                    {m.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -497,7 +534,9 @@ export function InvoicesTab({
                 type="text"
                 value={paymentReference}
                 onChange={(e) => setPaymentReference(e.target.value)}
-                placeholder={paymentMethod === 'check' ? 'Check #1234' : 'Transaction ID or reference'}
+                placeholder={
+                  paymentMethod === 'check' ? 'Check #1234' : 'Transaction ID or reference'
+                }
               />
             </div>
 
@@ -531,13 +570,22 @@ export function InvoicesTab({
       {/* PDF Preview Modal */}
       <PortalModal
         open={!!previewInvoice}
-        onOpenChange={(open) => { if (!open) setPreviewInvoice(null); }}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPreviewInvoice(null);
+          }
+        }}
         title={previewInvoice?.invoice_number || 'Invoice Preview'}
         icon={<Eye />}
         size="lg"
         footer={
           previewInvoice && onDownloadPdf ? (
-            <button className="btn-secondary" onClick={() => { handleDownloadPdf(previewInvoice.id); }}>
+            <button
+              className="btn-secondary"
+              onClick={() => {
+                handleDownloadPdf(previewInvoice.id);
+              }}
+            >
               <Download className="icon-sm" /> Download
             </button>
           ) : undefined
@@ -555,7 +603,14 @@ export function InvoicesTab({
       <InvoiceDetailPanel
         invoice={selectedInvoice}
         onClose={() => setSelectedInvoice(null)}
-        onStatusChange={onStatusChange ? async (id, status) => { await onStatusChange(id, status); onRefresh?.(); } : undefined}
+        onStatusChange={
+          onStatusChange
+            ? async (id, status) => {
+                await onStatusChange(id, status);
+                onRefresh?.();
+              }
+            : undefined
+        }
         onSend={onSendInvoice}
         onMarkPaid={onMarkPaid}
         onDownloadPdf={onDownloadPdf}

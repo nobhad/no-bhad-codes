@@ -1,10 +1,6 @@
 import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
-import {
-  Mail,
-  Inbox,
-  Tag
-} from 'lucide-react';
+import { Mail, Inbox, Tag } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
@@ -27,7 +23,10 @@ import { useListFetch } from '@react/factories/useDataFetch';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
-import { EMAIL_TEMPLATES_FILTER_CONFIG, EMAIL_TEMPLATE_STATUS_OPTIONS } from '../shared/filterConfigs';
+import {
+  EMAIL_TEMPLATES_FILTER_CONFIG,
+  EMAIL_TEMPLATE_STATUS_OPTIONS
+} from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
@@ -91,13 +90,17 @@ function filterTemplate(
 
   const categoryFilter = filters.category;
   if (categoryFilter && categoryFilter.length > 0) {
-    if (!categoryFilter.includes(template.category)) return false;
+    if (!categoryFilter.includes(template.category)) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
     const activeValue = template.is_active ? 'active' : 'inactive';
-    if (!statusFilter.includes(activeValue)) return false;
+    if (!statusFilter.includes(activeValue)) {
+      return false;
+    }
   }
 
   return true;
@@ -108,16 +111,22 @@ function sortTemplates(a: EmailTemplate, b: EmailTemplate, sort: SortConfig): nu
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'name':
-    return multiplier * a.name.localeCompare(b.name);
-  case 'updated_at':
-    return multiplier * a.updated_at.localeCompare(b.updated_at);
-  default:
-    return 0;
+    case 'name':
+      return multiplier * a.name.localeCompare(b.name);
+    case 'updated_at':
+      return multiplier * a.updated_at.localeCompare(b.updated_at);
+    default:
+      return 0;
   }
 }
 
-export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotification, defaultPageSize = 25, overviewMode = false }: EmailTemplatesManagerProps) {
+export function EmailTemplatesManager({
+  onNavigate,
+  getAuthToken,
+  showNotification,
+  defaultPageSize = 25,
+  overviewMode = false
+}: EmailTemplatesManagerProps) {
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -150,58 +159,71 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
   const categoryFilterOptions = useMemo(() => {
     return [
       { value: 'all', label: 'All Categories' },
-      ...stats.categories.map(cat => ({ value: cat.value, label: cat.label }))
+      ...stats.categories.map((cat) => ({ value: cat.value, label: cat.label }))
     ];
   }, [stats.categories]);
 
   const filteredTemplates = useMemo(() => applyFilters(templates), [applyFilters, templates]);
 
-  const pagination = usePagination({ storageKey: overviewMode ? undefined : 'admin_email_templates_pagination', totalItems: filteredTemplates.length, defaultPageSize });
+  const pagination = usePagination({
+    storageKey: overviewMode ? undefined : 'admin_email_templates_pagination',
+    totalItems: filteredTemplates.length,
+    defaultPageSize
+  });
   const paginatedTemplates = filteredTemplates.slice(
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
   );
 
   // Single delete handler
-  const handleDeleteTemplate = useCallback(async (templateId: number) => {
-    if (!window.confirm('Are you sure you want to delete this template?')) return;
-    try {
-      const response = await apiFetch(`${API_ENDPOINTS.ADMIN.EMAIL_TEMPLATES}/${templateId}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete template');
-      showNotification?.('Template deleted', 'success');
-      refetch();
-    } catch {
-      showNotification?.('Failed to delete template', 'error');
-    }
-  }, [showNotification, refetch]);
-
-  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
-    setCreateLoading(true);
-    try {
-      const res = await apiPost(API_ENDPOINTS.ADMIN.EMAIL_TEMPLATES, formData);
-      if (res.ok) {
-        showNotification?.('Template created successfully', 'success');
-        setCreateOpen(false);
-        refetch();
-      } else {
-        showNotification?.('Failed to create template', 'error');
+  const handleDeleteTemplate = useCallback(
+    async (templateId: number) => {
+      if (!window.confirm('Are you sure you want to delete this template?')) {
+        return;
       }
-    } catch {
-      showNotification?.('Failed to create template', 'error');
-    } finally {
-      setCreateLoading(false);
-    }
-  }, [showNotification, refetch]);
+      try {
+        const response = await apiFetch(`${API_ENDPOINTS.ADMIN.EMAIL_TEMPLATES}/${templateId}`, {
+          method: 'DELETE'
+        });
+        if (!response.ok) {
+          throw new Error('Failed to delete template');
+        }
+        showNotification?.('Template deleted', 'success');
+        refetch();
+      } catch {
+        showNotification?.('Failed to delete template', 'error');
+      }
+    },
+    [showNotification, refetch]
+  );
+
+  const handleCreate = useCallback(
+    async (formData: Record<string, unknown>) => {
+      setCreateLoading(true);
+      try {
+        const res = await apiPost(API_ENDPOINTS.ADMIN.EMAIL_TEMPLATES, formData);
+        if (res.ok) {
+          showNotification?.('Template created successfully', 'success');
+          setCreateOpen(false);
+          refetch();
+        } else {
+          showNotification?.('Failed to create template', 'error');
+        }
+      } catch {
+        showNotification?.('Failed to create template', 'error');
+      } finally {
+        setCreateLoading(false);
+      }
+    },
+    [showNotification, refetch]
+  );
 
   // Detail panel state
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
 
-  const handleRowClick = useCallback(
-    (template: EmailTemplate) => {
-      setSelectedTemplate(template);
-    },
-    []
-  );
+  const handleRowClick = useCallback((template: EmailTemplate) => {
+    setSelectedTemplate(template);
+  }, []);
 
   const handleClosePanel = useCallback(() => {
     setSelectedTemplate(null);
@@ -224,11 +246,7 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
         }
         actions={
           <>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search templates..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search templates..." />
             <FilterDropdown
               sections={[
                 { key: 'category', label: 'CATEGORY', options: categoryFilterOptions },
@@ -268,9 +286,11 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
                 sortDirection={sort?.column === 'name' ? sort.direction : null}
                 onClick={() => toggleSort('name')}
               >
-              Template
+                Template
               </PortalTableHead>
-              {!overviewMode && <PortalTableHead className="category-col">Category</PortalTableHead>}
+              {!overviewMode && (
+                <PortalTableHead className="category-col">Category</PortalTableHead>
+              )}
               <PortalTableHead className="status-col">Status</PortalTableHead>
               {!overviewMode && (
                 <>
@@ -280,7 +300,7 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
                     sortDirection={sort?.column === 'updated_at' ? sort.direction : null}
                     onClick={() => toggleSort('updated_at')}
                   >
-                  Updated
+                    Updated
                   </PortalTableHead>
                   <PortalTableHead className="col-actions">Actions</PortalTableHead>
                 </>
@@ -301,16 +321,25 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
               />
             ) : (
               paginatedTemplates.map((template) => (
-                <PortalTableRow key={template.id} clickable onClick={() => handleRowClick(template)}>
+                <PortalTableRow
+                  key={template.id}
+                  clickable
+                  onClick={() => handleRowClick(template)}
+                >
                   <PortalTableCell className="primary-cell">
                     <div className="cell-with-icon">
                       <Mail className="icon-sm" />
                       <div className="cell-content">
                         <span className="cell-title">{decodeHtmlEntities(template.name)}</span>
-                        <span className="cell-subtitle">{decodeHtmlEntities(template.subject)}</span>
+                        <span className="cell-subtitle">
+                          {decodeHtmlEntities(template.subject)}
+                        </span>
                         <span className="category-stacked">{template.category}</span>
                         <span className="status-stacked">
-                          <StatusBadge status={template.is_active ? 'completed' : 'pending'} size="sm">
+                          <StatusBadge
+                            status={template.is_active ? 'completed' : 'pending'}
+                            size="sm"
+                          >
                             {template.is_active ? 'Active' : 'Inactive'}
                           </StatusBadge>
                         </span>
@@ -332,11 +361,21 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
                   </PortalTableCell>
                   {!overviewMode && (
                     <>
-                      <PortalTableCell className="date-col">{formatDate(template.updated_at)}</PortalTableCell>
+                      <PortalTableCell className="date-col">
+                        {formatDate(template.updated_at)}
+                      </PortalTableCell>
                       <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                         <div className="action-group">
-                          <IconButton action="edit" title="Edit" onClick={() => onNavigate?.('email-template', String(template.id))} />
-                          <IconButton action="delete" title="Delete" onClick={() => handleDeleteTemplate(template.id)} />
+                          <IconButton
+                            action="edit"
+                            title="Edit"
+                            onClick={() => onNavigate?.('email-template', String(template.id))}
+                          />
+                          <IconButton
+                            action="delete"
+                            title="Delete"
+                            onClick={() => handleDeleteTemplate(template.id)}
+                          />
                         </div>
                       </PortalTableCell>
                     </>

@@ -20,10 +20,7 @@ import {
 
 const logger = createLogger('ValidationErrorsTab');
 
-export function ValidationErrorsTab({
-  getAuthToken,
-  showNotification
-}: TabProps) {
+export function ValidationErrorsTab({ getAuthToken, showNotification }: TabProps) {
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorTypeFilter, setErrorTypeFilter] = useState('');
@@ -49,7 +46,7 @@ export function ValidationErrorsTab({
   }, [loadErrors]);
 
   const errorTypes = useMemo(() => {
-    const types = new Set(errors.map(e => e.errorType));
+    const types = new Set(errors.map((e) => e.errorType));
     return Array.from(types).sort();
   }, [errors]);
 
@@ -62,14 +59,18 @@ export function ValidationErrorsTab({
   );
 
   const filteredErrors = useMemo(() => {
-    if (!errorTypeFilter) return errors;
-    return errors.filter(e => e.errorType === errorTypeFilter);
+    if (!errorTypeFilter) {
+      return errors;
+    }
+    return errors.filter((e) => e.errorType === errorTypeFilter);
   }, [errors, errorTypeFilter]);
 
   return (
     <div className="portal-card">
       <div className="data-table-header">
-        <h3><span className="title-full">Validation Errors</span></h3>
+        <h3>
+          <span className="title-full">Validation Errors</span>
+        </h3>
         <div className="data-table-actions">
           <div className="filter-inline">
             <Filter />
@@ -86,7 +87,11 @@ export function ValidationErrorsTab({
       {loading ? (
         <div className="loading-state">Loading validation errors...</div>
       ) : filteredErrors.length === 0 ? (
-        <EmptyState message={errorTypeFilter ? 'No errors match the selected filter.' : 'No validation errors found.'} />
+        <EmptyState
+          message={
+            errorTypeFilter ? 'No errors match the selected filter.' : 'No validation errors found.'
+          }
+        />
       ) : (
         <table className="data-table">
           <thead>
@@ -100,7 +105,7 @@ export function ValidationErrorsTab({
             </tr>
           </thead>
           <tbody>
-            {filteredErrors.map(error => (
+            {filteredErrors.map((error) => (
               <tr key={error.id}>
                 <td>{error.entityType}</td>
                 <td>{error.entityName}</td>
@@ -109,7 +114,9 @@ export function ValidationErrorsTab({
                 </td>
                 <td>{error.message}</td>
                 <td>
-                  <span className={`status-badge status-badge-${getSeverityBadgeVariant(error.severity)}`}>
+                  <span
+                    className={`status-badge status-badge-${getSeverityBadgeVariant(error.severity)}`}
+                  >
                     {error.severity}
                   </span>
                 </td>

@@ -34,12 +34,12 @@ export interface PortalAdHocRequestsProps extends PortalViewProps {}
 /**
  * PortalAdHocRequests Component
  */
-export function PortalAdHocRequests({
-  getAuthToken,
-  showNotification
-}: PortalAdHocRequestsProps) {
+export function PortalAdHocRequests({ getAuthToken, showNotification }: PortalAdHocRequestsProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const listRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_DEFAULT, GSAP.STAGGER_DELAY_SHORT);
+  const listRef = useStaggerChildren<HTMLDivElement>(
+    GSAP.STAGGER_DEFAULT,
+    GSAP.STAGGER_DELAY_SHORT
+  );
 
   // Primary data fetch via shared hook
   const {
@@ -51,7 +51,7 @@ export function PortalAdHocRequests({
   } = usePortalData<AdHocRequest[]>({
     getAuthToken,
     url: API_ENDPOINTS.AD_HOC_REQUESTS_MY,
-    transform: (raw) => (raw as Record<string, unknown>).requests as AdHocRequest[] || []
+    transform: (raw) => ((raw as Record<string, unknown>).requests as AdHocRequest[]) || []
   });
   const items = useMemo(() => requests ?? [], [requests]);
 
@@ -60,17 +60,12 @@ export function PortalAdHocRequests({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Table filters
-  const {
-    filterValues,
-    setFilter,
-    search,
-    setSearch,
-    applyFilters
-  } = useTableFilters<AdHocRequest>({
-    storageKey: 'portal_adhoc_requests',
-    filters: PORTAL_ADHOC_FILTER_CONFIG,
-    filterFn: filterAdHocRequest
-  });
+  const { filterValues, setFilter, search, setSearch, applyFilters } =
+    useTableFilters<AdHocRequest>({
+      storageKey: 'portal_adhoc_requests',
+      filters: PORTAL_ADHOC_FILTER_CONFIG,
+      filterFn: filterAdHocRequest
+    });
 
   const filteredRequests = useMemo(() => applyFilters(items), [applyFilters, items]);
 
@@ -105,7 +100,9 @@ export function PortalAdHocRequests({
         // Raw fetch for FormData — add CSRF protection manually
         const csrfToken = getCsrfToken();
         const requestHeaders: Record<string, string> = {};
-        if (csrfToken) requestHeaders[CSRF_HEADER_NAME] = csrfToken;
+        if (csrfToken) {
+          requestHeaders[CSRF_HEADER_NAME] = csrfToken;
+        }
 
         const response = await fetch(buildEndpoint.projectUpload(payload.projectId), {
           method: 'POST',
@@ -116,9 +113,7 @@ export function PortalAdHocRequests({
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          throw new Error(
-            (errorData as { error?: string }).error || 'Failed to upload attachment'
-          );
+          throw new Error((errorData as { error?: string }).error || 'Failed to upload attachment');
         }
 
         const uploaded = (await response.json()) as {
@@ -147,10 +142,7 @@ export function PortalAdHocRequests({
       await refetch();
     } catch (err) {
       logger.error('Error submitting request:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to submit request'),
-        'error'
-      );
+      showNotification?.(formatErrorMessage(err, 'Failed to submit request'), 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -166,10 +158,7 @@ export function PortalAdHocRequests({
       await refetch();
     } catch (err) {
       logger.error('Error approving quote:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to approve quote'),
-        'error'
-      );
+      showNotification?.(formatErrorMessage(err, 'Failed to approve quote'), 'error');
       throw err; // Re-throw for the card to handle
     }
   };
@@ -184,10 +173,7 @@ export function PortalAdHocRequests({
       await refetch();
     } catch (err) {
       logger.error('Error declining quote:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to decline quote'),
-        'error'
-      );
+      showNotification?.(formatErrorMessage(err, 'Failed to decline quote'), 'error');
       throw err; // Re-throw for the card to handle
     }
   };
@@ -223,9 +209,10 @@ export function PortalAdHocRequests({
         ) : filteredRequests.length === 0 ? (
           <EmptyState
             icon={<Inbox className="icon-lg" />}
-            message={items.length === 0
-              ? 'No requests yet. Click \'+\' to submit your first ad-hoc request.'
-              : 'No requests match the current filters.'
+            message={
+              items.length === 0
+                ? "No requests yet. Click '+' to submit your first ad-hoc request."
+                : 'No requests match the current filters.'
             }
           />
         ) : (

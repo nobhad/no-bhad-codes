@@ -77,7 +77,6 @@ interface ProjectsTableProps {
   overviewMode?: boolean;
 }
 
-
 // Filter function
 function filterProject(
   project: Project,
@@ -94,19 +93,25 @@ function filterProject(
       project.company_name?.toLowerCase().includes(searchLower) ||
       project.description?.toLowerCase().includes(searchLower);
 
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   // Status filter
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(project.status)) return false;
+    if (!statusFilter.includes(project.status)) {
+      return false;
+    }
   }
 
   // Type filter
   const typeFilter = filters.type;
   if (typeFilter && typeFilter.length > 0) {
-    if (!typeFilter.includes(project.project_type ?? '')) return false;
+    if (!typeFilter.includes(project.project_type ?? '')) {
+      return false;
+    }
   }
 
   return true;
@@ -118,26 +123,24 @@ function sortProjects(a: Project, b: Project, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'name':
-    return multiplier * (a.project_name || '').localeCompare(b.project_name || '');
-  case 'status':
-    return multiplier * a.status.localeCompare(b.status);
-  case 'type':
-    return multiplier * (a.project_type || '').localeCompare(b.project_type || '');
-  case 'budget':
-    return multiplier * ((parseFloat(a.budget || '0') || 0) - (parseFloat(b.budget || '0') || 0));
-  case 'start_date':
-    return (
-      multiplier *
-        (new Date(a.start_date || 0).getTime() - new Date(b.start_date || 0).getTime())
-    );
-  case 'end_date':
-    return (
-      multiplier *
-        (new Date(a.end_date || 0).getTime() - new Date(b.end_date || 0).getTime())
-    );
-  default:
-    return 0;
+    case 'name':
+      return multiplier * (a.project_name || '').localeCompare(b.project_name || '');
+    case 'status':
+      return multiplier * a.status.localeCompare(b.status);
+    case 'type':
+      return multiplier * (a.project_type || '').localeCompare(b.project_type || '');
+    case 'budget':
+      return multiplier * ((parseFloat(a.budget || '0') || 0) - (parseFloat(b.budget || '0') || 0));
+    case 'start_date':
+      return (
+        multiplier * (new Date(a.start_date || 0).getTime() - new Date(b.start_date || 0).getTime())
+      );
+    case 'end_date':
+      return (
+        multiplier * (new Date(a.end_date || 0).getTime() - new Date(b.end_date || 0).getTime())
+      );
+    default:
+      return 0;
   }
 }
 
@@ -154,7 +157,8 @@ export function ProjectsTable({
   const containerRef = useFadeIn<HTMLDivElement>();
 
   // Data fetching
-  const { projects, isLoading, error, stats, refetch, createProject, updateProject, bulkDelete } = useProjects();
+  const { projects, isLoading, error, stats, refetch, createProject, updateProject, bulkDelete } =
+    useProjects();
 
   // Client list for the Add Project modal dropdown
   const { clients } = useClients();
@@ -164,7 +168,7 @@ export function ProjectsTable({
         value: String(c.id),
         label: c.company_name
           ? `${c.contact_name || c.email} (${c.company_name})`
-          : (c.contact_name || c.email)
+          : c.contact_name || c.email
       })),
     [clients]
   );
@@ -231,7 +235,9 @@ export function ProjectsTable({
   // Handle bulk status change
   const handleBulkStatusChange = useCallback(
     async (newStatus: string) => {
-      if (selection.selectedCount === 0) return;
+      if (selection.selectedCount === 0) {
+        return;
+      }
 
       setBulkActionLoading(true);
       let successCount = 0;
@@ -256,7 +262,9 @@ export function ProjectsTable({
 
   // Handle bulk delete
   const handleBulkDelete = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
     const ids = selection.selectedItems.map((p) => p.id);
     const result = await bulkDelete(ids);
@@ -308,7 +316,6 @@ export function ProjectsTable({
     [updateProject]
   );
 
-
   // Handle view project
   const handleViewProject = useCallback(
     (projectId: number) => {
@@ -342,11 +349,7 @@ export function ProjectsTable({
         }
         actions={
           <>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search projects..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search projects..." />
             <FilterDropdown
               sections={PROJECTS_FILTER_CONFIG}
               values={filterValues}
@@ -377,11 +380,15 @@ export function ProjectsTable({
             totalCount={filteredProjects.length}
             onClearSelection={selection.clearSelection}
             onSelectAll={() => selection.selectMany(filteredProjects)}
-            allSelected={selection.allSelected && selection.selectedCount === filteredProjects.length}
+            allSelected={
+              selection.allSelected && selection.selectedCount === filteredProjects.length
+            }
             statusOptions={bulkStatusOptions}
             onStatusChange={handleBulkStatusChange}
             onDelete={
-              filterValues.status?.some((s: string) => ['completed', 'cancelled', 'on-hold'].includes(s))
+              filterValues.status?.some((s: string) =>
+                ['completed', 'cancelled', 'on-hold'].includes(s)
+              )
                 ? deleteDialog.open
                 : undefined
             }
@@ -491,15 +498,23 @@ export function ProjectsTable({
                   {/* Project Name & Client */}
                   <PortalTableCell className="primary-cell name-col">
                     <div className="cell-content">
-                      <span className="cell-title">{decodeHtmlEntities(project.project_name) || 'Untitled Project'}</span>
+                      <span className="cell-title">
+                        {decodeHtmlEntities(project.project_name) || 'Untitled Project'}
+                      </span>
                       {(() => {
                         const contact = decodeHtmlEntities(project.contact_name || '');
-                        const company = project.company_name ? decodeHtmlEntities(project.company_name) : '';
+                        const company = project.company_name
+                          ? decodeHtmlEntities(project.company_name)
+                          : '';
 
                         let subtitle = '';
                         if (company) {
                           // Avoid duplicating company name when contact already includes it
-                          if (contact && contact.toLowerCase() !== company.toLowerCase() && !contact.toLowerCase().includes(company.toLowerCase())) {
+                          if (
+                            contact &&
+                            contact.toLowerCase() !== company.toLowerCase() &&
+                            !contact.toLowerCase().includes(company.toLowerCase())
+                          ) {
                             subtitle = `${contact} \u2014 ${company}`;
                           } else {
                             subtitle = company;
@@ -518,7 +533,9 @@ export function ProjectsTable({
                         <span className="budget-stacked">{formatCurrency(project.budget)}</span>
                       )}
                       {project.end_date && (
-                        <span className="target-stacked">Target: {formatDate(project.end_date)}</span>
+                        <span className="target-stacked">
+                          Target: {formatDate(project.end_date)}
+                        </span>
                       )}
                     </div>
                   </PortalTableCell>
@@ -532,7 +549,9 @@ export function ProjectsTable({
                   <StatusDropdownCell
                     status={project.status}
                     statusConfig={PROJECT_STATUS_CONFIG}
-                    onStatusChange={(newStatus) => handleStatusChange(project.id, newStatus as ProjectStatus)}
+                    onStatusChange={(newStatus) =>
+                      handleStatusChange(project.id, newStatus as ProjectStatus)
+                    }
                     ariaLabel="Change project status"
                   />
 
@@ -544,9 +563,7 @@ export function ProjectsTable({
                   {/* Timeline - consolidated dates */}
                   <PortalTableCell className="timeline-cell">
                     <div className="cell-content">
-                      {project.timeline && (
-                        <span className="cell-title">{project.timeline}</span>
-                      )}
+                      {project.timeline && <span className="cell-title">{project.timeline}</span>}
                       <span className="cell-subtitle">
                         {formatDate(project.start_date)} → {formatDate(project.end_date)}
                       </span>

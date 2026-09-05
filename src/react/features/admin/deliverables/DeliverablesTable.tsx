@@ -1,9 +1,6 @@
 import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
-import {
-  Package,
-  Inbox
-} from 'lucide-react';
+import { Package, Inbox } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -106,12 +103,16 @@ function filterDeliverable(
       deliverable.title.toLowerCase().includes(searchLower) ||
       deliverable.projectName.toLowerCase().includes(searchLower) ||
       deliverable.clientName.toLowerCase().includes(searchLower);
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(deliverable.status)) return false;
+    if (!statusFilter.includes(deliverable.status)) {
+      return false;
+    }
   }
 
   return true;
@@ -123,20 +124,27 @@ function sortDeliverables(a: Deliverable, b: Deliverable, sort: SortConfig): num
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'title':
-    return multiplier * a.title.localeCompare(b.title);
-  case 'project':
-    return multiplier * a.projectName.localeCompare(b.projectName);
-  case 'dueDate':
-    return multiplier * ((a.dueDate || '').localeCompare(b.dueDate || ''));
-  case 'updatedAt':
-    return multiplier * (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime());
-  default:
-    return 0;
+    case 'title':
+      return multiplier * a.title.localeCompare(b.title);
+    case 'project':
+      return multiplier * a.projectName.localeCompare(b.projectName);
+    case 'dueDate':
+      return multiplier * (a.dueDate || '').localeCompare(b.dueDate || '');
+    case 'updatedAt':
+      return multiplier * (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime());
+    default:
+      return 0;
   }
 }
 
-export function DeliverablesTable({ projectId, getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: DeliverablesTableProps) {
+export function DeliverablesTable({
+  projectId,
+  getAuthToken,
+  showNotification,
+  onNavigate,
+  defaultPageSize = 25,
+  overviewMode = false
+}: DeliverablesTableProps) {
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -145,7 +153,9 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
   // Build endpoint with optional projectId query param
   const endpoint = useMemo(() => {
     const params = new URLSearchParams();
-    if (projectId) params.set('projectId', projectId);
+    if (projectId) {
+      params.set('projectId', projectId);
+    }
     const qs = params.toString();
     return qs ? `${API_ENDPOINTS.ADMIN.DELIVERABLES}?${qs}` : API_ENDPOINTS.ADMIN.DELIVERABLES;
   }, [projectId]);
@@ -180,7 +190,10 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
   });
 
   // Apply filters
-  const filteredDeliverables = useMemo(() => applyFilters(deliverables), [applyFilters, deliverables]);
+  const filteredDeliverables = useMemo(
+    () => applyFilters(deliverables),
+    [applyFilters, deliverables]
+  );
 
   const { exportCsv, isExporting } = useExport({
     config: DELIVERABLES_EXPORT_CONFIG,
@@ -209,88 +222,122 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
   });
 
   // Status change handler
-  const handleStatusChange = useCallback(async (deliverableId: number, newStatus: string) => {
-    try {
-      const response = await apiFetch(buildEndpoint.adminDeliverable(deliverableId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
+  const handleStatusChange = useCallback(
+    async (deliverableId: number, newStatus: string) => {
+      try {
+        const response = await apiFetch(buildEndpoint.adminDeliverable(deliverableId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
 
-      if (!response.ok) throw new Error('Failed to update deliverable');
+        if (!response.ok) {
+          throw new Error('Failed to update deliverable');
+        }
 
-      setData((prev) => prev ? {
-        ...prev,
-        items: prev.items.map((d) =>
-          d.id === deliverableId
-            ? { ...d, status: newStatus as Deliverable['status'] }
-            : d
-        )
-      } : prev);
-      showNotification?.('Deliverable status updated', 'success');
-    } catch (err) {
-      logger.error('Failed to update deliverable status:', err);
-      showNotification?.('Failed to update deliverable status', 'error');
-    }
-  }, [setData, showNotification]);
+        setData((prev) =>
+          prev
+            ? {
+                ...prev,
+                items: prev.items.map((d) =>
+                  d.id === deliverableId ? { ...d, status: newStatus as Deliverable['status'] } : d
+                )
+              }
+            : prev
+        );
+        showNotification?.('Deliverable status updated', 'success');
+      } catch (err) {
+        logger.error('Failed to update deliverable status:', err);
+        showNotification?.('Failed to update deliverable status', 'error');
+      }
+    },
+    [setData, showNotification]
+  );
 
   // Generic field update handler for inline editing
-  const handleFieldUpdate = useCallback(async (
-    deliverableId: number,
-    field: keyof Deliverable,
-    value: string
-  ): Promise<boolean> => {
-    try {
-      const response = await apiFetch(buildEndpoint.adminDeliverable(deliverableId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [field]: value })
-      });
+  const handleFieldUpdate = useCallback(
+    async (deliverableId: number, field: keyof Deliverable, value: string): Promise<boolean> => {
+      try {
+        const response = await apiFetch(buildEndpoint.adminDeliverable(deliverableId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ [field]: value })
+        });
 
-      if (!response.ok) throw new Error(`Failed to update deliverable ${field}`);
+        if (!response.ok) {
+          throw new Error(`Failed to update deliverable ${field}`);
+        }
 
-      setData((prev) => prev ? {
-        ...prev,
-        items: prev.items.map((d) =>
-          d.id === deliverableId ? { ...d, [field]: value } : d
-        )
-      } : prev);
-      showNotification?.(`Deliverable ${field} updated`, 'success');
-      return true;
-    } catch (err) {
-      logger.error(`Failed to update deliverable ${field}:`, err);
-      showNotification?.(`Failed to update deliverable ${field}`, 'error');
-      return false;
-    }
-  }, [setData, showNotification]);
+        setData((prev) =>
+          prev
+            ? {
+                ...prev,
+                items: prev.items.map((d) =>
+                  d.id === deliverableId ? { ...d, [field]: value } : d
+                )
+              }
+            : prev
+        );
+        showNotification?.(`Deliverable ${field} updated`, 'success');
+        return true;
+      } catch (err) {
+        logger.error(`Failed to update deliverable ${field}:`, err);
+        showNotification?.(`Failed to update deliverable ${field}`, 'error');
+        return false;
+      }
+    },
+    [setData, showNotification]
+  );
 
   // Single delete handler
-  const handleDeleteDeliverable = useCallback(async (deliverableId: number) => {
-    if (!window.confirm('Are you sure you want to delete this deliverable?')) return;
-    try {
-      const response = await apiFetch(buildEndpoint.adminDeliverable(deliverableId), { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete deliverable');
-      setData((prev) => prev ? { ...prev, items: prev.items.filter((d) => d.id !== deliverableId) } : prev);
-      showNotification?.('Deliverable deleted', 'success');
-    } catch (err) {
-      logger.error('Failed to delete deliverable:', err);
-      showNotification?.('Failed to delete deliverable', 'error');
-    }
-  }, [setData, showNotification]);
+  const handleDeleteDeliverable = useCallback(
+    async (deliverableId: number) => {
+      if (!window.confirm('Are you sure you want to delete this deliverable?')) {
+        return;
+      }
+      try {
+        const response = await apiFetch(buildEndpoint.adminDeliverable(deliverableId), {
+          method: 'DELETE'
+        });
+        if (!response.ok) {
+          throw new Error('Failed to delete deliverable');
+        }
+        setData((prev) =>
+          prev ? { ...prev, items: prev.items.filter((d) => d.id !== deliverableId) } : prev
+        );
+        showNotification?.('Deliverable deleted', 'success');
+      } catch (err) {
+        logger.error('Failed to delete deliverable:', err);
+        showNotification?.('Failed to delete deliverable', 'error');
+      }
+    },
+    [setData, showNotification]
+  );
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
     const ids = selection.selectedItems.map((d) => d.id);
     try {
-      const response = await apiPost(API_ENDPOINTS.ADMIN.DELIVERABLES_BULK_DELETE, { deliverableIds: ids });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.DELIVERABLES_BULK_DELETE, {
+        deliverableIds: ids
+      });
 
-      if (!response.ok) throw new Error('Failed to delete deliverables');
+      if (!response.ok) {
+        throw new Error('Failed to delete deliverables');
+      }
 
-      setData((prev) => prev ? { ...prev, items: prev.items.filter((d) => !ids.includes(d.id)) } : prev);
+      setData((prev) =>
+        prev ? { ...prev, items: prev.items.filter((d) => !ids.includes(d.id)) } : prev
+      );
       selection.clearSelection();
-      showNotification?.(`Deleted ${ids.length} deliverable${ids.length !== 1 ? 's' : ''}`, 'success');
+      showNotification?.(
+        `Deleted ${ids.length} deliverable${ids.length !== 1 ? 's' : ''}`,
+        'success'
+      );
     } catch (err) {
       logger.error('Failed to delete deliverables:', err);
       showNotification?.('Failed to delete deliverables', 'error');
@@ -311,7 +358,9 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
   // Handle bulk status change
   const handleBulkStatusChange = useCallback(
     async (newStatus: string) => {
-      if (selection.selectedCount === 0) return;
+      if (selection.selectedCount === 0) {
+        return;
+      }
 
       for (const d of selection.selectedItems) {
         await handleStatusChange(d.id, newStatus);
@@ -333,31 +382,40 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
   const projectOptions = useMemo(() => {
     const map = new Map<string, string>();
     entityProjects.forEach((o) => map.set(o.value, o.label));
-    deliverables.forEach((d) => { if (d.projectId && d.projectName) map.set(String(d.projectId), d.projectName); });
+    deliverables.forEach((d) => {
+      if (d.projectId && d.projectName) {
+        map.set(String(d.projectId), d.projectName);
+      }
+    });
     return Array.from(map, ([value, label]) => ({ value, label }));
   }, [deliverables, entityProjects]);
 
   // Create handler
-  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
-    setCreateLoading(true);
-    try {
-      const res = await apiPost(API_ENDPOINTS.ADMIN.DELIVERABLES, formData);
-      if (res.ok) {
-        showNotification?.('Deliverable created successfully', 'success');
-        setCreateOpen(false);
-        refetch();
-      } else {
+  const handleCreate = useCallback(
+    async (formData: Record<string, unknown>) => {
+      setCreateLoading(true);
+      try {
+        const res = await apiPost(API_ENDPOINTS.ADMIN.DELIVERABLES, formData);
+        if (res.ok) {
+          showNotification?.('Deliverable created successfully', 'success');
+          setCreateOpen(false);
+          refetch();
+        } else {
+          showNotification?.('Failed to create deliverable', 'error');
+        }
+      } catch {
         showNotification?.('Failed to create deliverable', 'error');
+      } finally {
+        setCreateLoading(false);
       }
-    } catch {
-      showNotification?.('Failed to create deliverable', 'error');
-    } finally {
-      setCreateLoading(false);
-    }
-  }, [showNotification, refetch]);
+    },
+    [showNotification, refetch]
+  );
 
   function isOverdue(dueDate?: string, status?: string): boolean {
-    if (!dueDate || status === 'delivered' || status === 'approved') return false;
+    if (!dueDate || status === 'delivered' || status === 'approved') {
+      return false;
+    }
     return new Date(dueDate) < new Date();
   }
 
@@ -380,11 +438,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
       }
       actions={
         <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search deliverables..."
-          />
+          <SearchFilter value={search} onChange={setSearch} placeholder="Search deliverables..." />
           <FilterDropdown
             sections={DELIVERABLES_FILTER_CONFIG}
             values={filterValues}
@@ -405,7 +459,9 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
           totalCount={filteredDeliverables.length}
           onClearSelection={selection.clearSelection}
           onSelectAll={() => selection.selectMany(filteredDeliverables)}
-          allSelected={selection.allSelected && selection.selectedCount === filteredDeliverables.length}
+          allSelected={
+            selection.allSelected && selection.selectedCount === filteredDeliverables.length
+          }
           statusOptions={bulkStatusOptions}
           onStatusChange={handleBulkStatusChange}
           onDelete={handleBulkDelete}
@@ -479,7 +535,9 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
             <PortalTableEmpty
               colSpan={8}
               icon={<Inbox />}
-              message={hasActiveFilters ? 'No deliverables match your filters' : 'No deliverables yet'}
+              message={
+                hasActiveFilters ? 'No deliverables match your filters' : 'No deliverables yet'
+              }
             />
           ) : (
             paginatedDeliverables.map((deliverable) => (
@@ -540,10 +598,12 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                 />
                 <PortalTableCell>v{deliverable.version}</PortalTableCell>
                 <PortalTableCell>{deliverable.files}</PortalTableCell>
-                <PortalTableCell className={cn(
-                  'date-col',
-                  isOverdue(deliverable.dueDate, deliverable.status) && 'overdue'
-                )}>
+                <PortalTableCell
+                  className={cn(
+                    'date-col',
+                    isOverdue(deliverable.dueDate, deliverable.status) && 'overdue'
+                  )}
+                >
                   <InlineEdit
                     value={deliverable.dueDate || ''}
                     type="date"
@@ -553,12 +613,18 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                 </PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="action-group">
-                    <IconButton action="view" title="View" onClick={() => onNavigate?.('deliverable-detail', String(deliverable.id))} />
-                    {deliverable.files > 0 && (
-                      <IconButton action="download" title="Download" />
-                    )}
+                    <IconButton
+                      action="view"
+                      title="View"
+                      onClick={() => onNavigate?.('deliverable-detail', String(deliverable.id))}
+                    />
+                    {deliverable.files > 0 && <IconButton action="download" title="Download" />}
                     <IconButton action="copy-link" title="Share Link" />
-                    <IconButton action="delete" title="Delete" onClick={() => handleDeleteDeliverable(deliverable.id)} />
+                    <IconButton
+                      action="delete"
+                      title="Delete"
+                      onClick={() => handleDeleteDeliverable(deliverable.id)}
+                    />
                   </div>
                 </PortalTableCell>
               </PortalTableRow>

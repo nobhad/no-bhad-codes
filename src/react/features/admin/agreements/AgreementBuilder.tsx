@@ -177,12 +177,16 @@ function filterAgreement(
       agreement.name?.toLowerCase().includes(searchLower) ||
       agreement.client?.name?.toLowerCase().includes(searchLower) ||
       agreement.project?.name?.toLowerCase().includes(searchLower);
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(agreement.status)) return false;
+    if (!statusFilter.includes(agreement.status)) {
+      return false;
+    }
   }
 
   return true;
@@ -194,23 +198,23 @@ function sortAgreements(a: Agreement, b: Agreement, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'name':
-    return multiplier * (a.name || '').localeCompare(b.name || '');
-  case 'client':
-    return multiplier * (a.client?.name || '').localeCompare(b.client?.name || '');
-  case 'project':
-    return multiplier * (a.project?.name || '').localeCompare(b.project?.name || '');
-  case 'status':
-    return multiplier * (a.status || '').localeCompare(b.status || '');
-  case 'created_at':
-    return multiplier * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-  case 'expires_at': {
-    const aTime = a.expires_at ? new Date(a.expires_at).getTime() : 0;
-    const bTime = b.expires_at ? new Date(b.expires_at).getTime() : 0;
-    return multiplier * (aTime - bTime);
-  }
-  default:
-    return 0;
+    case 'name':
+      return multiplier * (a.name || '').localeCompare(b.name || '');
+    case 'client':
+      return multiplier * (a.client?.name || '').localeCompare(b.client?.name || '');
+    case 'project':
+      return multiplier * (a.project?.name || '').localeCompare(b.project?.name || '');
+    case 'status':
+      return multiplier * (a.status || '').localeCompare(b.status || '');
+    case 'created_at':
+      return multiplier * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    case 'expires_at': {
+      const aTime = a.expires_at ? new Date(a.expires_at).getTime() : 0;
+      const bTime = b.expires_at ? new Date(b.expires_at).getTime() : 0;
+      return multiplier * (aTime - bTime);
+    }
+    default:
+      return 0;
   }
 }
 
@@ -248,7 +252,9 @@ function StepList({ steps, onReorder, reorderLoading }: StepListProps) {
 
   const handleMoveUp = useCallback(
     (index: number) => {
-      if (index <= 0 || reorderLoading) return;
+      if (index <= 0 || reorderLoading) {
+        return;
+      }
       const ids = sortedSteps.map((s) => s.id);
       [ids[index - 1], ids[index]] = [ids[index], ids[index - 1]];
       onReorder(ids);
@@ -258,7 +264,9 @@ function StepList({ steps, onReorder, reorderLoading }: StepListProps) {
 
   const handleMoveDown = useCallback(
     (index: number) => {
-      if (index >= sortedSteps.length - 1 || reorderLoading) return;
+      if (index >= sortedSteps.length - 1 || reorderLoading) {
+        return;
+      }
       const ids = sortedSteps.map((s) => s.id);
       [ids[index], ids[index + 1]] = [ids[index + 1], ids[index]];
       onReorder(ids);
@@ -277,12 +285,8 @@ function StepList({ steps, onReorder, reorderLoading }: StepListProps) {
           <div className="agreement-step-order">{index + 1}</div>
           <div className="agreement-step-info">
             <span className="agreement-step-type">{getStepTypeLabel(step.step_type)}</span>
-            {step.custom_title && (
-              <span className="agreement-step-title">{step.custom_title}</span>
-            )}
-            <StatusBadge status={getAgreementStatusVariant(step.status)}>
-              {step.status}
-            </StatusBadge>
+            {step.custom_title && <span className="agreement-step-title">{step.custom_title}</span>}
+            <StatusBadge status={getAgreementStatusVariant(step.status)}>{step.status}</StatusBadge>
           </div>
           <div className="agreement-step-actions">
             <button
@@ -349,20 +353,26 @@ function AgreementDetailModal({
   }, [agreement?.id, agreement?.expires_at]);
 
   const handleSetExpiration = useCallback(() => {
-    if (!agreement) return;
+    if (!agreement) {
+      return;
+    }
     onSetExpiration(agreement.id, expirationDate || null);
     setShowExpirationForm(false);
   }, [agreement, expirationDate, onSetExpiration]);
 
   const handleReorder = useCallback(
     (stepIds: number[]) => {
-      if (!agreement) return;
+      if (!agreement) {
+        return;
+      }
       onReorder(agreement.id, stepIds);
     },
     [agreement, onReorder]
   );
 
-  if (!agreement) return null;
+  if (!agreement) {
+    return null;
+  }
 
   const canSend = agreement.status === 'draft';
   const canCancel = agreement.status !== 'cancelled' && agreement.status !== 'completed';
@@ -370,7 +380,11 @@ function AgreementDetailModal({
   return (
     <PortalModal
       open={!!agreement}
-      onOpenChange={(open) => { if (!open) onClose(); }}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
       title={agreement.name || 'Agreement Details'}
       icon={<FileSignature />}
       size="lg"
@@ -483,9 +497,7 @@ function AgreementDetailModal({
       </div>
 
       <div className="detail-section">
-        <h3 className="detail-section-title">
-          Steps ({agreement.steps?.length || 0})
-        </h3>
+        <h3 className="detail-section-title">Steps ({agreement.steps?.length || 0})</h3>
         <StepList
           steps={agreement.steps || []}
           onReorder={handleReorder}
@@ -546,7 +558,9 @@ function CreateAgreementModal({
   }, [resetForm, onOpenChange]);
 
   const handleAddStep = useCallback(() => {
-    if (!newStep.step_type) return;
+    if (!newStep.step_type) {
+      return;
+    }
     setSteps((prev) => [...prev, { ...newStep }]);
     setNewStep(INITIAL_STEP_DRAFT);
   }, [newStep]);
@@ -583,7 +597,12 @@ function CreateAgreementModal({
       onSubmit={handleFormSubmit}
       footer={
         <>
-          <button type="button" className="btn btn-secondary" onClick={handleClose} disabled={loading}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleClose}
+            disabled={loading}
+          >
             Cancel
           </button>
           <button
@@ -595,7 +614,11 @@ function CreateAgreementModal({
             <ClipboardList className="icon-xs" />
             From Template
           </button>
-          <button type="submit" className="btn btn-primary" disabled={loading || !name || !projectId || !clientId}>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading || !name || !projectId || !clientId}
+          >
             {loading ? 'Creating...' : 'Create Agreement'}
           </button>
         </>
@@ -713,7 +736,8 @@ export function AgreementBuilder({
   const [selectedAgreement, setSelectedAgreement] = useState<Agreement | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [reorderLoading, setReorderLoading] = useState(false);
-  const { clientOptions: entityClients, projectOptions: entityProjects } = useEntityOptions(createOpen);
+  const { clientOptions: entityClients, projectOptions: entityProjects } =
+    useEntityOptions(createOpen);
 
   // Data fetching
   const { data, isLoading, error, refetch, setData } = useListFetch<Agreement, AgreementStats>({
@@ -767,7 +791,9 @@ export function AgreementBuilder({
     const map = new Map<string, string>();
     entityClients.forEach((o) => map.set(o.value, o.label));
     agreements.forEach((a) => {
-      if (a.client_id && a.client?.name) map.set(String(a.client_id), a.client.name);
+      if (a.client_id && a.client?.name) {
+        map.set(String(a.client_id), a.client.name);
+      }
     });
     return Array.from(map, ([value, label]) => ({ value, label }));
   }, [agreements, entityClients]);
@@ -776,7 +802,9 @@ export function AgreementBuilder({
     const map = new Map<string, string>();
     entityProjects.forEach((o) => map.set(o.value, o.label));
     agreements.forEach((a) => {
-      if (a.project_id && a.project?.name) map.set(String(a.project_id), a.project.name);
+      if (a.project_id && a.project?.name) {
+        map.set(String(a.project_id), a.project.name);
+      }
     });
     return Array.from(map, ([value, label]) => ({ value, label }));
   }, [agreements, entityProjects]);
@@ -854,13 +882,13 @@ export function AgreementBuilder({
           setData((prev) =>
             prev
               ? {
-                ...prev,
-                items: prev.items.map((a) =>
-                  a.id === agreementId
-                    ? { ...a, status: 'sent', sent_at: new Date().toISOString() }
-                    : a
-                )
-              }
+                  ...prev,
+                  items: prev.items.map((a) =>
+                    a.id === agreementId
+                      ? { ...a, status: 'sent', sent_at: new Date().toISOString() }
+                      : a
+                  )
+                }
               : prev
           );
           setSelectedAgreement((prev) =>
@@ -891,11 +919,11 @@ export function AgreementBuilder({
           setData((prev) =>
             prev
               ? {
-                ...prev,
-                items: prev.items.map((a) =>
-                  a.id === agreementId ? { ...a, status: 'cancelled' } : a
-                )
-              }
+                  ...prev,
+                  items: prev.items.map((a) =>
+                    a.id === agreementId ? { ...a, status: 'cancelled' } : a
+                  )
+                }
               : prev
           );
           setSelectedAgreement((prev) =>
@@ -928,11 +956,11 @@ export function AgreementBuilder({
           setData((prev) =>
             prev
               ? {
-                ...prev,
-                items: prev.items.map((a) =>
-                  a.id === agreementId ? { ...a, expires_at: expiresAt } : a
-                )
-              }
+                  ...prev,
+                  items: prev.items.map((a) =>
+                    a.id === agreementId ? { ...a, expires_at: expiresAt } : a
+                  )
+                }
               : prev
           );
           setSelectedAgreement((prev) =>
@@ -963,7 +991,9 @@ export function AgreementBuilder({
         if (response.ok) {
           // Update local step order
           setSelectedAgreement((prev) => {
-            if (!prev || prev.id !== agreementId) return prev;
+            if (!prev || prev.id !== agreementId) {
+              return prev;
+            }
             const updatedSteps = prev.steps.map((step) => ({
               ...step,
               step_order: stepIds.indexOf(step.id) + 1
@@ -973,16 +1003,18 @@ export function AgreementBuilder({
           setData((prev) =>
             prev
               ? {
-                ...prev,
-                items: prev.items.map((a) => {
-                  if (a.id !== agreementId) return a;
-                  const updatedSteps = a.steps.map((step) => ({
-                    ...step,
-                    step_order: stepIds.indexOf(step.id) + 1
-                  }));
-                  return { ...a, steps: updatedSteps };
-                })
-              }
+                  ...prev,
+                  items: prev.items.map((a) => {
+                    if (a.id !== agreementId) {
+                      return a;
+                    }
+                    const updatedSteps = a.steps.map((step) => ({
+                      ...step,
+                      step_order: stepIds.indexOf(step.id) + 1
+                    }));
+                    return { ...a, steps: updatedSteps };
+                  })
+                }
               : prev
           );
           showToast('Steps reordered', 'success');
@@ -1000,25 +1032,22 @@ export function AgreementBuilder({
   );
 
   // Row click opens detail
-  const handleRowClick = useCallback(
-    async (agreement: Agreement) => {
-      // Fetch enriched agreement with full step data
-      try {
-        const response = await apiFetch(buildEndpoint.agreement(agreement.id));
-        if (response.ok) {
-          const json = await response.json();
-          const enriched = json.data?.agreement || json.agreement || json.data || json;
-          setSelectedAgreement(enriched);
-        } else {
-          // Fallback to list data
-          setSelectedAgreement(agreement);
-        }
-      } catch {
+  const handleRowClick = useCallback(async (agreement: Agreement) => {
+    // Fetch enriched agreement with full step data
+    try {
+      const response = await apiFetch(buildEndpoint.agreement(agreement.id));
+      if (response.ok) {
+        const json = await response.json();
+        const enriched = json.data?.agreement || json.agreement || json.data || json;
+        setSelectedAgreement(enriched);
+      } else {
+        // Fallback to list data
         setSelectedAgreement(agreement);
       }
-    },
-    []
-  );
+    } catch {
+      setSelectedAgreement(agreement);
+    }
+  }, []);
 
   const handleCloseDetail = useCallback(() => {
     setSelectedAgreement(null);
@@ -1026,12 +1055,16 @@ export function AgreementBuilder({
 
   // Confirm dialog handlers
   const handleConfirmSend = useCallback(async () => {
-    if (!selectedAgreement) return;
+    if (!selectedAgreement) {
+      return;
+    }
     await handleSend(selectedAgreement.id);
   }, [selectedAgreement, handleSend]);
 
   const handleConfirmCancel = useCallback(async () => {
-    if (!selectedAgreement) return;
+    if (!selectedAgreement) {
+      return;
+    }
     await handleCancel(selectedAgreement.id);
   }, [selectedAgreement, handleCancel]);
 
@@ -1056,11 +1089,7 @@ export function AgreementBuilder({
         }
         actions={
           <>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search agreements..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search agreements..." />
             <FilterDropdown
               sections={AGREEMENTS_FILTER_CONFIG}
               values={filterValues}
@@ -1150,7 +1179,9 @@ export function AgreementBuilder({
               <PortalTableEmpty
                 colSpan={COL_COUNT}
                 icon={<Inbox />}
-                message={hasActiveFilters ? 'No agreements match your filters' : 'No agreements yet'}
+                message={
+                  hasActiveFilters ? 'No agreements match your filters' : 'No agreements yet'
+                }
               />
             ) : (
               paginatedAgreements.map((agreement) => (
@@ -1163,7 +1194,9 @@ export function AgreementBuilder({
                     <div className="cell-with-icon">
                       <FileSignature className="icon-sm" />
                       <div className="cell-content">
-                        <span className="cell-title">{agreement.name || `Agreement #${agreement.id}`}</span>
+                        <span className="cell-title">
+                          {agreement.name || `Agreement #${agreement.id}`}
+                        </span>
                       </div>
                     </div>
                   </PortalTableCell>

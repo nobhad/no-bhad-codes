@@ -51,7 +51,9 @@ export function AuthGate(props: AuthGateProps) {
     e.preventDefault();
     setAuthError('');
 
-    if (!password.trim()) return;
+    if (!password.trim()) {
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -76,7 +78,9 @@ export function AuthGate(props: AuthGateProps) {
     setMagicSuccess(false);
 
     const trimmedEmail = email.trim();
-    if (!trimmedEmail || !password) return;
+    if (!trimmedEmail || !password) {
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -97,7 +101,9 @@ export function AuthGate(props: AuthGateProps) {
     setMagicSuccess(false);
 
     const trimmedEmail = email.trim();
-    if (!trimmedEmail) return;
+    if (!trimmedEmail) {
+      return;
+    }
 
     setIsSubmitting(true);
     try {

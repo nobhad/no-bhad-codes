@@ -56,8 +56,12 @@ const TOTAL_STARS = 5;
 // ============================================
 
 function getNpsColor(score: number): string {
-  if (score >= NPS_GREEN_THRESHOLD) return 'var(--app-color-success)';
-  if (score >= NPS_YELLOW_THRESHOLD) return 'var(--app-color-warning)';
+  if (score >= NPS_GREEN_THRESHOLD) {
+    return 'var(--app-color-success)';
+  }
+  if (score >= NPS_YELLOW_THRESHOLD) {
+    return 'var(--app-color-warning)';
+  }
   return 'var(--app-color-danger)';
 }
 
@@ -72,7 +76,9 @@ function renderStarRating(value: number): React.ReactNode {
             key={i}
             size={16}
             fill={i < Math.round(value) ? 'var(--app-color-warning)' : 'none'}
-            stroke={i < Math.round(value) ? 'var(--app-color-warning)' : 'var(--app-color-text-muted)'}
+            stroke={
+              i < Math.round(value) ? 'var(--app-color-warning)' : 'var(--app-color-text-muted)'
+            }
           />
         ))}
       </span>
@@ -96,7 +102,9 @@ export function FeedbackAnalytics() {
       setLoading(true);
       setError(null);
       const res = await apiFetch(API_ENDPOINTS.FEEDBACK_ANALYTICS);
-      if (!res.ok) throw new Error('Failed to load analytics');
+      if (!res.ok) {
+        throw new Error('Failed to load analytics');
+      }
       const json = await res.json();
       setAnalytics(json.data?.analytics || json.analytics);
     } catch (err) {
@@ -106,13 +114,28 @@ export function FeedbackAnalytics() {
     }
   }, []);
 
-  useEffect(() => { fetchAnalytics(); }, [fetchAnalytics]);
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
-  if (loading) return <LoadingState message="Loading analytics..." />;
-  if (error) return <ErrorState message={error} onRetry={fetchAnalytics} />;
-  if (!analytics) return <EmptyState icon={<BarChart3 size={32} />} message="No analytics data" />;
+  if (loading) {
+    return <LoadingState message="Loading analytics..." />;
+  }
+  if (error) {
+    return <ErrorState message={error} onRetry={fetchAnalytics} />;
+  }
+  if (!analytics) {
+    return <EmptyState icon={<BarChart3 size={32} />} message="No analytics data" />;
+  }
 
-  const { nps, averageRatings, totalSurveysSent, totalCompleted, completionRate, sampleSizeWarning } = analytics;
+  const {
+    nps,
+    averageRatings,
+    totalSurveysSent,
+    totalCompleted,
+    completionRate,
+    sampleSizeWarning
+  } = analytics;
   const npsColor = getNpsColor(nps.score);
   const completionPct = Math.round(completionRate * PERCENTAGE_MULTIPLIER);
 

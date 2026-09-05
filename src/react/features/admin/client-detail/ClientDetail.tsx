@@ -172,7 +172,9 @@ export function ClientDetail({
 
   // Get display name
   const getDisplayName = () => {
-    if (!client) return 'Client';
+    if (!client) {
+      return 'Client';
+    }
     if (client.client_type === 'business') {
       return client.company_name || client.contact_name || 'Client';
     }
@@ -186,14 +188,7 @@ export function ClientDetail({
 
   // Error state
   if (error && !client) {
-    return (
-      <ErrorState
-        message={error}
-        type="general"
-        retryLabel="Retry"
-        onRetry={refetch}
-      />
-    );
+    return <ErrorState message={error} type="general" retryLabel="Retry" onRetry={refetch} />;
   }
 
   // No client found
@@ -233,9 +228,16 @@ export function ClientDetail({
             ariaLabel="Change client status"
           />
         }
-        meta={client.client_type ? [
-          { label: 'Type', value: CLIENT_TYPE_LABELS[client.client_type] || client.client_type }
-        ] : []}
+        meta={
+          client.client_type
+            ? [
+                {
+                  label: 'Type',
+                  value: CLIENT_TYPE_LABELS[client.client_type] || client.client_type
+                }
+              ]
+            : []
+        }
         actions={
           <>
             <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
@@ -262,10 +264,7 @@ export function ClientDetail({
                   Archive Client
                 </PortalDropdownItem>
                 <PortalDropdownSeparator />
-                <PortalDropdownItem
-                  onClick={deleteDialog.open}
-                  className="danger"
-                >
+                <PortalDropdownItem onClick={deleteDialog.open} className="danger">
                   <Trash2 className="icon-sm" />
                   Delete Client
                 </PortalDropdownItem>
@@ -303,18 +302,11 @@ export function ClientDetail({
       </TabPanel>
 
       <TabPanel tabId="activity" isActive={activeTab === 'activity'}>
-        <ActivityTab
-          activities={activities}
-          onNavigate={onNavigate}
-        />
+        <ActivityTab activities={activities} onNavigate={onNavigate} />
       </TabPanel>
 
       <TabPanel tabId="projects" isActive={activeTab === 'projects'}>
-        <ProjectsTab
-          projects={projects}
-          onViewProject={onViewProject}
-          onNavigate={onNavigate}
-        />
+        <ProjectsTab projects={projects} onViewProject={onViewProject} onNavigate={onNavigate} />
       </TabPanel>
 
       <TabPanel tabId="notes" isActive={activeTab === 'notes'}>

@@ -149,9 +149,7 @@ interface ActivityListProps {
 
 const ActivityList = React.memo(({ activities, onNavigate }: ActivityListProps) => {
   if (activities.length === 0) {
-    return (
-      <EmptyState message="No recent activity" />
-    );
+    return <EmptyState message="No recent activity" />;
   }
 
   return (
@@ -170,11 +168,11 @@ const ActivityList = React.memo(({ activities, onNavigate }: ActivityListProps) 
           onKeyDown={
             item.entityId && onNavigate
               ? (e) => {
-                if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) {
-                  e.preventDefault();
-                  onNavigate(ACTIVITY_TYPE_TO_TAB[item.type] ?? item.type, item.entityId);
+                  if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) {
+                    e.preventDefault();
+                    onNavigate(ACTIVITY_TYPE_TO_TAB[item.type] ?? item.type, item.entityId);
+                  }
                 }
-              }
               : undefined
           }
         >
@@ -187,9 +185,7 @@ const ActivityList = React.memo(({ activities, onNavigate }: ActivityListProps) 
               <span className="activity-context"> — {item.context}</span>
             )}
           </span>
-          <span className="activity-date">
-            {formatRelativeTime(item.date)}
-          </span>
+          <span className="activity-date">{formatRelativeTime(item.date)}</span>
         </li>
       ))}
     </ul>
@@ -222,11 +218,13 @@ export function PortalDashboard({
   // Sync projects from dashboard API into the Zustand store
   useEffect(() => {
     if (data?.projects && data.projects.length > 0) {
-      setProjects(data.projects.map((p) => ({
-        id: p.id,
-        name: p.name,
-        status: p.status
-      })));
+      setProjects(
+        data.projects.map((p) => ({
+          id: p.id,
+          name: p.name,
+          status: p.status
+        }))
+      );
     }
   }, [data?.projects, setProjects]);
 
@@ -235,11 +233,15 @@ export function PortalDashboard({
 
   // Get the active project info for the snapshot
   const activeProject: ProjectInfo | null = React.useMemo(() => {
-    if (!data?.projects || data.projects.length === 0) return null;
+    if (!data?.projects || data.projects.length === 0) {
+      return null;
+    }
     const match = activeProjectId
       ? data.projects.find((p) => p.id === activeProjectId)
       : data.projects[0];
-    if (!match) return null;
+    if (!match) {
+      return null;
+    }
     return {
       id: match.id,
       name: match.name,
@@ -253,7 +255,9 @@ export function PortalDashboard({
 
   // Action item counts
   const actionCounts: ActionItemCounts | null = React.useMemo(() => {
-    if (!stats) return null;
+    if (!stats) {
+      return null;
+    }
     return {
       pendingContracts: stats.pendingContracts,
       pendingInvoices: stats.pendingInvoices,
@@ -279,9 +283,7 @@ export function PortalDashboard({
       ) : (
         <>
           {/* 1. Project Header (no panel) */}
-          {activeProject && (
-            <ProjectHeader project={activeProject} />
-          )}
+          {activeProject && <ProjectHeader project={activeProject} />}
 
           {/* 2. Project Progress Panel */}
           {activeProject && (
@@ -304,9 +306,10 @@ export function PortalDashboard({
           <div className="dashboard-stats-grid">
             <StatCard
               label="Outstanding Balance"
-              value={stats?.outstandingBalance
-                ? `$${(stats.outstandingBalance / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
-                : '$0.00'
+              value={
+                stats?.outstandingBalance
+                  ? `$${(stats.outstandingBalance / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+                  : '$0.00'
               }
               onClick={() => handleStatClick(NAV_TAB_DOCUMENTS)}
             />
@@ -321,17 +324,13 @@ export function PortalDashboard({
               variant={stats?.unreadMessages ? 'alert' : 'default'}
               onClick={() => handleStatClick(NAV_TAB_MESSAGES)}
             />
-            {actionCounts && (
-              <ActionItems counts={actionCounts} onNavigate={onNavigate} />
-            )}
+            {actionCounts && <ActionItems counts={actionCounts} onNavigate={onNavigate} />}
           </div>
 
           {/* Submit Request + Recent Activity */}
           <TableLayout
             title="RECENT ACTIVITY"
-            actions={
-              <IconButton action="refresh" onClick={refetch} title="Refresh" />
-            }
+            actions={<IconButton action="refresh" onClick={refetch} title="Refresh" />}
           >
             <ActivityList activities={recentActivity} onNavigate={onNavigate} />
           </TableLayout>

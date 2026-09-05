@@ -127,11 +127,7 @@ interface StepEditorProps {
 function StepEditor({ steps, onChange }: StepEditorProps) {
   const handleStepChange = useCallback(
     (index: number, field: keyof TemplateStepConfig, value: string | boolean) => {
-      onChange(
-        steps.map((step, i) =>
-          i === index ? { ...step, [field]: value } : step
-        )
-      );
+      onChange(steps.map((step, i) => (i === index ? { ...step, [field]: value } : step)));
     },
     [steps, onChange]
   );
@@ -150,7 +146,9 @@ function StepEditor({ steps, onChange }: StepEditorProps) {
   const handleMoveStep = useCallback(
     (index: number, direction: 'up' | 'down') => {
       const targetIndex = direction === 'up' ? index - 1 : index + 1;
-      if (targetIndex < 0 || targetIndex >= steps.length) return;
+      if (targetIndex < 0 || targetIndex >= steps.length) {
+        return;
+      }
       const reordered = [...steps];
       const [moved] = reordered.splice(index, 1);
       reordered.splice(targetIndex, 0, moved);
@@ -163,11 +161,7 @@ function StepEditor({ steps, onChange }: StepEditorProps) {
     <div className="template-steps-editor">
       <div className="template-steps-header">
         <h3 className="form-section-title">Steps</h3>
-        <button
-          type="button"
-          className="btn-secondary btn-sm"
-          onClick={handleAddStep}
-        >
+        <button type="button" className="btn-secondary btn-sm" onClick={handleAddStep}>
           <Plus className="icon-xs" />
           <span>Add Step</span>
         </button>
@@ -443,9 +437,7 @@ function TemplateFormModal({
 // MAIN COMPONENT
 // ============================================
 
-export function OnboardingTemplatesManager({
-  showNotification
-}: OnboardingTemplatesManagerProps) {
+export function OnboardingTemplatesManager({ showNotification }: OnboardingTemplatesManagerProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const formModal = useModal();
   const deleteDialog = useConfirmDialog();
@@ -514,7 +506,9 @@ export function OnboardingTemplatesManager({
   );
 
   const handleDeleteConfirm = useCallback(async () => {
-    if (!templateToDelete) return;
+    if (!templateToDelete) {
+      return;
+    }
     try {
       const response = await apiDelete(buildEndpoint.onboardingTemplate(templateToDelete.id));
       if (response.ok) {
@@ -557,10 +551,7 @@ export function OnboardingTemplatesManager({
             showNotification?.('Failed to update template', 'error');
           }
         } else {
-          const response = await apiPost(
-            API_ENDPOINTS.ONBOARDING_CHECKLIST_TEMPLATES,
-            payload
-          );
+          const response = await apiPost(API_ENDPOINTS.ONBOARDING_CHECKLIST_TEMPLATES, payload);
           if (response.ok) {
             const data = unwrapApiData<{ template: OnboardingTemplate }>(await response.json());
             setTemplates((prev) => [...prev, data.template]);
@@ -653,7 +644,10 @@ export function OnboardingTemplatesManager({
                     </PortalTableCell>
 
                     <PortalTableCell>
-                      <StatusBadge status={template.is_default === 1 ? 'active' : 'pending'} size="sm">
+                      <StatusBadge
+                        status={template.is_default === 1 ? 'active' : 'pending'}
+                        size="sm"
+                      >
                         {template.is_default === 1 ? 'Yes' : 'No'}
                       </StatusBadge>
                     </PortalTableCell>

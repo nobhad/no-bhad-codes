@@ -11,8 +11,16 @@
 import * as React from 'react';
 import { useState, useCallback } from 'react';
 import {
-  CheckCircle, Circle, ChevronRight, X,
-  FileSignature, CreditCard, ClipboardList, Upload, Eye, Sparkles
+  CheckCircle,
+  Circle,
+  ChevronRight,
+  X,
+  FileSignature,
+  CreditCard,
+  ClipboardList,
+  Upload,
+  Eye,
+  Sparkles
 } from 'lucide-react';
 import { usePortalData, usePortalFetch } from '../../../hooks/usePortalFetch';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
@@ -21,18 +29,18 @@ import type { OnboardingChecklist, OnboardingCardProps, OnboardingStep } from '.
 /** Map step types to Lucide icons */
 function getStepIcon(stepType: string) {
   switch (stepType) {
-  case 'review_proposal':
-    return <Eye size={16} />;
-  case 'sign_contract':
-    return <FileSignature size={16} />;
-  case 'pay_deposit':
-    return <CreditCard size={16} />;
-  case 'complete_questionnaire':
-    return <ClipboardList size={16} />;
-  case 'upload_assets':
-    return <Upload size={16} />;
-  default:
-    return <Sparkles size={16} />;
+    case 'review_proposal':
+      return <Eye size={16} />;
+    case 'sign_contract':
+      return <FileSignature size={16} />;
+    case 'pay_deposit':
+      return <CreditCard size={16} />;
+    case 'complete_questionnaire':
+      return <ClipboardList size={16} />;
+    case 'upload_assets':
+      return <Upload size={16} />;
+    default:
+      return <Sparkles size={16} />;
   }
 }
 
@@ -53,7 +61,9 @@ export function OnboardingCard({
   const checklist = data?.checklist;
 
   const handleDismiss = useCallback(async () => {
-    if (!checklist) return;
+    if (!checklist) {
+      return;
+    }
     setDismissing(true);
     try {
       await portalFetch(`${API_ENDPOINTS.ONBOARDING_CHECKLIST}/dismiss`, {
@@ -68,23 +78,32 @@ export function OnboardingCard({
     }
   }, [checklist, portalFetch, refetch, showNotification]);
 
-  const handleStepComplete = useCallback(async (stepId: number) => {
-    try {
-      await portalFetch(buildEndpoint.onboardingStepComplete(stepId), {
-        method: 'POST'
-      });
-      showNotification?.('Step completed!', 'success');
-      refetch();
-    } catch {
-      showNotification?.('Failed to complete step', 'error');
-    }
-  }, [portalFetch, showNotification, refetch]);
+  const handleStepComplete = useCallback(
+    async (stepId: number) => {
+      try {
+        await portalFetch(buildEndpoint.onboardingStepComplete(stepId), {
+          method: 'POST'
+        });
+        showNotification?.('Step completed!', 'success');
+        refetch();
+      } catch {
+        showNotification?.('Failed to complete step', 'error');
+      }
+    },
+    [portalFetch, showNotification, refetch]
+  );
 
-  const handleStepNavigate = useCallback((step: OnboardingStep) => {
-    if (step.navigateTab) {
-      onNavigate?.(step.navigateTab, step.navigateEntityId ? String(step.navigateEntityId) : undefined);
-    }
-  }, [onNavigate]);
+  const handleStepNavigate = useCallback(
+    (step: OnboardingStep) => {
+      if (step.navigateTab) {
+        onNavigate?.(
+          step.navigateTab,
+          step.navigateEntityId ? String(step.navigateEntityId) : undefined
+        );
+      }
+    },
+    [onNavigate]
+  );
 
   // Don't render if no active checklist
   if (isLoading || !checklist || checklist.status !== 'active') {
@@ -150,9 +169,7 @@ export function OnboardingCard({
                     {step.label}
                   </span>
                   {step.description && !isComplete && (
-                    <p className="text-muted text-xs mt-0\.5">
-                      {step.description}
-                    </p>
+                    <p className="text-muted text-xs mt-0\.5">{step.description}</p>
                   )}
                 </div>
               </div>

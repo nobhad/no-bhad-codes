@@ -68,10 +68,7 @@ const FILTER_CONFIG = [
   {
     key: 'category',
     label: 'Category',
-    options: [
-      { value: 'all', label: 'All Categories' },
-      ...CATEGORY_OPTIONS
-    ]
+    options: [{ value: 'all', label: 'All Categories' }, ...CATEGORY_OPTIONS]
   }
 ];
 
@@ -128,7 +125,9 @@ function filterExpense(
       expense.vendor_name?.toLowerCase().includes(searchLower) ||
       expense.project_name?.toLowerCase().includes(searchLower) ||
       EXPENSE_CATEGORY_LABELS[expense.category]?.toLowerCase().includes(searchLower);
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const categoryFilter = filters.category;
@@ -143,19 +142,19 @@ function sortExpenses(a: Expense, b: Expense, sort: SortConfig): number {
   const multiplier = sort.direction === 'asc' ? 1 : -1;
 
   switch (sort.column) {
-  case 'date':
-    return multiplier * (new Date(a.expense_date).getTime() - new Date(b.expense_date).getTime());
-  case 'amount': {
-    const aAmt = typeof a.amount === 'string' ? parseFloat(a.amount) : (a.amount || 0);
-    const bAmt = typeof b.amount === 'string' ? parseFloat(b.amount) : (b.amount || 0);
-    return multiplier * (aAmt - bAmt);
-  }
-  case 'category':
-    return multiplier * (a.category || '').localeCompare(b.category || '');
-  case 'description':
-    return multiplier * (a.description || '').localeCompare(b.description || '');
-  default:
-    return 0;
+    case 'date':
+      return multiplier * (new Date(a.expense_date).getTime() - new Date(b.expense_date).getTime());
+    case 'amount': {
+      const aAmt = typeof a.amount === 'string' ? parseFloat(a.amount) : a.amount || 0;
+      const bAmt = typeof b.amount === 'string' ? parseFloat(b.amount) : b.amount || 0;
+      return multiplier * (aAmt - bAmt);
+    }
+    case 'category':
+      return multiplier * (a.category || '').localeCompare(b.category || '');
+    case 'description':
+      return multiplier * (a.description || '').localeCompare(b.description || '');
+    default:
+      return 0;
   }
 }
 
@@ -182,31 +181,34 @@ function ExpenseCreateForm({ projectOptions, onSubmit, onCancel, isSubmitting }:
     notes: ''
   });
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (!formData.description.trim() || !formData.amount || !formData.expenseDate) {
-      showToast('Description, amount, and date are required', 'error');
-      return;
-    }
+      if (!formData.description.trim() || !formData.amount || !formData.expenseDate) {
+        showToast('Description, amount, and date are required', 'error');
+        return;
+      }
 
-    const parsedAmount = parseFloat(formData.amount);
-    if (isNaN(parsedAmount) || parsedAmount < 0) {
-      showToast('Amount must be a valid non-negative number', 'error');
-      return;
-    }
+      const parsedAmount = parseFloat(formData.amount);
+      if (isNaN(parsedAmount) || parsedAmount < 0) {
+        showToast('Amount must be a valid non-negative number', 'error');
+        return;
+      }
 
-    await onSubmit({
-      projectId: formData.projectId ? Number(formData.projectId) : null,
-      category: formData.category,
-      description: formData.description.trim(),
-      amount: parsedAmount,
-      vendorName: formData.vendorName.trim() || null,
-      expenseDate: formData.expenseDate,
-      isBillable: formData.isBillable,
-      notes: formData.notes.trim() || null
-    });
-  }, [formData, onSubmit]);
+      await onSubmit({
+        projectId: formData.projectId ? Number(formData.projectId) : null,
+        category: formData.category,
+        description: formData.description.trim(),
+        amount: parsedAmount,
+        vendorName: formData.vendorName.trim() || null,
+        expenseDate: formData.expenseDate,
+        isBillable: formData.isBillable,
+        notes: formData.notes.trim() || null
+      });
+    },
+    [formData, onSubmit]
+  );
 
   const updateField = useCallback((field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -216,7 +218,9 @@ function ExpenseCreateForm({ projectOptions, onSubmit, onCancel, isSubmitting }:
     <form className="inline-create-form" onSubmit={handleSubmit}>
       <div className="inline-form-grid">
         <div className="form-field">
-          <label className="form-label" htmlFor="expense-project">Project (optional)</label>
+          <label className="form-label" htmlFor="expense-project">
+            Project (optional)
+          </label>
           <select
             id="expense-project"
             className="form-input"
@@ -225,13 +229,17 @@ function ExpenseCreateForm({ projectOptions, onSubmit, onCancel, isSubmitting }:
           >
             <option value="">No project</option>
             {projectOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
             ))}
           </select>
         </div>
 
         <div className="form-field">
-          <label className="form-label" htmlFor="expense-category">Category</label>
+          <label className="form-label" htmlFor="expense-category">
+            Category
+          </label>
           <select
             id="expense-category"
             className="form-input"
@@ -239,13 +247,17 @@ function ExpenseCreateForm({ projectOptions, onSubmit, onCancel, isSubmitting }:
             onChange={(e) => updateField('category', e.target.value)}
           >
             {CATEGORY_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
             ))}
           </select>
         </div>
 
         <div className="form-field">
-          <label className="form-label" htmlFor="expense-description">Description</label>
+          <label className="form-label" htmlFor="expense-description">
+            Description
+          </label>
           <input
             id="expense-description"
             className="form-input"
@@ -258,7 +270,9 @@ function ExpenseCreateForm({ projectOptions, onSubmit, onCancel, isSubmitting }:
         </div>
 
         <div className="form-field">
-          <label className="form-label" htmlFor="expense-amount">Amount</label>
+          <label className="form-label" htmlFor="expense-amount">
+            Amount
+          </label>
           <input
             id="expense-amount"
             className="form-input"
@@ -273,7 +287,9 @@ function ExpenseCreateForm({ projectOptions, onSubmit, onCancel, isSubmitting }:
         </div>
 
         <div className="form-field">
-          <label className="form-label" htmlFor="expense-vendor">Vendor</label>
+          <label className="form-label" htmlFor="expense-vendor">
+            Vendor
+          </label>
           <input
             id="expense-vendor"
             className="form-input"
@@ -285,7 +301,9 @@ function ExpenseCreateForm({ projectOptions, onSubmit, onCancel, isSubmitting }:
         </div>
 
         <div className="form-field">
-          <label className="form-label" htmlFor="expense-date">Date</label>
+          <label className="form-label" htmlFor="expense-date">
+            Date
+          </label>
           <input
             id="expense-date"
             className="form-input"
@@ -309,7 +327,9 @@ function ExpenseCreateForm({ projectOptions, onSubmit, onCancel, isSubmitting }:
         </div>
 
         <div className="form-field form-field--wide">
-          <label className="form-label" htmlFor="expense-notes">Notes</label>
+          <label className="form-label" htmlFor="expense-notes">
+            Notes
+          </label>
           <textarea
             id="expense-notes"
             className="form-input"
@@ -355,10 +375,29 @@ export function ExpensesTable({
   const fetchedProjects = useRef(false);
 
   // Delete confirmation
+  const fetchExpenses = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await apiFetch(EXPENSES_API);
+      if (!res.ok) {
+        throw new Error('Failed to load expenses');
+      }
+      const json = await res.json();
+      setExpenses(json.data?.expenses || json.expenses || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load expenses');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const deleteConfirm = useDeleteConfirm<Expense>({
     onDelete: async (expense) => {
       const res = await apiDelete(`${EXPENSES_API}/${expense.id}`);
-      if (!res.ok) throw new Error('Failed to delete expense');
+      if (!res.ok) {
+        throw new Error('Failed to delete expense');
+      }
       showToast('Expense deleted', 'success');
       fetchExpenses();
       return true;
@@ -372,9 +411,11 @@ export function ExpensesTable({
     let total = 0;
     let billable = 0;
     for (const exp of expenses) {
-      const amt = typeof exp.amount === 'string' ? parseFloat(exp.amount) : (exp.amount || 0);
+      const amt = typeof exp.amount === 'string' ? parseFloat(exp.amount) : exp.amount || 0;
       total += amt;
-      if (exp.is_billable) billable += amt;
+      if (exp.is_billable) {
+        billable += amt;
+      }
     }
     return {
       count: expenses.length,
@@ -384,34 +425,28 @@ export function ExpensesTable({
   }, [expenses]);
 
   // Fetch expenses
-  const fetchExpenses = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const res = await apiFetch(EXPENSES_API);
-      if (!res.ok) throw new Error('Failed to load expenses');
-      const json = await res.json();
-      setExpenses(json.data?.expenses || json.expenses || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load expenses');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
   // Fetch project options for the create form dropdown
   const fetchProjectOptions = useCallback(async () => {
-    if (fetchedProjects.current) return;
+    if (fetchedProjects.current) {
+      return;
+    }
     fetchedProjects.current = true;
     try {
       const res = await apiFetch(API_ENDPOINTS.ADMIN.PROJECTS);
       if (res.ok) {
         const json = await res.json();
-        const projects = (json.data?.projects || json.projects || []) as Array<{ id: number; name?: string; project_name?: string }>;
-        setProjectOptions(projects.map((p) => ({
-          value: String(p.id),
-          label: p.name || p.project_name || `Project #${p.id}`
-        })));
+        const projects = (json.data?.projects || json.projects || []) as Array<{
+          id: number;
+          name?: string;
+          project_name?: string;
+        }>;
+        setProjectOptions(
+          projects.map((p) => ({
+            value: String(p.id),
+            label: p.name || p.project_name || `Project #${p.id}`
+          }))
+        );
       }
     } catch {
       // Non-critical — form can still submit without project
@@ -429,23 +464,26 @@ export function ExpensesTable({
   }, [fetchProjectOptions]);
 
   // Create expense
-  const handleCreate = useCallback(async (data: Record<string, unknown>) => {
-    setIsSubmitting(true);
-    try {
-      const res = await apiPost(EXPENSES_API, data);
-      if (!res.ok) {
-        const json = await res.json().catch(() => ({}));
-        throw new Error(json.error || 'Failed to create expense');
+  const handleCreate = useCallback(
+    async (data: Record<string, unknown>) => {
+      setIsSubmitting(true);
+      try {
+        const res = await apiPost(EXPENSES_API, data);
+        if (!res.ok) {
+          const json = await res.json().catch(() => ({}));
+          throw new Error(json.error || 'Failed to create expense');
+        }
+        showToast('Expense created', 'success');
+        setShowCreateForm(false);
+        fetchExpenses();
+      } catch (err) {
+        showToast(err instanceof Error ? err.message : 'Failed to create expense', 'error');
+      } finally {
+        setIsSubmitting(false);
       }
-      showToast('Expense created', 'success');
-      setShowCreateForm(false);
-      fetchExpenses();
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Failed to create expense', 'error');
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [fetchExpenses]);
+    },
+    [fetchExpenses]
+  );
 
   // Delete expense handled by useDeleteConfirm hook
 
@@ -498,21 +536,13 @@ export function ExpensesTable({
         }
         actions={
           <>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search expenses..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search expenses..." />
             <FilterDropdown
               sections={FILTER_CONFIG}
               values={{ category: filterValues.category || 'all' }}
               onChange={(key, value) => setFilter(key, value)}
             />
-            <IconButton
-              action="add"
-              onClick={handleOpenCreate}
-              title="Add expense"
-            />
+            <IconButton action="add" onClick={handleOpenCreate} title="Add expense" />
             <IconButton
               action="refresh"
               onClick={fetchExpenses}
@@ -604,8 +634,10 @@ export function ExpensesTable({
               />
             ) : (
               paginatedExpenses.map((expense) => {
-                const amount = typeof expense.amount === 'string'
-                  ? parseFloat(expense.amount) : (expense.amount || 0);
+                const amount =
+                  typeof expense.amount === 'string'
+                    ? parseFloat(expense.amount)
+                    : expense.amount || 0;
 
                 return (
                   <PortalTableRow key={expense.id}>

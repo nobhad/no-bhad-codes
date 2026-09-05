@@ -82,45 +82,45 @@ const SERVICE_ICONS: Record<string, React.ReactNode> = {
 
 function getStatusVariantName(status: string): string {
   switch (status) {
-  case 'operational':
-  case 'good':
-  case 'resolved':
-    return 'completed';
-  case 'degraded':
-  case 'warning':
-  case 'monitoring':
-  case 'identified':
-    return 'pending';
-  case 'outage':
-  case 'critical':
-  case 'investigating':
-    return 'cancelled';
-  case 'maintenance':
-    return 'active';
-  default:
-    return 'muted';
+    case 'operational':
+    case 'good':
+    case 'resolved':
+      return 'completed';
+    case 'degraded':
+    case 'warning':
+    case 'monitoring':
+    case 'identified':
+      return 'pending';
+    case 'outage':
+    case 'critical':
+    case 'investigating':
+      return 'cancelled';
+    case 'maintenance':
+      return 'active';
+    default:
+      return 'muted';
   }
 }
 
 function getStatusIcon(status: string) {
   switch (status) {
-  case 'operational':
-  case 'good':
-  case 'resolved':
-    return <CheckCircle className="icon-md" />;
-  case 'degraded':
-  case 'warning':
-  case 'monitoring':
-  case 'identified':
-    return <AlertCircle className="icon-md" />;
-  case 'outage':
-  case 'critical':
-  case 'investigating':
-    return <XCircle className="icon-md" />;
-  case 'maintenance':
-    return <Clock className="icon-md" />;
-  default:
-    return <Activity className="icon-md" />;
+    case 'operational':
+    case 'good':
+    case 'resolved':
+      return <CheckCircle className="icon-md" />;
+    case 'degraded':
+    case 'warning':
+    case 'monitoring':
+    case 'identified':
+      return <AlertCircle className="icon-md" />;
+    case 'outage':
+    case 'critical':
+    case 'investigating':
+      return <XCircle className="icon-md" />;
+    case 'maintenance':
+      return <Clock className="icon-md" />;
+    default:
+      return <Activity className="icon-md" />;
   }
 }
 
@@ -133,7 +133,11 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _getAuthToken, showNotification }: SystemStatusDashboardProps) {
+export function SystemStatusDashboard({
+  onNavigate: _onNavigate,
+  getAuthToken: _getAuthToken,
+  showNotification
+}: SystemStatusDashboardProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -153,13 +157,16 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
     setError(null);
     try {
       const response = await apiFetch(API_ENDPOINTS.ADMIN.SYSTEM_STATUS);
-      if (!response.ok) throw new Error('Failed to load system status');
+      if (!response.ok) {
+        throw new Error('Failed to load system status');
+      }
       const payload = unwrapApiData<Record<string, unknown>>(await response.json());
       setData({
         services: Array.isArray(payload.services) ? payload.services : [],
         metrics: Array.isArray(payload.metrics) ? payload.metrics : [],
         incidents: Array.isArray(payload.incidents) ? payload.incidents : [],
-        overallStatus: (payload.overallStatus as SystemStatusData['overallStatus']) || 'operational',
+        overallStatus:
+          (payload.overallStatus as SystemStatusData['overallStatus']) || 'operational',
         lastUpdated: (payload.lastUpdated as string) || new Date().toISOString()
       });
     } catch (err) {
@@ -173,7 +180,9 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
     setIsClearingCache(true);
     try {
       const response = await apiPost(API_ENDPOINTS.ADMIN.CACHE_CLEAR);
-      if (!response.ok) throw new Error('Failed to clear cache');
+      if (!response.ok) {
+        throw new Error('Failed to clear cache');
+      }
       showNotification?.('Cache cleared successfully', 'success');
     } catch (err) {
       showNotification?.(formatErrorMessage(err, 'Failed to clear cache'), 'error');
@@ -186,7 +195,9 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
     setIsSendingTestEmail(true);
     try {
       const response = await apiPost(API_ENDPOINTS.ADMIN.TEST_EMAIL);
-      if (!response.ok) throw new Error('Failed to send test email');
+      if (!response.ok) {
+        throw new Error('Failed to send test email');
+      }
       const payload = unwrapApiData<{ to: string }>(await response.json());
       showNotification?.(`Test email sent to ${payload.to}`, 'success');
     } catch (err) {
@@ -203,24 +214,33 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
       interval = setInterval(loadStatus, TIMING.STATUS_REFRESH);
     }
     return () => {
-      if (interval) clearInterval(interval);
+      if (interval) {
+        clearInterval(interval);
+      }
     };
   }, [autoRefresh, loadStatus]);
 
-  const overallLabel = data.overallStatus === 'operational'
-    ? 'All Systems Operational'
-    : `System ${data.overallStatus}`;
+  const overallLabel =
+    data.overallStatus === 'operational'
+      ? 'All Systems Operational'
+      : `System ${data.overallStatus}`;
 
   return (
     <TableLayout
       containerRef={containerRef as React.Ref<HTMLDivElement>}
       title="SYSTEM STATUS"
       stats={
-        <TableStats items={[
-          { value: overallLabel, label: '', variant: data.overallStatus === 'operational' ? 'completed' : 'pending' },
-          { value: data.services.length, label: 'services' },
-          { value: data.incidents.length, label: 'incidents', variant: 'pending' }
-        ]} />
+        <TableStats
+          items={[
+            {
+              value: overallLabel,
+              label: '',
+              variant: data.overallStatus === 'operational' ? 'completed' : 'pending'
+            },
+            { value: data.services.length, label: 'services' },
+            { value: data.incidents.length, label: 'incidents', variant: 'pending' }
+          ]}
+        />
       }
       actions={
         <>
@@ -258,25 +278,38 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
           {/* Services */}
           {data.services.length > 0 && (
             <div className="status-section">
-              <div className="data-table-header"><h3><span className="title-full">Services</span></h3></div>
+              <div className="data-table-header">
+                <h3>
+                  <span className="title-full">Services</span>
+                </h3>
+              </div>
               <div className="status-services-grid">
                 {data.services.map((service) => (
                   <div key={service.id} className="status-service-card">
                     <div className="status-service-header">
                       <div className="status-service-name-row">
-                        <span className="status-service-icon" data-status-variant={getStatusVariantName(service.status)}>
+                        <span
+                          className="status-service-icon"
+                          data-status-variant={getStatusVariantName(service.status)}
+                        >
                           {SERVICE_ICONS[service.icon] || <Server className="icon-lg" />}
                         </span>
                         <span className="status-service-name">{service.name}</span>
                       </div>
-                      <span className="status-color-indicator" data-status-variant={getStatusVariantName(service.status)}>
+                      <span
+                        className="status-color-indicator"
+                        data-status-variant={getStatusVariantName(service.status)}
+                      >
                         {getStatusIcon(service.status)}
                       </span>
                     </div>
                     <div className="status-service-details">
                       <div className="status-detail-row">
                         <span className="status-detail-label">Status</span>
-                        <span className="status-text-capitalize status-color-indicator" data-status-variant={getStatusVariantName(service.status)}>
+                        <span
+                          className="status-text-capitalize status-color-indicator"
+                          data-status-variant={getStatusVariantName(service.status)}
+                        >
                           {service.status}
                         </span>
                       </div>
@@ -300,18 +333,26 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
           {/* Metrics */}
           {data.metrics.length > 0 && (
             <div className="status-section">
-              <div className="data-table-header"><h3><span className="title-full">System Metrics</span></h3></div>
+              <div className="data-table-header">
+                <h3>
+                  <span className="title-full">System Metrics</span>
+                </h3>
+              </div>
               <div className="status-metrics-grid">
                 {data.metrics.map((metric) => (
                   <div key={metric.id} className="status-metric-card">
                     <div className="status-metric-header">
                       <span className="status-metric-name">{metric.name}</span>
-                      <span className="status-color-indicator" data-status-variant={getStatusVariantName(metric.status)}>
+                      <span
+                        className="status-color-indicator"
+                        data-status-variant={getStatusVariantName(metric.status)}
+                      >
                         {getStatusIcon(metric.status)}
                       </span>
                     </div>
                     <div className="status-metric-value">
-                      {metric.value}{metric.unit}
+                      {metric.value}
+                      {metric.unit}
                     </div>
                     <div className="status-progress-track">
                       <div
@@ -323,7 +364,8 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
                       />
                     </div>
                     <span className="status-metric-threshold">
-                      Threshold: {metric.threshold}{metric.unit}
+                      Threshold: {metric.threshold}
+                      {metric.unit}
                     </span>
                   </div>
                 ))}
@@ -334,24 +376,38 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
           {/* Incidents */}
           {data.incidents.length > 0 && (
             <div className="status-section">
-              <div className="data-table-header"><h3><span className="title-full">Recent Incidents</span></h3></div>
+              <div className="data-table-header">
+                <h3>
+                  <span className="title-full">Recent Incidents</span>
+                </h3>
+              </div>
               <div className="status-incidents-list">
                 {data.incidents.map((incident) => (
                   <div key={incident.id} className="status-incident-card">
                     <div className="status-incident-main">
                       <div className="status-incident-info">
-                        <span className={cn('status-incident-severity', `severity-${incident.severity}`)}>
+                        <span
+                          className={cn(
+                            'status-incident-severity',
+                            `severity-${incident.severity}`
+                          )}
+                        >
                           {incident.severity}
                         </span>
                         <span className="status-incident-title">{incident.title}</span>
                       </div>
                       <div className="status-incident-meta">
                         <span>Started: {formatDate(incident.startedAt)}</span>
-                        {incident.resolvedAt && <span>Resolved: {formatDate(incident.resolvedAt)}</span>}
+                        {incident.resolvedAt && (
+                          <span>Resolved: {formatDate(incident.resolvedAt)}</span>
+                        )}
                         <span>Affected: {incident.affectedServices.join(', ')}</span>
                       </div>
                     </div>
-                    <div className="status-incident-status status-color-indicator" data-status-variant={getStatusVariantName(incident.status)}>
+                    <div
+                      className="status-incident-status status-color-indicator"
+                      data-status-variant={getStatusVariantName(incident.status)}
+                    >
                       {getStatusIcon(incident.status)}
                       <span className="status-text-capitalize">{incident.status}</span>
                     </div>
@@ -362,12 +418,14 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
           )}
 
           {/* Empty state when no services or metrics */}
-          {data.services.length === 0 && data.metrics.length === 0 && data.incidents.length === 0 && (
-            <div className="status-empty">
-              <CheckCircle className="icon-lg text-status-success" />
-              <span>All systems operational. No services to display.</span>
-            </div>
-          )}
+          {data.services.length === 0 &&
+            data.metrics.length === 0 &&
+            data.incidents.length === 0 && (
+              <div className="status-empty">
+                <CheckCircle className="icon-lg text-status-success" />
+                <span>All systems operational. No services to display.</span>
+              </div>
+            )}
         </div>
       )}
     </TableLayout>

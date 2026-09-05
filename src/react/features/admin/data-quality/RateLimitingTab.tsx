@@ -9,19 +9,11 @@ import { RefreshCw, Ban, Unlock } from 'lucide-react';
 import { StatCard } from '@react/components/portal/StatCard';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import {
-  fetchWithAuth,
-  formatDate,
-  type TabProps,
-  type RateLimitStats
-} from './types';
+import { fetchWithAuth, formatDate, type TabProps, type RateLimitStats } from './types';
 
 const logger = createLogger('RateLimitingTab');
 
-export function RateLimitingTab({
-  getAuthToken,
-  showNotification
-}: TabProps) {
+export function RateLimitingTab({ getAuthToken, showNotification }: TabProps) {
   const [stats, setStats] = useState<RateLimitStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [blockIp, setBlockIp] = useState('');
@@ -49,50 +41,58 @@ export function RateLimitingTab({
     loadStats();
   }, [loadStats]);
 
-  const handleBlock = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!blockIp.trim()) return;
+  const handleBlock = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!blockIp.trim()) {
+        return;
+      }
 
-    try {
-      setActionLoading(true);
-      await fetchWithAuth(
-        API_ENDPOINTS.ADMIN.DATA_QUALITY_RATE_LIMITS_BLOCK,
-        getAuthToken,
-        { method: 'POST', body: JSON.stringify({ ip: blockIp.trim(), reason: blockReason.trim() }) }
-      );
-      showNotification?.(`IP ${blockIp} blocked successfully`, 'success');
-      setBlockIp('');
-      setBlockReason('');
-      loadStats();
-    } catch (err) {
-      logger.error('Failed to block IP:', err);
-      showNotification?.('Failed to block IP', 'error');
-    } finally {
-      setActionLoading(false);
-    }
-  }, [blockIp, blockReason, getAuthToken, showNotification, loadStats]);
+      try {
+        setActionLoading(true);
+        await fetchWithAuth(API_ENDPOINTS.ADMIN.DATA_QUALITY_RATE_LIMITS_BLOCK, getAuthToken, {
+          method: 'POST',
+          body: JSON.stringify({ ip: blockIp.trim(), reason: blockReason.trim() })
+        });
+        showNotification?.(`IP ${blockIp} blocked successfully`, 'success');
+        setBlockIp('');
+        setBlockReason('');
+        loadStats();
+      } catch (err) {
+        logger.error('Failed to block IP:', err);
+        showNotification?.('Failed to block IP', 'error');
+      } finally {
+        setActionLoading(false);
+      }
+    },
+    [blockIp, blockReason, getAuthToken, showNotification, loadStats]
+  );
 
-  const handleUnblock = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!unblockIp.trim()) return;
+  const handleUnblock = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!unblockIp.trim()) {
+        return;
+      }
 
-    try {
-      setActionLoading(true);
-      await fetchWithAuth(
-        API_ENDPOINTS.ADMIN.DATA_QUALITY_RATE_LIMITS_UNBLOCK,
-        getAuthToken,
-        { method: 'POST', body: JSON.stringify({ ip: unblockIp.trim() }) }
-      );
-      showNotification?.(`IP ${unblockIp} unblocked successfully`, 'success');
-      setUnblockIp('');
-      loadStats();
-    } catch (err) {
-      logger.error('Failed to unblock IP:', err);
-      showNotification?.('Failed to unblock IP', 'error');
-    } finally {
-      setActionLoading(false);
-    }
-  }, [unblockIp, getAuthToken, showNotification, loadStats]);
+      try {
+        setActionLoading(true);
+        await fetchWithAuth(API_ENDPOINTS.ADMIN.DATA_QUALITY_RATE_LIMITS_UNBLOCK, getAuthToken, {
+          method: 'POST',
+          body: JSON.stringify({ ip: unblockIp.trim() })
+        });
+        showNotification?.(`IP ${unblockIp} unblocked successfully`, 'success');
+        setUnblockIp('');
+        loadStats();
+      } catch (err) {
+        logger.error('Failed to unblock IP:', err);
+        showNotification?.('Failed to unblock IP', 'error');
+      } finally {
+        setActionLoading(false);
+      }
+    },
+    [unblockIp, getAuthToken, showNotification, loadStats]
+  );
 
   if (loading) {
     return <div className="loading-state">Loading rate limit stats...</div>;
@@ -103,7 +103,9 @@ export function RateLimitingTab({
       {stats && (
         <div className="portal-card">
           <div className="data-table-header">
-            <h3><span className="title-full">Rate Limit Overview</span></h3>
+            <h3>
+              <span className="title-full">Rate Limit Overview</span>
+            </h3>
             <div className="data-table-actions">
               <button className="btn btn-secondary" onClick={loadStats}>
                 <RefreshCw />
@@ -120,7 +122,11 @@ export function RateLimitingTab({
 
           {stats.topOffenders.length > 0 && (
             <>
-              <div className="data-table-header"><h3><span className="title-full">Top Offenders</span></h3></div>
+              <div className="data-table-header">
+                <h3>
+                  <span className="title-full">Top Offenders</span>
+                </h3>
+              </div>
               <table className="data-table">
                 <thead>
                   <tr>
@@ -131,12 +137,16 @@ export function RateLimitingTab({
                   </tr>
                 </thead>
                 <tbody>
-                  {stats.topOffenders.map(offender => (
+                  {stats.topOffenders.map((offender) => (
                     <tr key={offender.ip}>
-                      <td><code>{offender.ip}</code></td>
+                      <td>
+                        <code>{offender.ip}</code>
+                      </td>
                       <td>{offender.requestCount.toLocaleString()}</td>
                       <td>
-                        <span className={`status-badge status-badge-${offender.blocked ? 'danger' : 'active'}`}>
+                        <span
+                          className={`status-badge status-badge-${offender.blocked ? 'danger' : 'active'}`}
+                        >
                           {offender.blocked ? 'Blocked' : 'Active'}
                         </span>
                       </td>
@@ -151,35 +161,47 @@ export function RateLimitingTab({
       )}
 
       <div className="portal-card">
-        <div className="data-table-header"><h3><span className="title-full">Block / Unblock IP</span></h3></div>
+        <div className="data-table-header">
+          <h3>
+            <span className="title-full">Block / Unblock IP</span>
+          </h3>
+        </div>
 
         <div className="rate-limit-forms">
           <form onSubmit={handleBlock} className="rate-limit-form">
             <h4 className="field-label">Block an IP Address</h4>
             <div className="form-field">
-              <label className="field-label" htmlFor="block-ip">IP Address</label>
+              <label className="field-label" htmlFor="block-ip">
+                IP Address
+              </label>
               <input
                 id="block-ip"
                 className="form-input"
                 type="text"
                 placeholder="e.g. 192.168.1.1"
                 value={blockIp}
-                onChange={e => setBlockIp(e.target.value)}
+                onChange={(e) => setBlockIp(e.target.value)}
                 required
               />
             </div>
             <div className="form-field">
-              <label className="field-label" htmlFor="block-reason">Reason (optional)</label>
+              <label className="field-label" htmlFor="block-reason">
+                Reason (optional)
+              </label>
               <input
                 id="block-reason"
                 className="form-input"
                 type="text"
                 placeholder="Reason for blocking"
                 value={blockReason}
-                onChange={e => setBlockReason(e.target.value)}
+                onChange={(e) => setBlockReason(e.target.value)}
               />
             </div>
-            <button className="btn btn-danger" type="submit" disabled={actionLoading || !blockIp.trim()}>
+            <button
+              className="btn btn-danger"
+              type="submit"
+              disabled={actionLoading || !blockIp.trim()}
+            >
               <Ban />
               Block IP
             </button>
@@ -188,18 +210,24 @@ export function RateLimitingTab({
           <form onSubmit={handleUnblock} className="rate-limit-form">
             <h4 className="field-label">Unblock an IP Address</h4>
             <div className="form-field">
-              <label className="field-label" htmlFor="unblock-ip">IP Address</label>
+              <label className="field-label" htmlFor="unblock-ip">
+                IP Address
+              </label>
               <input
                 id="unblock-ip"
                 className="form-input"
                 type="text"
                 placeholder="e.g. 192.168.1.1"
                 value={unblockIp}
-                onChange={e => setUnblockIp(e.target.value)}
+                onChange={(e) => setUnblockIp(e.target.value)}
                 required
               />
             </div>
-            <button className="btn btn-secondary" type="submit" disabled={actionLoading || !unblockIp.trim()}>
+            <button
+              className="btn btn-secondary"
+              type="submit"
+              disabled={actionLoading || !unblockIp.trim()}
+            >
               <Unlock />
               Unblock IP
             </button>

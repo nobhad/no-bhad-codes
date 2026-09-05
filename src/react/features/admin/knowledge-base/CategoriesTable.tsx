@@ -1,11 +1,6 @@
 import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
-import {
-  Folder,
-  Inbox,
-  CheckCircle,
-  XCircle
-} from 'lucide-react';
+import { Folder, Inbox, CheckCircle, XCircle } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
 import { InlineEdit } from '@react/components/portal/InlineEdit';
@@ -76,18 +71,24 @@ function sortCategories(a: Category, b: Category, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'name':
-    return multiplier * a.name.localeCompare(b.name);
-  case 'article_count':
-    return multiplier * (a.article_count - b.article_count);
-  case 'sort_order':
-    return multiplier * ((a.sort_order ?? 0) - (b.sort_order ?? 0));
-  default:
-    return 0;
+    case 'name':
+      return multiplier * a.name.localeCompare(b.name);
+    case 'article_count':
+      return multiplier * (a.article_count - b.article_count);
+    case 'sort_order':
+      return multiplier * ((a.sort_order ?? 0) - (b.sort_order ?? 0));
+    default:
+      return 0;
   }
 }
 
-export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNotification, defaultPageSize = 25, overviewMode = false }: CategoriesTableProps) {
+export function CategoriesTable({
+  onNavigate: _onNavigate,
+  getAuthToken,
+  showNotification,
+  defaultPageSize = 25,
+  overviewMode = false
+}: CategoriesTableProps) {
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -100,49 +101,47 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
   const categories = useMemo(() => data?.items ?? [], [data]);
 
   // Generic field update handler for inline editing
-  const handleFieldUpdate = useCallback(async (
-    categoryId: number,
-    updates: Partial<Record<string, unknown>>
-  ): Promise<boolean> => {
-    try {
-      const response = await apiFetch(`${API_ENDPOINTS.ADMIN.KB_CATEGORIES}/${categoryId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      });
+  const handleFieldUpdate = useCallback(
+    async (categoryId: number, updates: Partial<Record<string, unknown>>): Promise<boolean> => {
+      try {
+        const response = await apiFetch(`${API_ENDPOINTS.ADMIN.KB_CATEGORIES}/${categoryId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates)
+        });
 
-      if (!response.ok) throw new Error('Failed to update category');
+        if (!response.ok) {
+          throw new Error('Failed to update category');
+        }
 
-      setData((prev) => prev ? {
-        ...prev,
-        items: prev.items.map((cat) =>
-          cat.id === categoryId
-            ? { ...cat, ...updates }
-            : cat
-        )
-      } : prev);
-      showNotification?.('Category updated', 'success');
-      return true;
-    } catch (err) {
-      logger.error('Failed to update category:', err);
-      showNotification?.('Failed to update category', 'error');
-      return false;
-    }
-  }, [showNotification, setData]);
+        setData((prev) =>
+          prev
+            ? {
+                ...prev,
+                items: prev.items.map((cat) =>
+                  cat.id === categoryId ? { ...cat, ...updates } : cat
+                )
+              }
+            : prev
+        );
+        showNotification?.('Category updated', 'success');
+        return true;
+      } catch (err) {
+        logger.error('Failed to update category:', err);
+        showNotification?.('Failed to update category', 'error');
+        return false;
+      }
+    },
+    [showNotification, setData]
+  );
 
-  const {
-    search,
-    setSearch,
-    sort,
-    toggleSort,
-    applyFilters,
-    hasActiveFilters
-  } = useTableFilters<Category>({
-    storageKey: overviewMode ? undefined : 'admin_kb_categories',
-    filters: [],
-    filterFn: filterCategory,
-    sortFn: sortCategories
-  });
+  const { search, setSearch, sort, toggleSort, applyFilters, hasActiveFilters } =
+    useTableFilters<Category>({
+      storageKey: overviewMode ? undefined : 'admin_kb_categories',
+      filters: [],
+      filterFn: filterCategory,
+      sortFn: sortCategories
+    });
 
   const filteredCategories = useMemo(() => applyFilters(categories), [applyFilters, categories]);
 
@@ -157,39 +156,53 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
     pagination.page * pagination.pageSize
   );
 
-  const activeCount = categories.filter(c => c.is_active !== false).length;
+  const activeCount = categories.filter((c) => c.is_active !== false).length;
 
   // Single delete handler
-  const handleDeleteCategory = useCallback(async (categoryId: number) => {
-    if (!window.confirm('Are you sure you want to delete this category?')) return;
-    try {
-      const response = await apiFetch(`${API_ENDPOINTS.ADMIN.KB_CATEGORIES}/${categoryId}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete category');
-      setData((prev) => prev ? { ...prev, items: prev.items.filter((c) => c.id !== categoryId) } : prev);
-      showNotification?.('Category deleted', 'success');
-    } catch (err) {
-      logger.error('Failed to delete category:', err);
-      showNotification?.('Failed to delete category', 'error');
-    }
-  }, [showNotification, setData]);
-
-  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
-    setCreateLoading(true);
-    try {
-      const res = await apiPost(API_ENDPOINTS.ADMIN.KB_CATEGORIES, formData);
-      if (res.ok) {
-        showNotification?.('Category created successfully', 'success');
-        setCreateOpen(false);
-        refetch();
-      } else {
-        showNotification?.('Failed to create category', 'error');
+  const handleDeleteCategory = useCallback(
+    async (categoryId: number) => {
+      if (!window.confirm('Are you sure you want to delete this category?')) {
+        return;
       }
-    } catch {
-      showNotification?.('Failed to create category', 'error');
-    } finally {
-      setCreateLoading(false);
-    }
-  }, [showNotification, refetch]);
+      try {
+        const response = await apiFetch(`${API_ENDPOINTS.ADMIN.KB_CATEGORIES}/${categoryId}`, {
+          method: 'DELETE'
+        });
+        if (!response.ok) {
+          throw new Error('Failed to delete category');
+        }
+        setData((prev) =>
+          prev ? { ...prev, items: prev.items.filter((c) => c.id !== categoryId) } : prev
+        );
+        showNotification?.('Category deleted', 'success');
+      } catch (err) {
+        logger.error('Failed to delete category:', err);
+        showNotification?.('Failed to delete category', 'error');
+      }
+    },
+    [showNotification, setData]
+  );
+
+  const handleCreate = useCallback(
+    async (formData: Record<string, unknown>) => {
+      setCreateLoading(true);
+      try {
+        const res = await apiPost(API_ENDPOINTS.ADMIN.KB_CATEGORIES, formData);
+        if (res.ok) {
+          showNotification?.('Category created successfully', 'success');
+          setCreateOpen(false);
+          refetch();
+        } else {
+          showNotification?.('Failed to create category', 'error');
+        }
+      } catch {
+        showNotification?.('Failed to create category', 'error');
+      } finally {
+        setCreateLoading(false);
+      }
+    },
+    [showNotification, refetch]
+  );
 
   return (
     <>
@@ -207,11 +220,7 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
         }
         actions={
           <>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search categories..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search categories..." />
             <IconButton action="refresh" onClick={refetch} disabled={isLoading} title="Refresh" />
             <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Category" />
           </>
@@ -242,7 +251,7 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
                 sortDirection={sort?.column === 'name' ? sort.direction : null}
                 onClick={() => toggleSort('name')}
               >
-              Name
+                Name
               </PortalTableHead>
               <PortalTableHead>Slug</PortalTableHead>
               <PortalTableHead
@@ -251,7 +260,7 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
                 sortDirection={sort?.column === 'article_count' ? sort.direction : null}
                 onClick={() => toggleSort('article_count')}
               >
-              Articles
+                Articles
               </PortalTableHead>
               <PortalTableHead className="text-center">Active</PortalTableHead>
               <PortalTableHead className="col-actions">Actions</PortalTableHead>
@@ -300,7 +309,9 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
                   <PortalTableCell>
                     <code>{category.slug}</code>
                   </PortalTableCell>
-                  <PortalTableCell className="text-center">{category.article_count}</PortalTableCell>
+                  <PortalTableCell className="text-center">
+                    {category.article_count}
+                  </PortalTableCell>
                   <PortalTableCell className="text-center">
                     {category.is_active !== false ? (
                       <CheckCircle className="icon-xs status-completed" />
@@ -310,7 +321,11 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
                   </PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
-                      <IconButton action="delete" title="Delete" onClick={() => handleDeleteCategory(category.id)} />
+                      <IconButton
+                        action="delete"
+                        title="Delete"
+                        onClick={() => handleDeleteCategory(category.id)}
+                      />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>

@@ -85,7 +85,9 @@ const US_STATES = [
 
 // Validation helpers
 function validatePostalCode(postalCode: string, country?: string): string | null {
-  if (!postalCode) return null; // Optional
+  if (!postalCode) {
+    return null;
+  } // Optional
 
   if (country === 'US') {
     const usZipRegex = /^\d{5}(-\d{4})?$/;
@@ -108,42 +110,66 @@ function validatePostalCode(postalCode: string, country?: string): string | null
  */
 export function BillingForm({ billing, onUpdate }: BillingFormProps) {
   // Save handlers - each field updates the full billing object
-  const handleSaveName = useCallback(async (value: string) => {
-    return await onUpdate({ ...billing, billing_name: value || undefined });
-  }, [billing, onUpdate]);
+  const handleSaveName = useCallback(
+    async (value: string) => {
+      return await onUpdate({ ...billing, billing_name: value || undefined });
+    },
+    [billing, onUpdate]
+  );
 
-  const handleSavePhone = useCallback(async (value: string) => {
-    return await onUpdate({ ...billing, billing_phone: value || undefined });
-  }, [billing, onUpdate]);
+  const handleSavePhone = useCallback(
+    async (value: string) => {
+      return await onUpdate({ ...billing, billing_phone: value || undefined });
+    },
+    [billing, onUpdate]
+  );
 
-  const handleSaveEmail = useCallback(async (value: string) => {
-    return await onUpdate({ ...billing, billing_email: value || undefined });
-  }, [billing, onUpdate]);
+  const handleSaveEmail = useCallback(
+    async (value: string) => {
+      return await onUpdate({ ...billing, billing_email: value || undefined });
+    },
+    [billing, onUpdate]
+  );
 
-  const handleSaveStreet = useCallback(async (value: string) => {
-    return await onUpdate({ ...billing, street_address: value || undefined });
-  }, [billing, onUpdate]);
+  const handleSaveStreet = useCallback(
+    async (value: string) => {
+      return await onUpdate({ ...billing, street_address: value || undefined });
+    },
+    [billing, onUpdate]
+  );
 
-  const handleSaveCity = useCallback(async (value: string) => {
-    return await onUpdate({ ...billing, city: value || undefined });
-  }, [billing, onUpdate]);
+  const handleSaveCity = useCallback(
+    async (value: string) => {
+      return await onUpdate({ ...billing, city: value || undefined });
+    },
+    [billing, onUpdate]
+  );
 
-  const handleSaveState = useCallback(async (value: string) => {
-    return await onUpdate({ ...billing, state: value || undefined });
-  }, [billing, onUpdate]);
+  const handleSaveState = useCallback(
+    async (value: string) => {
+      return await onUpdate({ ...billing, state: value || undefined });
+    },
+    [billing, onUpdate]
+  );
 
-  const handleSavePostalCode = useCallback(async (value: string) => {
-    return await onUpdate({ ...billing, postal_code: value || undefined });
-  }, [billing, onUpdate]);
+  const handleSavePostalCode = useCallback(
+    async (value: string) => {
+      return await onUpdate({ ...billing, postal_code: value || undefined });
+    },
+    [billing, onUpdate]
+  );
 
-  const handleSaveCountry = useCallback(async (value: string) => {
-    // Clear state when changing away from US
-    const updates: BillingAddress = { ...billing, country: value || undefined };
-    if (value !== 'US') {
-      updates.state = undefined;
-    }
-    return await onUpdate(updates);
-  }, [billing, onUpdate]);
+  const handleSaveCountry = useCallback(
+    async (value: string) => {
+      // Clear state when changing away from US
+      const updates: BillingAddress = { ...billing, country: value || undefined };
+      if (value !== 'US') {
+        updates.state = undefined;
+      }
+      return await onUpdate(updates);
+    },
+    [billing, onUpdate]
+  );
 
   // Determine if we're in the US for state dropdown
   const isUS = billing.country === 'US';
@@ -193,7 +219,7 @@ export function BillingForm({ billing, onUpdate }: BillingFormProps) {
             value={billing.street_address || ''}
             onSave={handleSaveStreet}
             placeholder="Enter street address"
-            icon={<Building  />}
+            icon={<Building />}
           />
 
           <InlineEditField
@@ -201,7 +227,7 @@ export function BillingForm({ billing, onUpdate }: BillingFormProps) {
             value={billing.city || ''}
             onSave={handleSaveCity}
             placeholder="Enter city"
-            icon={<MapPin  />}
+            icon={<MapPin />}
           />
 
           {isUS ? (
@@ -210,7 +236,7 @@ export function BillingForm({ billing, onUpdate }: BillingFormProps) {
               value={billing.state || ''}
               options={US_STATES}
               onSave={handleSaveState}
-              icon={<MapPin  />}
+              icon={<MapPin />}
             />
           ) : (
             <InlineEditField
@@ -218,7 +244,7 @@ export function BillingForm({ billing, onUpdate }: BillingFormProps) {
               value={billing.state || ''}
               onSave={handleSaveState}
               placeholder="Enter state or province"
-              icon={<MapPin  />}
+              icon={<MapPin />}
             />
           )}
 
@@ -228,7 +254,7 @@ export function BillingForm({ billing, onUpdate }: BillingFormProps) {
             onSave={handleSavePostalCode}
             placeholder={isUS ? '12345' : 'Postal code'}
             validate={(value) => validatePostalCode(value, billing.country)}
-            icon={<MapPin  />}
+            icon={<MapPin />}
           />
 
           <InlineEditSelect
@@ -236,7 +262,7 @@ export function BillingForm({ billing, onUpdate }: BillingFormProps) {
             value={billing.country || 'US'}
             options={COUNTRIES}
             onSave={handleSaveCountry}
-            icon={<Globe  />}
+            icon={<Globe />}
           />
         </div>
       </div>

@@ -29,13 +29,7 @@ export interface NewRequestFormProps {
 }
 
 const PRIORITY_OPTIONS: AdHocRequestPriority[] = ['low', 'normal', 'high', 'urgent'];
-const TYPE_OPTIONS: AdHocRequestType[] = [
-  'feature',
-  'change',
-  'enhancement',
-  'bug_fix',
-  'support'
-];
+const TYPE_OPTIONS: AdHocRequestType[] = ['feature', 'change', 'enhancement', 'bug_fix', 'support'];
 /** The API accepts one attachment per request (ad_hoc_requests.attachment_file_id). */
 const DEFAULT_MAX_FILES = 1;
 
@@ -89,7 +83,9 @@ export function NewRequestForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      return;
+    }
 
     const payload: NewAdHocRequestPayload = {
       title: title.trim(),
@@ -105,7 +101,9 @@ export function NewRequestForm({
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
-    if (!selectedFiles) return;
+    if (!selectedFiles) {
+      return;
+    }
 
     setFileError(null);
     const newFiles: File[] = [];
@@ -148,7 +146,9 @@ export function NewRequestForm({
     e.stopPropagation();
 
     const droppedFiles = e.dataTransfer.files;
-    if (!droppedFiles) return;
+    if (!droppedFiles) {
+      return;
+    }
 
     setFileError(null);
     const newFiles: File[] = [];
@@ -201,9 +201,7 @@ export function NewRequestForm({
           disabled={loading}
           className={cn('input', errors.title && 'input-error')}
         />
-        {errors.title && (
-          <span className="form-error-message">{errors.title}</span>
-        )}
+        {errors.title && <span className="form-error-message">{errors.title}</span>}
       </div>
 
       {/* Description */}
@@ -226,14 +224,14 @@ export function NewRequestForm({
           rows={4}
           className={cn('textarea form-textarea-resizable', errors.description && 'input-error')}
         />
-        {errors.description && (
-          <span className="form-error-message">{errors.description}</span>
-        )}
+        {errors.description && <span className="form-error-message">{errors.description}</span>}
       </div>
 
       {/* Request type */}
       <div className="flex flex-col gap-1">
-        <label className="field-label" htmlFor="request-type">What kind of request is this?</label>
+        <label className="field-label" htmlFor="request-type">
+          What kind of request is this?
+        </label>
         <FormDropdown
           id="request-type"
           value={requestType}
@@ -258,8 +256,12 @@ export function NewRequestForm({
               disabled={loading}
               className={cn('flex-1', priority === p ? 'btn-primary' : 'btn-secondary')}
               style={{
-                color: priority === p ? 'var(--color-text-primary)' : AD_HOC_REQUEST_PRIORITY_CONFIG[p].color,
-                backgroundColor: priority === p ? AD_HOC_REQUEST_PRIORITY_CONFIG[p].color : 'transparent',
+                color:
+                  priority === p
+                    ? 'var(--color-text-primary)'
+                    : AD_HOC_REQUEST_PRIORITY_CONFIG[p].color,
+                backgroundColor:
+                  priority === p ? AD_HOC_REQUEST_PRIORITY_CONFIG[p].color : 'transparent',
                 borderColor: priority === p ? AD_HOC_REQUEST_PRIORITY_CONFIG[p].color : undefined
               }}
             >
@@ -290,9 +292,7 @@ export function NewRequestForm({
             placeholder="Select a project..."
             disabled={loading}
           />
-          {errors.projectId && (
-            <span className="form-error-message">{errors.projectId}</span>
-          )}
+          {errors.projectId && <span className="form-error-message">{errors.projectId}</span>}
         </div>
       )}
 
@@ -318,7 +318,8 @@ export function NewRequestForm({
               </button>
             </p>
             <p className="text-secondary mt-0.5">
-              {maxFiles === 1 ? 'One file' : `Max ${maxFiles} files`}, up to {formatFileSize(maxFileSize)}
+              {maxFiles === 1 ? 'One file' : `Max ${maxFiles} files`}, up to{' '}
+              {formatFileSize(maxFileSize)}
             </p>
           </div>
           <input
@@ -342,18 +343,11 @@ export function NewRequestForm({
         {files.length > 0 && (
           <div className="flex flex-col gap-1 mt-2">
             {files.map((file, index) => (
-              <div
-                key={`${file.name}-${index}`}
-                className="list-item justify-between"
-              >
+              <div key={`${file.name}-${index}`} className="list-item justify-between">
                 <div className="flex items-center gap-2 card-content-truncate">
                   <Paperclip className="icon-xs flex-shrink-0" />
-                  <span className="text-primary">
-                    {file.name}
-                  </span>
-                  <span className="text-secondary">
-                    ({formatFileSize(file.size)})
-                  </span>
+                  <span className="text-primary">{file.name}</span>
+                  <span className="text-secondary">({formatFileSize(file.size)})</span>
                 </div>
                 <button
                   type="button"
@@ -373,20 +367,11 @@ export function NewRequestForm({
       {/* Actions */}
       <div className="flex items-center justify-end gap-2 mt-2">
         {onCancel && (
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={onCancel}
-            disabled={loading}
-          >
+          <button type="button" className="btn-secondary" onClick={onCancel} disabled={loading}>
             Cancel
           </button>
         )}
-        <button
-          type="submit"
-          className="btn-primary flex items-center gap-1.5"
-          disabled={loading}
-        >
+        <button type="submit" className="btn-primary flex items-center gap-1.5" disabled={loading}>
           {loading && <RefreshCw className="icon-xs loading-spin" />}
           Submit Request
         </button>

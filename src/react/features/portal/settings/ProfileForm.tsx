@@ -22,21 +22,27 @@ interface ProfileFormProps {
 
 // Validation adapters — wraps shared ValidationResult into (string | null) for InlineEditField
 function validateEmail(email: string): string | null {
-  if (!email) return 'Email is required';
+  if (!email) {
+    return 'Email is required';
+  }
   const result = sharedValidateEmail(email, { allowDisposable: true });
-  return result.isValid ? null : (result.error || 'Invalid email');
+  return result.isValid ? null : result.error || 'Invalid email';
 }
 
 function validatePhone(phone: string): string | null {
-  if (!phone) return null; // Phone is optional
+  if (!phone) {
+    return null;
+  } // Phone is optional
   const result = sharedValidatePhone(phone);
-  return result.isValid ? null : (result.error || 'Invalid phone number');
+  return result.isValid ? null : result.error || 'Invalid phone number';
 }
 
 function validateName(name: string): string | null {
-  if (!name || !name.trim()) return 'Name is required';
+  if (!name || !name.trim()) {
+    return 'Name is required';
+  }
   const result = sharedValidateName(name, { type: 'person' });
-  return result.isValid ? null : (result.error || 'Invalid name');
+  return result.isValid ? null : result.error || 'Invalid name';
 }
 
 /**
@@ -45,21 +51,33 @@ function validateName(name: string): string | null {
  */
 export function ProfileForm({ profile, onUpdate }: ProfileFormProps) {
   // Save handlers for each field
-  const handleSaveName = useCallback(async (value: string) => {
-    return await onUpdate({ contact_name: value });
-  }, [onUpdate]);
+  const handleSaveName = useCallback(
+    async (value: string) => {
+      return await onUpdate({ contact_name: value });
+    },
+    [onUpdate]
+  );
 
-  const handleSaveCompany = useCallback(async (value: string) => {
-    return await onUpdate({ company_name: value || undefined });
-  }, [onUpdate]);
+  const handleSaveCompany = useCallback(
+    async (value: string) => {
+      return await onUpdate({ company_name: value || undefined });
+    },
+    [onUpdate]
+  );
 
-  const handleSaveEmail = useCallback(async (value: string) => {
-    return await onUpdate({ email: value });
-  }, [onUpdate]);
+  const handleSaveEmail = useCallback(
+    async (value: string) => {
+      return await onUpdate({ email: value });
+    },
+    [onUpdate]
+  );
 
-  const handleSavePhone = useCallback(async (value: string) => {
-    return await onUpdate({ phone: value || undefined });
-  }, [onUpdate]);
+  const handleSavePhone = useCallback(
+    async (value: string) => {
+      return await onUpdate({ phone: value || undefined });
+    },
+    [onUpdate]
+  );
 
   return (
     <>
@@ -80,7 +98,7 @@ export function ProfileForm({ profile, onUpdate }: ProfileFormProps) {
             placeholder="Enter your name"
             required
             validate={validateName}
-            icon={<User  />}
+            icon={<User />}
           />
 
           <InlineEditField
@@ -88,7 +106,7 @@ export function ProfileForm({ profile, onUpdate }: ProfileFormProps) {
             value={profile.company_name || ''}
             onSave={handleSaveCompany}
             placeholder="Enter company name"
-            icon={<Building2  />}
+            icon={<Building2 />}
           />
 
           <InlineEditField
@@ -99,7 +117,7 @@ export function ProfileForm({ profile, onUpdate }: ProfileFormProps) {
             placeholder="Enter email address"
             required
             validate={validateEmail}
-            icon={<Mail  />}
+            icon={<Mail />}
           />
 
           <InlineEditField
@@ -109,11 +127,10 @@ export function ProfileForm({ profile, onUpdate }: ProfileFormProps) {
             type="tel"
             placeholder="Enter phone number"
             validate={validatePhone}
-            icon={<Phone  />}
+            icon={<Phone />}
           />
         </div>
       </div>
-
     </>
   );
 }

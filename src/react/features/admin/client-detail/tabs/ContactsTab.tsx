@@ -37,11 +37,10 @@ function getContactDisplayName(contact: ClientContact): string {
 
 interface ContactsTabProps {
   contacts: ClientContact[];
-  onAddContact: (contact: Omit<ClientContact, 'id' | 'clientId' | 'createdAt' | 'updatedAt'>) => Promise<boolean>;
-  onUpdateContact: (
-    contactId: number,
-    updates: Partial<ClientContact>
+  onAddContact: (
+    contact: Omit<ClientContact, 'id' | 'clientId' | 'createdAt' | 'updatedAt'>
   ) => Promise<boolean>;
+  onUpdateContact: (contactId: number, updates: Partial<ClientContact>) => Promise<boolean>;
   onDeleteContact: (contactId: number) => Promise<boolean>;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
@@ -97,23 +96,30 @@ export function ContactsTab({
 
   // Sort contacts: primary first, then alphabetically
   const sortedContacts = [...contacts].sort((a, b) => {
-    if (a.isPrimary && !b.isPrimary) return -1;
-    if (!a.isPrimary && b.isPrimary) return 1;
+    if (a.isPrimary && !b.isPrimary) {
+      return -1;
+    }
+    if (!a.isPrimary && b.isPrimary) {
+      return 1;
+    }
     return getContactDisplayName(a).localeCompare(getContactDisplayName(b));
   });
 
   // Start editing contact — maps ClientContact to ContactFormData
-  const handleStartEdit = useCallback((contact: ClientContact) => {
-    startEdit(contact.id, {
-      name: getContactDisplayName(contact),
-      email: contact.email || '',
-      phone: contact.phone || '',
-      title: contact.title || '',
-      role: (contact.role as ContactRole) || 'other',
-      is_primary: contact.isPrimary,
-      notes: contact.notes || ''
-    });
-  }, [startEdit]);
+  const handleStartEdit = useCallback(
+    (contact: ClientContact) => {
+      startEdit(contact.id, {
+        name: getContactDisplayName(contact),
+        email: contact.email || '',
+        phone: contact.phone || '',
+        title: contact.title || '',
+        role: (contact.role as ContactRole) || 'other',
+        is_primary: contact.isPrimary,
+        notes: contact.notes || ''
+      });
+    },
+    [startEdit]
+  );
 
   // Update form field
   const handleFieldChange = useCallback(
@@ -158,7 +164,9 @@ export function ContactsTab({
           showNotification?.('Failed to update contact', 'error');
         }
       } else {
-        const success = await onAddContact(contactData as Omit<ClientContact, 'id' | 'clientId' | 'createdAt' | 'updatedAt'>);
+        const success = await onAddContact(
+          contactData as Omit<ClientContact, 'id' | 'clientId' | 'createdAt' | 'updatedAt'>
+        );
         if (success) {
           showNotification?.('Contact added', 'success');
           handleCancel();
@@ -169,7 +177,15 @@ export function ContactsTab({
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, editingId, onAddContact, onUpdateContact, showNotification, handleCancel, setIsSubmitting]);
+  }, [
+    formData,
+    editingId,
+    onAddContact,
+    onUpdateContact,
+    showNotification,
+    handleCancel,
+    setIsSubmitting
+  ]);
 
   // Handle delete
   const handleDeleteClick = useCallback(
@@ -181,7 +197,9 @@ export function ContactsTab({
   );
 
   const handleConfirmDelete = useCallback(async () => {
-    if (!contactToDelete) return;
+    if (!contactToDelete) {
+      return;
+    }
 
     const success = await onDeleteContact(contactToDelete.id);
     if (success) {
@@ -212,11 +230,7 @@ export function ContactsTab({
         <h3 className="heading">
           <span className="title-full">{editingId ? 'Edit Contact' : 'Add Contact'}</span>
         </h3>
-        <button
-          onClick={handleCancel}
-          className="icon-btn"
-          aria-label="Cancel editing"
-        >
+        <button onClick={handleCancel} className="icon-btn" aria-label="Cancel editing">
           <X className="icon-md" />
         </button>
       </div>
@@ -225,7 +239,9 @@ export function ContactsTab({
         <PortalInput
           label="Name"
           value={formData.name}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFieldChange('name', e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            handleFieldChange('name', e.target.value)
+          }
           placeholder="Contact name"
           required
         />
@@ -234,7 +250,9 @@ export function ContactsTab({
           label="Email"
           type="email"
           value={formData.email}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFieldChange('email', e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            handleFieldChange('email', e.target.value)
+          }
           placeholder="email@example.com"
           required
         />
@@ -242,26 +260,29 @@ export function ContactsTab({
         <PortalInput
           label="Phone"
           value={formData.phone}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFieldChange('phone', e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            handleFieldChange('phone', e.target.value)
+          }
           placeholder="(555) 123-4567"
         />
 
         <PortalInput
           label="Title"
           value={formData.title}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFieldChange('title', e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            handleFieldChange('title', e.target.value)
+          }
           placeholder="Job title"
         />
 
         <div className="form-field-col">
-          <label className="field-label">
-            Role
-          </label>
+          <label className="field-label">Role</label>
           <PortalDropdown>
             <PortalDropdownTrigger asChild>
               <button className="dropdown-trigger--form" type="button">
                 <span className="dropdown-value--form">
-                  {CONTACT_ROLE_LABELS[formData.role as keyof typeof CONTACT_ROLE_LABELS] || formData.role}
+                  {CONTACT_ROLE_LABELS[formData.role as keyof typeof CONTACT_ROLE_LABELS] ||
+                    formData.role}
                 </span>
                 <ChevronDown className="dropdown-caret--form" />
               </button>
@@ -270,10 +291,7 @@ export function ContactsTab({
               {Object.entries(CONTACT_ROLE_LABELS)
                 .filter(([value]) => value !== formData.role)
                 .map(([value, label]) => (
-                  <PortalDropdownItem
-                    key={value}
-                    onSelect={() => handleFieldChange('role', value)}
-                  >
+                  <PortalDropdownItem key={value} onSelect={() => handleFieldChange('role', value)}>
                     {label}
                   </PortalDropdownItem>
                 ))}
@@ -287,9 +305,7 @@ export function ContactsTab({
               checked={formData.is_primary}
               onCheckedChange={(checked) => handleFieldChange('is_primary', checked === true)}
             />
-            <span className="text-secondary">
-              Primary Contact
-            </span>
+            <span className="text-secondary">Primary Contact</span>
           </label>
         </div>
       </div>
@@ -298,7 +314,9 @@ export function ContactsTab({
         <PortalInput
           label="Notes"
           value={formData.notes}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFieldChange('notes', e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            handleFieldChange('notes', e.target.value)
+          }
           placeholder="Additional notes..."
         />
       </div>
@@ -318,7 +336,9 @@ export function ContactsTab({
     <div className="subsection">
       <div className="panel">
         <div className="data-table-header">
-          <h3><span className="title-full">Contacts</span></h3>
+          <h3>
+            <span className="title-full">Contacts</span>
+          </h3>
           {!isFormOpen && (
             <div className="data-table-actions">
               <IconButton action="add" onClick={handleStartAdd} title="Add Contact" />
@@ -340,19 +360,14 @@ export function ContactsTab({
             {sortedContacts.map((contact) => (
               <div
                 key={contact.id}
-                className={cn(
-                  'portal-card',
-                  contact.isPrimary && 'border-primary-accent'
-                )}
+                className={cn('portal-card', contact.isPrimary && 'border-primary-accent')}
               >
                 {/* Contact Header — same class as all other section headers */}
                 <div className="data-table-header">
                   <h3>
                     <User className="icon-sm" />
                     <span className="title-full">{getContactDisplayName(contact)}</span>
-                    {contact.isPrimary && (
-                      <Star className="icon-xs is-active-primary" />
-                    )}
+                    {contact.isPrimary && <Star className="icon-xs is-active-primary" />}
                   </h3>
                   <div className="data-table-actions">
                     <PortalDropdown>
@@ -385,22 +400,19 @@ export function ContactsTab({
                 <div className="detail-list">
                   <div className="contact-detail-row">
                     <Mail className="icon-sm" />
-                    <a
-                      href={`mailto:${contact.email}`}
-                      className="text-accent"
-                    >
+                    <a href={`mailto:${contact.email}`} className="text-accent">
                       {contact.email}
                     </a>
-                    <CopyEmailButton email={contact.email || ''} showNotification={showNotification} />
+                    <CopyEmailButton
+                      email={contact.email || ''}
+                      showNotification={showNotification}
+                    />
                   </div>
 
                   {contact.phone && (
                     <div className="contact-detail-row">
                       <Phone className="icon-sm" />
-                      <a
-                        href={`tel:${contact.phone}`}
-                        className="text-secondary"
-                      >
+                      <a href={`tel:${contact.phone}`} className="text-secondary">
                         {contact.phone}
                       </a>
                     </div>
@@ -417,11 +429,7 @@ export function ContactsTab({
                 </div>
 
                 {/* Notes */}
-                {contact.notes && (
-                  <p className="text-secondary contact-notes">
-                    {contact.notes}
-                  </p>
-                )}
+                {contact.notes && <p className="text-secondary contact-notes">{contact.notes}</p>}
               </div>
             ))}
           </div>

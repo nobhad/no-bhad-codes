@@ -7,15 +7,7 @@
 
 import * as React from 'react';
 import { useState, useCallback, useEffect } from 'react';
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  RefreshCw,
-  ToggleLeft,
-  ToggleRight,
-  Inbox
-} from 'lucide-react';
+import { Plus, Pencil, Trash2, RefreshCw, ToggleLeft, ToggleRight, Inbox } from 'lucide-react';
 import {
   PortalTable,
   PortalTableHeader,
@@ -36,7 +28,11 @@ import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { unwrapApiData, apiFetch, apiPost, apiPut, apiDelete } from '@/utils/api-client';
 import { createLogger } from '@/utils/logger';
 import { showToast } from '@/utils/toast-notifications';
-import { LeadScoringRuleForm, type ScoringRule, type ScoringRuleFormData } from './LeadScoringRuleForm';
+import {
+  LeadScoringRuleForm,
+  type ScoringRule,
+  type ScoringRuleFormData
+} from './LeadScoringRuleForm';
 
 const logger = createLogger('LeadScoringConfig');
 
@@ -127,13 +123,18 @@ export function LeadScoringConfig() {
     setIsFormOpen(true);
   }, []);
 
-  const handleDeleteClick = useCallback((rule: ScoringRule) => {
-    setRuleToDelete(rule);
-    deleteDialog.open();
-  }, [deleteDialog]);
+  const handleDeleteClick = useCallback(
+    (rule: ScoringRule) => {
+      setRuleToDelete(rule);
+      deleteDialog.open();
+    },
+    [deleteDialog]
+  );
 
   const handleDeleteConfirm = useCallback(async () => {
-    if (!ruleToDelete) return;
+    if (!ruleToDelete) {
+      return;
+    }
     try {
       const response = await apiDelete(buildEndpoint.adminScoringRule(ruleToDelete.id));
       if (response.ok) {
@@ -156,13 +157,8 @@ export function LeadScoringConfig() {
         isActive: newActive
       });
       if (response.ok) {
-        setRules((prev) =>
-          prev.map((r) => r.id === rule.id ? { ...r, isActive: newActive } : r)
-        );
-        showToast(
-          `Rule "${rule.name}" ${newActive ? 'activated' : 'deactivated'}`,
-          'success'
-        );
+        setRules((prev) => prev.map((r) => (r.id === rule.id ? { ...r, isActive: newActive } : r)));
+        showToast(`Rule "${rule.name}" ${newActive ? 'activated' : 'deactivated'}`, 'success');
       }
     } catch (err) {
       logger.error('Failed to toggle rule:', err);
@@ -170,41 +166,42 @@ export function LeadScoringConfig() {
     }
   }, []);
 
-  const handleSave = useCallback(async (data: ScoringRuleFormData) => {
-    setIsSaving(true);
-    try {
-      if (editingRule) {
-        // Update existing
-        const response = await apiPut(buildEndpoint.adminScoringRule(editingRule.id), data);
-        if (response.ok) {
-          const result = unwrapApiData<{ rule: ScoringRule }>(await response.json());
-          setRules((prev) =>
-            prev.map((r) => r.id === editingRule.id ? result.rule : r)
-          );
-          showToast('Scoring rule updated', 'success');
-          setIsFormOpen(false);
+  const handleSave = useCallback(
+    async (data: ScoringRuleFormData) => {
+      setIsSaving(true);
+      try {
+        if (editingRule) {
+          // Update existing
+          const response = await apiPut(buildEndpoint.adminScoringRule(editingRule.id), data);
+          if (response.ok) {
+            const result = unwrapApiData<{ rule: ScoringRule }>(await response.json());
+            setRules((prev) => prev.map((r) => (r.id === editingRule.id ? result.rule : r)));
+            showToast('Scoring rule updated', 'success');
+            setIsFormOpen(false);
+          } else {
+            showToast('Failed to update rule', 'error');
+          }
         } else {
-          showToast('Failed to update rule', 'error');
+          // Create new
+          const response = await apiPost(API_ENDPOINTS.ADMIN.LEADS_SCORING_RULES, data);
+          if (response.ok) {
+            const result = unwrapApiData<{ rule: ScoringRule }>(await response.json());
+            setRules((prev) => [...prev, result.rule]);
+            showToast('Scoring rule created', 'success');
+            setIsFormOpen(false);
+          } else {
+            showToast('Failed to create rule', 'error');
+          }
         }
-      } else {
-        // Create new
-        const response = await apiPost(API_ENDPOINTS.ADMIN.LEADS_SCORING_RULES, data);
-        if (response.ok) {
-          const result = unwrapApiData<{ rule: ScoringRule }>(await response.json());
-          setRules((prev) => [...prev, result.rule]);
-          showToast('Scoring rule created', 'success');
-          setIsFormOpen(false);
-        } else {
-          showToast('Failed to create rule', 'error');
-        }
+      } catch (err) {
+        logger.error('Failed to save scoring rule:', err);
+        showToast('Failed to save rule', 'error');
+      } finally {
+        setIsSaving(false);
       }
-    } catch (err) {
-      logger.error('Failed to save scoring rule:', err);
-      showToast('Failed to save rule', 'error');
-    } finally {
-      setIsSaving(false);
-    }
-  }, [editingRule]);
+    },
+    [editingRule]
+  );
 
   const handleRecalculateAll = useCallback(async () => {
     setIsRecalculating(true);
@@ -229,9 +226,7 @@ export function LeadScoringConfig() {
   // ============================================
 
   const activeCount = rules.filter((r) => r.isActive).length;
-  const totalPoints = rules
-    .filter((r) => r.isActive)
-    .reduce((sum, r) => sum + r.points, 0);
+  const totalPoints = rules.filter((r) => r.isActive).reduce((sum, r) => sum + r.points, 0);
 
   // ============================================
   // RENDER
@@ -266,16 +261,10 @@ export function LeadScoringConfig() {
               disabled={isRecalculating}
               title="Recalculate all lead scores"
             >
-              <RefreshCw
-                className={isRecalculating ? 'icon-spin' : ''}
-              />
+              <RefreshCw className={isRecalculating ? 'icon-spin' : ''} />
               <span>{isRecalculating ? 'Recalculating...' : 'Recalculate All'}</span>
             </button>
-            <button
-              className="btn-primary"
-              onClick={handleCreate}
-              title="Add scoring rule"
-            >
+            <button className="btn-primary" onClick={handleCreate} title="Add scoring rule">
               <Plus />
               <span>Add Rule</span>
             </button>
@@ -341,8 +330,11 @@ export function LeadScoringConfig() {
                   </PortalTableCell>
 
                   <PortalTableCell>
-                    <span className={`scoring-points ${rule.points > 0 ? 'scoring-points--positive' : 'scoring-points--negative'}`}>
-                      {rule.points > 0 ? '+' : ''}{rule.points}
+                    <span
+                      className={`scoring-points ${rule.points > 0 ? 'scoring-points--positive' : 'scoring-points--negative'}`}
+                    >
+                      {rule.points > 0 ? '+' : ''}
+                      {rule.points}
                     </span>
                   </PortalTableCell>
 

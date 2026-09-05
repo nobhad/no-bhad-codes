@@ -1,13 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  Search,
-  MoreHorizontal,
-  User,
-  Users,
-  Inbox,
-  Star
-} from 'lucide-react';
+import { Search, MoreHorizontal, User, Users, Inbox, Star } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { formatTimeAgo } from '@/utils/time-utils';
@@ -68,7 +61,12 @@ interface MessageViewProps {
   defaultPageSize?: number;
 }
 
-export function MessageView({ getAuthToken: _getAuthToken, showNotification, onNavigate, defaultPageSize: _defaultPageSize = 25 }: MessageViewProps) {
+export function MessageView({
+  getAuthToken: _getAuthToken,
+  showNotification,
+  onNavigate,
+  defaultPageSize: _defaultPageSize = 25
+}: MessageViewProps) {
   const containerRef = useFadeIn();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -83,20 +81,27 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
   const [filterValues, setFilterValues] = useState<Record<string, string[]>>({});
 
   const statusFilter = filterValues.status ?? [];
-  const filter = (statusFilter.length === 1 ? statusFilter[0] : 'all') as 'all' | 'unread' | 'starred' | 'archived';
+  const filter = (statusFilter.length === 1 ? statusFilter[0] : 'all') as
+    | 'all'
+    | 'unread'
+    | 'starred'
+    | 'archived';
 
-  const filterSections: FilterSection[] = useMemo(() => [
-    {
-      key: 'status',
-      label: 'STATUS',
-      options: [
-        { value: 'all', label: 'All' },
-        { value: 'unread', label: 'Unread' },
-        { value: 'starred', label: 'Starred' },
-        { value: 'archived', label: 'Archived' }
-      ]
-    }
-  ], []);
+  const filterSections: FilterSection[] = useMemo(
+    () => [
+      {
+        key: 'status',
+        label: 'STATUS',
+        options: [
+          { value: 'all', label: 'All' },
+          { value: 'unread', label: 'Unread' },
+          { value: 'starred', label: 'Starred' },
+          { value: 'archived', label: 'Archived' }
+        ]
+      }
+    ],
+    []
+  );
 
   const loadConversations = useCallback(async (signal?: AbortSignal) => {
     setIsLoading(true);
@@ -104,12 +109,16 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
 
     try {
       const response = await apiFetch(API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS, { signal });
-      if (!response.ok) throw new Error('Failed to load conversations');
+      if (!response.ok) {
+        throw new Error('Failed to load conversations');
+      }
 
       const data = unwrapApiData<Record<string, unknown>>(await response.json());
       setConversations((data.conversations as Conversation[]) || []);
     } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') return;
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
       setError(formatErrorMessage(err, 'Failed to load conversations'));
     } finally {
       setIsLoading(false);
@@ -121,7 +130,9 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
 
     try {
       const response = await apiFetch(buildEndpoint.adminConversation(conversationId), { signal });
-      if (!response.ok) throw new Error('Failed to load messages');
+      if (!response.ok) {
+        throw new Error('Failed to load messages');
+      }
 
       const data = unwrapApiData<Record<string, unknown>>(await response.json());
       setMessages((data.messages as Message[]) || []);
@@ -133,42 +144,53 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
         prev.map((c) => (c.id === conversationId ? { ...c, unreadCount: 0 } : c))
       );
     } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') return;
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
       logger.error('Failed to load messages:', err);
     } finally {
       setMessagesLoading(false);
     }
   }, []);
 
-  const handleSend = useCallback(async (content: string): Promise<boolean> => {
-    if (!selectedConversation) return false;
-    try {
-      const response = await apiPost(
-        buildEndpoint.adminConversationMessages(selectedConversation.id),
-        { content }
-      );
-      if (!response.ok) return false;
-      const data = unwrapApiData<Record<string, unknown>>(await response.json());
-      setMessages((prev) => [...prev, data.message as Message]);
-      setConversations((prev) =>
-        prev.map((c) =>
-          c.id === selectedConversation.id
-            ? { ...c, lastMessage: content, lastMessageAt: new Date().toISOString() }
-            : c
-        )
-      );
-      return true;
-    } catch {
-      return false;
-    }
-  }, [selectedConversation]);
+  const handleSend = useCallback(
+    async (content: string): Promise<boolean> => {
+      if (!selectedConversation) {
+        return false;
+      }
+      try {
+        const response = await apiPost(
+          buildEndpoint.adminConversationMessages(selectedConversation.id),
+          { content }
+        );
+        if (!response.ok) {
+          return false;
+        }
+        const data = unwrapApiData<Record<string, unknown>>(await response.json());
+        setMessages((prev) => [...prev, data.message as Message]);
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.id === selectedConversation.id
+              ? { ...c, lastMessage: content, lastMessageAt: new Date().toISOString() }
+              : c
+          )
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [selectedConversation]
+  );
 
   const handleEdit = useCallback(async (messageId: number, content: string): Promise<boolean> => {
     try {
       const response = await apiPut(buildEndpoint.messageItem(messageId), { message: content });
-      if (!response.ok) return false;
+      if (!response.ok) {
+        return false;
+      }
       setMessages((prev) =>
-        prev.map((m) => m.id === messageId ? { ...m, content, isEdited: true } : m)
+        prev.map((m) => (m.id === messageId ? { ...m, content, isEdited: true } : m))
       );
       return true;
     } catch {
@@ -226,14 +248,14 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
     }
 
     switch (filter) {
-    case 'unread':
-      return conv.unreadCount > 0;
-    case 'starred':
-      return conv.isStarred;
-    case 'archived':
-      return conv.isArchived;
-    default:
-      return !conv.isArchived;
+      case 'unread':
+        return conv.unreadCount > 0;
+      case 'starred':
+        return conv.isStarred;
+      case 'archived':
+        return conv.isArchived;
+      default:
+        return !conv.isArchived;
     }
   });
 
@@ -246,11 +268,7 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
         <div className="data-table-header messaging-top-bar">
           <h3>
             Messages
-            {totalUnread > 0 && (
-              <span className="badge ml-2">
-                {totalUnread}
-              </span>
-            )}
+            {totalUnread > 0 && <span className="badge ml-2">{totalUnread}</span>}
           </h3>
           <div className="data-table-actions">
             <div className="search-bar">
@@ -276,12 +294,18 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
               <FilterDropdown
                 sections={filterSections}
                 values={filterValues}
-                onChange={(key, value) => setFilterValues(prev => {
-                  if (value === 'all') return { ...prev, [key]: [] };
-                  const current = prev[key] ?? [];
-                  const next = current.includes(value) ? current.filter(v => v !== value) : [...current, value];
-                  return { ...prev, [key]: next };
-                })}
+                onChange={(key, value) =>
+                  setFilterValues((prev) => {
+                    if (value === 'all') {
+                      return { ...prev, [key]: [] };
+                    }
+                    const current = prev[key] ?? [];
+                    const next = current.includes(value)
+                      ? current.filter((v) => v !== value)
+                      : [...current, value];
+                    return { ...prev, [key]: next };
+                  })
+                }
               />
             </div>
 
@@ -310,7 +334,12 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
                       </div>
                       <div className="messaging-conv-item-details">
                         <div className="messaging-conv-item-header">
-                          <span className={cn('messaging-conv-name', conv.unreadCount > 0 && 'messaging-conv-name-unread')}>
+                          <span
+                            className={cn(
+                              'messaging-conv-name',
+                              conv.unreadCount > 0 && 'messaging-conv-name-unread'
+                            )}
+                          >
                             {conv.clientName}
                           </span>
                           <span className="messaging-conv-time">
@@ -318,19 +347,20 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
                           </span>
                         </div>
                         {conv.projectName && (
-                          <span className="messaging-conv-project">
-                            {conv.projectName}
-                          </span>
+                          <span className="messaging-conv-project">{conv.projectName}</span>
                         )}
                         {conv.lastMessage && (
-                          <p className={cn('messaging-conv-preview', conv.unreadCount > 0 && 'messaging-conv-preview-unread')}>
+                          <p
+                            className={cn(
+                              'messaging-conv-preview',
+                              conv.unreadCount > 0 && 'messaging-conv-preview-unread'
+                            )}
+                          >
                             {conv.lastMessage}
                           </p>
                         )}
                       </div>
-                      {conv.unreadCount > 0 && (
-                        <span className="badge">{conv.unreadCount}</span>
-                      )}
+                      {conv.unreadCount > 0 && <span className="badge">{conv.unreadCount}</span>}
                     </div>
                   </div>
                 ))
@@ -350,7 +380,14 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
                   </h3>
                   {selectedConversation.projectName && (
                     <button
-                      onClick={() => onNavigate?.('projects', selectedConversation.projectId != null ? String(selectedConversation.projectId) : undefined)}
+                      onClick={() =>
+                        onNavigate?.(
+                          'projects',
+                          selectedConversation.projectId != null
+                            ? String(selectedConversation.projectId)
+                            : undefined
+                        )
+                      }
                       className="btn-ghost messaging-conv-project-link"
                     >
                       {selectedConversation.projectName}
@@ -358,9 +395,13 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
                   )}
                   <div className="data-table-actions">
                     <button
-                      onClick={() => toggleStar(selectedConversation.id, selectedConversation.isStarred)}
+                      onClick={() =>
+                        toggleStar(selectedConversation.id, selectedConversation.isStarred)
+                      }
                       className={cn('icon-btn', selectedConversation.isStarred && 'is-active')}
-                      aria-label={selectedConversation.isStarred ? 'Unstar conversation' : 'Star conversation'}
+                      aria-label={
+                        selectedConversation.isStarred ? 'Unstar conversation' : 'Star conversation'
+                      }
                     >
                       <Star
                         className="messaging-star-icon"
@@ -379,9 +420,10 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
                     content: m.content,
                     isOwn: m.senderType === 'admin',
                     senderName: m.senderName,
-                    avatarLabel: m.senderType === 'client'
-                      ? getInitials(selectedConversation.clientName)
-                      : undefined,
+                    avatarLabel:
+                      m.senderType === 'client'
+                        ? getInitials(selectedConversation.clientName)
+                        : undefined,
                     timestamp: m.createdAt,
                     readReceipt: m.isRead ? 'read' : 'sent',
                     isEdited: m.isEdited,

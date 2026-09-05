@@ -105,28 +105,30 @@ interface GlobalTasksTableProps {
 }
 
 // Filter function
-function filterTask(
-  task: Task,
-  filters: Record<string, string[]>,
-  search: string
-): boolean {
+function filterTask(task: Task, filters: Record<string, string[]>, search: string): boolean {
   if (search) {
     const searchLower = search.toLowerCase();
     const matchesSearch =
       task.title.toLowerCase().includes(searchLower) ||
       task.description?.toLowerCase().includes(searchLower) ||
       task.projectName?.toLowerCase().includes(searchLower);
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(task.status)) return false;
+    if (!statusFilter.includes(task.status)) {
+      return false;
+    }
   }
 
   const priorityFilter = filters.priority;
   if (priorityFilter && priorityFilter.length > 0) {
-    if (!priorityFilter.includes(task.priority)) return false;
+    if (!priorityFilter.includes(task.priority)) {
+      return false;
+    }
   }
 
   return true;
@@ -138,22 +140,28 @@ function sortTasks(a: Task, b: Task, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'title':
-    return multiplier * a.title.localeCompare(b.title);
-  case 'priority': {
-    const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
-    return multiplier * ((priorityOrder[a.priority] ?? 4) - (priorityOrder[b.priority] ?? 4));
-  }
-  case 'dueDate':
-    return multiplier * ((a.dueDate || '').localeCompare(b.dueDate || ''));
-  case 'status':
-    return multiplier * a.status.localeCompare(b.status);
-  default:
-    return 0;
+    case 'title':
+      return multiplier * a.title.localeCompare(b.title);
+    case 'priority': {
+      const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
+      return multiplier * ((priorityOrder[a.priority] ?? 4) - (priorityOrder[b.priority] ?? 4));
+    }
+    case 'dueDate':
+      return multiplier * (a.dueDate || '').localeCompare(b.dueDate || '');
+    case 'status':
+      return multiplier * a.status.localeCompare(b.status);
+    default:
+      return 0;
   }
 }
 
-export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: GlobalTasksTableProps) {
+export function GlobalTasksTable({
+  getAuthToken: _getAuthToken,
+  showNotification,
+  onNavigate,
+  defaultPageSize = 25,
+  overviewMode = false
+}: GlobalTasksTableProps) {
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -224,17 +232,21 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
 
     try {
       const response = await apiFetch(API_ENDPOINTS.ADMIN.TASKS);
-      if (!response.ok) throw new Error('Failed to load tasks');
+      if (!response.ok) {
+        throw new Error('Failed to load tasks');
+      }
 
       const payload = unwrapApiData<Record<string, unknown>>(await response.json());
       setTasks((payload.tasks as Task[]) || []);
-      setStats((payload.stats as TaskStats) || {
-        total: 0,
-        pending: 0,
-        inProgress: 0,
-        completed: 0,
-        overdue: 0
-      });
+      setStats(
+        (payload.stats as TaskStats) || {
+          total: 0,
+          pending: 0,
+          inProgress: 0,
+          completed: 0,
+          overdue: 0
+        }
+      );
     } catch (err) {
       setError(formatErrorMessage(err, 'Failed to load tasks'));
     } finally {
@@ -247,62 +259,74 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
   }, [loadTasks]);
 
   // Status change handler
-  const handleStatusChange = useCallback(async (taskId: number, newStatus: string) => {
-    try {
-      const response = await apiFetch(buildEndpoint.adminTask(taskId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
+  const handleStatusChange = useCallback(
+    async (taskId: number, newStatus: string) => {
+      try {
+        const response = await apiFetch(buildEndpoint.adminTask(taskId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
 
-      if (!response.ok) throw new Error('Failed to update task');
+        if (!response.ok) {
+          throw new Error('Failed to update task');
+        }
 
-      setTasks((prev) =>
-        prev.map((task) =>
-          task.id === taskId ? { ...task, status: newStatus as Task['status'] } : task
-        )
-      );
-      showNotification?.('Task status updated', 'success');
-    } catch (err) {
-      logger.error('Failed to update task status:', err);
-      showNotification?.('Failed to update task status', 'error');
-    }
-  }, [showNotification]);
+        setTasks((prev) =>
+          prev.map((task) =>
+            task.id === taskId ? { ...task, status: newStatus as Task['status'] } : task
+          )
+        );
+        showNotification?.('Task status updated', 'success');
+      } catch (err) {
+        logger.error('Failed to update task status:', err);
+        showNotification?.('Failed to update task status', 'error');
+      }
+    },
+    [showNotification]
+  );
 
   // Generic field update handler for inline editing
-  const handleFieldUpdate = useCallback(async (taskId: number, field: string, value: string): Promise<boolean> => {
-    try {
-      const response = await apiFetch(buildEndpoint.adminTask(taskId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [field]: value })
-      });
+  const handleFieldUpdate = useCallback(
+    async (taskId: number, field: string, value: string): Promise<boolean> => {
+      try {
+        const response = await apiFetch(buildEndpoint.adminTask(taskId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ [field]: value })
+        });
 
-      if (!response.ok) throw new Error(`Failed to update task ${field}`);
+        if (!response.ok) {
+          throw new Error(`Failed to update task ${field}`);
+        }
 
-      setTasks((prev) =>
-        prev.map((task) =>
-          task.id === taskId ? { ...task, [field]: value } : task
-        )
-      );
-      showNotification?.(`Task ${field} updated`, 'success');
-      return true;
-    } catch (err) {
-      logger.error(`Failed to update task ${field}:`, err);
-      showNotification?.(`Failed to update task ${field}`, 'error');
-      return false;
-    }
-  }, [showNotification]);
+        setTasks((prev) =>
+          prev.map((task) => (task.id === taskId ? { ...task, [field]: value } : task))
+        );
+        showNotification?.(`Task ${field} updated`, 'success');
+        return true;
+      } catch (err) {
+        logger.error(`Failed to update task ${field}:`, err);
+        showNotification?.(`Failed to update task ${field}`, 'error');
+        return false;
+      }
+    },
+    [showNotification]
+  );
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
     const ids = selection.selectedItems.map((t) => t.id);
     try {
       const response = await apiPost(API_ENDPOINTS.ADMIN.TASKS_BULK_DELETE, { taskIds: ids });
 
-      if (!response.ok) throw new Error('Failed to delete tasks');
+      if (!response.ok) {
+        throw new Error('Failed to delete tasks');
+      }
 
       setTasks((prev) => prev.filter((t) => !ids.includes(t.id)));
       selection.clearSelection();
@@ -327,7 +351,9 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
   // Handle bulk status change
   const handleBulkStatusChange = useCallback(
     async (newStatus: string) => {
-      if (selection.selectedCount === 0) return;
+      if (selection.selectedCount === 0) {
+        return;
+      }
 
       for (const task of selection.selectedItems) {
         await handleStatusChange(task.id, newStatus);
@@ -345,23 +371,26 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
     [setFilter]
   );
 
-  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
-    setCreateLoading(true);
-    try {
-      const res = await apiPost(API_ENDPOINTS.ADMIN.TASKS, formData);
-      if (res.ok) {
-        showNotification?.('Task created successfully', 'success');
-        setCreateOpen(false);
-        loadTasks();
-      } else {
+  const handleCreate = useCallback(
+    async (formData: Record<string, unknown>) => {
+      setCreateLoading(true);
+      try {
+        const res = await apiPost(API_ENDPOINTS.ADMIN.TASKS, formData);
+        if (res.ok) {
+          showNotification?.('Task created successfully', 'success');
+          setCreateOpen(false);
+          loadTasks();
+        } else {
+          showNotification?.('Failed to create task', 'error');
+        }
+      } catch {
         showNotification?.('Failed to create task', 'error');
+      } finally {
+        setCreateLoading(false);
       }
-    } catch {
-      showNotification?.('Failed to create task', 'error');
-    } finally {
-      setCreateLoading(false);
-    }
-  }, [showNotification, loadTasks]);
+    },
+    [showNotification, loadTasks]
+  );
 
   return (
     <>
@@ -397,11 +426,7 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
                 <LayoutGrid className="icon-sm" />
               </button>
             </div>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search tasks..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search tasks..." />
             <FilterDropdown
               sections={GLOBAL_TASKS_FILTER_CONFIG}
               values={filterValues}
@@ -463,7 +488,7 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
                   sortDirection={sort?.column === 'title' ? sort.direction : null}
                   onClick={() => toggleSort('title')}
                 >
-                Task
+                  Task
                 </PortalTableHead>
                 <PortalTableHead className="project-col">Project</PortalTableHead>
                 <PortalTableHead
@@ -472,7 +497,7 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
                   sortDirection={sort?.column === 'priority' ? sort.direction : null}
                   onClick={() => toggleSort('priority')}
                 >
-                Priority
+                  Priority
                 </PortalTableHead>
                 <PortalTableHead
                   className="status-col"
@@ -480,7 +505,7 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
                   sortDirection={sort?.column === 'status' ? sort.direction : null}
                   onClick={() => toggleSort('status')}
                 >
-                Status
+                  Status
                 </PortalTableHead>
                 <PortalTableHead
                   className="date-col"
@@ -488,7 +513,7 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
                   sortDirection={sort?.column === 'dueDate' ? sort.direction : null}
                   onClick={() => toggleSort('dueDate')}
                 >
-                Due Date
+                  Due Date
                 </PortalTableHead>
                 <PortalTableHead className="col-actions">Actions</PortalTableHead>
               </PortalTableRow>
@@ -507,11 +532,7 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
                 />
               ) : (
                 paginatedTasks.map((task) => (
-                  <PortalTableRow
-                    key={task.id}
-                    clickable
-                    selected={selection.isSelected(task)}
-                  >
+                  <PortalTableRow key={task.id} clickable selected={selection.isSelected(task)}>
                     <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={selection.isSelected(task)}
@@ -549,7 +570,12 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
                     <PortalTableCell className="project-cell">
                       {task.projectName && (
                         <span
-                          onClick={() => onNavigate?.('project-detail', task.projectId != null ? String(task.projectId) : undefined)}
+                          onClick={() =>
+                            onNavigate?.(
+                              'project-detail',
+                              task.projectId != null ? String(task.projectId) : undefined
+                            )
+                          }
                           className="table-link"
                         >
                           {task.projectName}
@@ -584,7 +610,9 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
                         type="date"
                         placeholder="Set date"
                         className={cn(
-                          task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed'
+                          task.dueDate &&
+                            new Date(task.dueDate) < new Date() &&
+                            task.status !== 'completed'
                             ? 'overdue'
                             : ''
                         )}
@@ -592,7 +620,11 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
                     </PortalTableCell>
                     <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                       <div className="action-group">
-                        <IconButton action="view" title="View" onClick={() => onNavigate?.('task-detail', String(task.id))} />
+                        <IconButton
+                          action="view"
+                          title="View"
+                          onClick={() => onNavigate?.('task-detail', String(task.id))}
+                        />
                       </div>
                     </PortalTableCell>
                   </PortalTableRow>
@@ -639,10 +671,7 @@ function TasksKanbanView({
     return (
       <div className="kanban-board kanban-loading">
         {columns.map((col) => (
-          <div
-            key={col.id}
-            className="kanban-column kanban-column-skeleton"
-          />
+          <div key={col.id} className="kanban-column kanban-column-skeleton" />
         ))}
       </div>
     );
@@ -654,11 +683,7 @@ function TasksKanbanView({
         const columnTasks = tasks.filter((task) => task.status === column.id);
 
         return (
-          <div
-            key={column.id}
-            className="kanban-column"
-            data-status={column.id}
-          >
+          <div key={column.id} className="kanban-column" data-status={column.id}>
             <div className="kanban-column-header">
               <span className="kanban-column-title">
                 <span
@@ -668,28 +693,21 @@ function TasksKanbanView({
                 />
                 {column.label}
               </span>
-              <span className="kanban-column-count">
-                {columnTasks.length}
-              </span>
+              <span className="kanban-column-count">{columnTasks.length}</span>
             </div>
             <div className="kanban-column-content">
               {columnTasks.length === 0 ? (
                 <EmptyState message="No tasks" className="empty-state--compact" />
               ) : (
                 columnTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="kanban-card"
-                  >
+                  <div key={task.id} className="kanban-card">
                     <div className="kanban-card-header">
                       <span
                         className="priority-indicator"
                         data-priority={task.priority}
                         style={{ backgroundColor: PRIORITY_CONFIG[task.priority]?.color }}
                       />
-                      <span className="kanban-card-title">
-                        {task.title}
-                      </span>
+                      <span className="kanban-card-title">{task.title}</span>
                     </div>
                     {task.projectName && (
                       <div className="kanban-card-project">

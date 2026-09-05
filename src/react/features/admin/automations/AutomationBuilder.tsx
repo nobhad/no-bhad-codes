@@ -35,10 +35,7 @@ import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { formatErrorMessage } from '@/utils/error-utils';
 import { createLogger } from '@/utils/logger';
 import type { ActionType, Automation } from './types';
-import {
-  ACTION_TYPE_LABELS,
-  TRIGGER_EVENT_GROUPS
-} from './types';
+import { ACTION_TYPE_LABELS, TRIGGER_EVENT_GROUPS } from './types';
 
 const logger = createLogger('AutomationBuilder');
 
@@ -164,30 +161,30 @@ function nextCondKey(): string {
 
 function defaultConfigForType(actionType: ActionType): Record<string, unknown> {
   switch (actionType) {
-  case 'send_email':
-    return { to: 'client', subject: '' };
-  case 'create_task':
-    return { title: '', priority: 'medium', dueOffsetDays: 1 };
-  case 'update_status':
-    return { entity: '', newStatus: '' };
-  case 'send_notification':
-    return { message: '', to: 'admin' };
-  case 'wait':
-    return { duration: 1, unit: 'hours' };
-  case 'enroll_sequence':
-    return { sequenceId: '' };
-  case 'create_invoice':
-    return {};
-  case 'assign_questionnaire':
-    return {};
-  case 'webhook':
-    return { url: '', method: 'POST' };
-  case 'add_tag':
-    return { tagName: '' };
-  case 'add_note':
-    return { content: '' };
-  default:
-    return {};
+    case 'send_email':
+      return { to: 'client', subject: '' };
+    case 'create_task':
+      return { title: '', priority: 'medium', dueOffsetDays: 1 };
+    case 'update_status':
+      return { entity: '', newStatus: '' };
+    case 'send_notification':
+      return { message: '', to: 'admin' };
+    case 'wait':
+      return { duration: 1, unit: 'hours' };
+    case 'enroll_sequence':
+      return { sequenceId: '' };
+    case 'create_invoice':
+      return {};
+    case 'assign_questionnaire':
+      return {};
+    case 'webhook':
+      return { url: '', method: 'POST' };
+    case 'add_tag':
+      return { tagName: '' };
+    case 'add_note':
+      return { content: '' };
+    default:
+      return {};
   }
 }
 
@@ -196,253 +193,265 @@ function defaultConfigForType(actionType: ActionType): Record<string, unknown> {
 // ============================================================================
 
 /** Renders the type-specific config fields for a single action. */
-const ActionConfigForm = React.memo(({
-  action,
-  onConfigChange
-}: {
-  action: ActionDraft;
-  onConfigChange: (key: string, field: string, value: unknown) => void;
-}) => {
-  const { key, actionType, actionConfig } = action;
+const ActionConfigForm = React.memo(
+  ({
+    action,
+    onConfigChange
+  }: {
+    action: ActionDraft;
+    onConfigChange: (key: string, field: string, value: unknown) => void;
+  }) => {
+    const { key, actionType, actionConfig } = action;
 
-  const updateField = useCallback(
-    (field: string, value: unknown) => onConfigChange(key, field, value),
-    [key, onConfigChange]
-  );
-
-  switch (actionType) {
-  case 'send_email':
-    return (
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-col gap-1">
-          <label className="field-label">To</label>
-          <select
-            className="form-input"
-            value={(actionConfig.to as string) || 'client'}
-            onChange={(e) => updateField('to', e.target.value)}
-          >
-            {RECIPIENT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="field-label">Subject</label>
-          <input
-            type="text"
-            className="form-input"
-            placeholder="Email subject line"
-            value={(actionConfig.subject as string) || ''}
-            onChange={(e) => updateField('subject', e.target.value)}
-          />
-        </div>
-      </div>
+    const updateField = useCallback(
+      (field: string, value: unknown) => onConfigChange(key, field, value),
+      [key, onConfigChange]
     );
 
-  case 'create_task':
-    return (
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-col gap-1">
-          <label className="field-label">Title</label>
-          <input
-            type="text"
-            className="form-input"
-            placeholder="Task title"
-            value={(actionConfig.title as string) || ''}
-            onChange={(e) => updateField('title', e.target.value)}
-          />
-        </div>
-        <div className="flex gap-2">
-          <div className="flex flex-col gap-1 flex-1">
-            <label className="field-label">Priority</label>
-            <select
-              className="form-input"
-              value={(actionConfig.priority as string) || 'medium'}
-              onChange={(e) => updateField('priority', e.target.value)}
-            >
-              {PRIORITY_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
+    switch (actionType) {
+      case 'send_email':
+        return (
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
+              <label className="field-label">To</label>
+              <select
+                className="form-input"
+                value={(actionConfig.to as string) || 'client'}
+                onChange={(e) => updateField('to', e.target.value)}
+              >
+                {RECIPIENT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="field-label">Subject</label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Email subject line"
+                value={(actionConfig.subject as string) || ''}
+                onChange={(e) => updateField('subject', e.target.value)}
+              />
+            </div>
           </div>
-          <div className="flex flex-col gap-1 flex-1">
-            <label className="field-label">Due (days from trigger)</label>
+        );
+
+      case 'create_task':
+        return (
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
+              <label className="field-label">Title</label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Task title"
+                value={(actionConfig.title as string) || ''}
+                onChange={(e) => updateField('title', e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2">
+              <div className="flex flex-col gap-1 flex-1">
+                <label className="field-label">Priority</label>
+                <select
+                  className="form-input"
+                  value={(actionConfig.priority as string) || 'medium'}
+                  onChange={(e) => updateField('priority', e.target.value)}
+                >
+                  {PRIORITY_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1 flex-1">
+                <label className="field-label">Due (days from trigger)</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  min={0}
+                  value={(actionConfig.dueOffsetDays as number) ?? 1}
+                  onChange={(e) => updateField('dueOffsetDays', Number(e.target.value))}
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'update_status':
+        return (
+          <div className="flex gap-2">
+            <div className="flex flex-col gap-1 flex-1">
+              <label className="field-label">Entity</label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="project, invoice, etc."
+                value={(actionConfig.entity as string) || ''}
+                onChange={(e) => updateField('entity', e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-1 flex-1">
+              <label className="field-label">New Status</label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="active, completed, etc."
+                value={(actionConfig.newStatus as string) || ''}
+                onChange={(e) => updateField('newStatus', e.target.value)}
+              />
+            </div>
+          </div>
+        );
+
+      case 'send_notification':
+        return (
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
+              <label className="field-label">To</label>
+              <select
+                className="form-input"
+                value={(actionConfig.to as string) || 'admin'}
+                onChange={(e) => updateField('to', e.target.value)}
+              >
+                {RECIPIENT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="field-label">Message</label>
+              <textarea
+                className="form-input"
+                rows={3}
+                placeholder="Notification message..."
+                value={(actionConfig.message as string) || ''}
+                onChange={(e) => updateField('message', e.target.value)}
+              />
+            </div>
+          </div>
+        );
+
+      case 'wait':
+        return (
+          <div className="flex gap-2">
+            <div className="flex flex-col gap-1 flex-1">
+              <label className="field-label">Duration</label>
+              <input
+                type="number"
+                className="form-input"
+                min={1}
+                value={(actionConfig.duration as number) ?? 1}
+                onChange={(e) => updateField('duration', Number(e.target.value))}
+              />
+            </div>
+            <div className="flex flex-col gap-1 flex-1">
+              <label className="field-label">Unit</label>
+              <select
+                className="form-input"
+                value={(actionConfig.unit as string) || 'hours'}
+                onChange={(e) => updateField('unit', e.target.value)}
+              >
+                {WAIT_UNITS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        );
+
+      case 'enroll_sequence':
+        return (
+          <div className="flex flex-col gap-1">
+            <label className="field-label">Sequence ID</label>
             <input
-              type="number"
+              type="text"
               className="form-input"
-              min={0}
-              value={(actionConfig.dueOffsetDays as number) ?? 1}
-              onChange={(e) => updateField('dueOffsetDays', Number(e.target.value))}
+              placeholder="Enter sequence ID"
+              value={(actionConfig.sequenceId as string) || ''}
+              onChange={(e) => updateField('sequenceId', e.target.value)}
             />
           </div>
-        </div>
-      </div>
-    );
+        );
 
-  case 'update_status':
-    return (
-      <div className="flex gap-2">
-        <div className="flex flex-col gap-1 flex-1">
-          <label className="field-label">Entity</label>
-          <input
-            type="text"
-            className="form-input"
-            placeholder="project, invoice, etc."
-            value={(actionConfig.entity as string) || ''}
-            onChange={(e) => updateField('entity', e.target.value)}
-          />
-        </div>
-        <div className="flex flex-col gap-1 flex-1">
-          <label className="field-label">New Status</label>
-          <input
-            type="text"
-            className="form-input"
-            placeholder="active, completed, etc."
-            value={(actionConfig.newStatus as string) || ''}
-            onChange={(e) => updateField('newStatus', e.target.value)}
-          />
-        </div>
-      </div>
-    );
+      case 'create_invoice':
+      case 'assign_questionnaire':
+        return (
+          <p className="text-muted text-sm">
+            Configuration will use trigger context data automatically.
+          </p>
+        );
 
-  case 'send_notification':
-    return (
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-col gap-1">
-          <label className="field-label">To</label>
-          <select
-            className="form-input"
-            value={(actionConfig.to as string) || 'admin'}
-            onChange={(e) => updateField('to', e.target.value)}
-          >
-            {RECIPIENT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="field-label">Message</label>
-          <textarea
-            className="form-input"
-            rows={3}
-            placeholder="Notification message..."
-            value={(actionConfig.message as string) || ''}
-            onChange={(e) => updateField('message', e.target.value)}
-          />
-        </div>
-      </div>
-    );
+      case 'webhook':
+        return (
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
+              <label className="field-label">URL</label>
+              <input
+                type="url"
+                className="form-input"
+                placeholder="https://example.com/webhook"
+                value={(actionConfig.url as string) || ''}
+                onChange={(e) => updateField('url', e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="field-label">Method</label>
+              <select
+                className="form-input"
+                value={(actionConfig.method as string) || 'POST'}
+                onChange={(e) => updateField('method', e.target.value)}
+              >
+                {HTTP_METHODS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        );
 
-  case 'wait':
-    return (
-      <div className="flex gap-2">
-        <div className="flex flex-col gap-1 flex-1">
-          <label className="field-label">Duration</label>
-          <input
-            type="number"
-            className="form-input"
-            min={1}
-            value={(actionConfig.duration as number) ?? 1}
-            onChange={(e) => updateField('duration', Number(e.target.value))}
-          />
-        </div>
-        <div className="flex flex-col gap-1 flex-1">
-          <label className="field-label">Unit</label>
-          <select
-            className="form-input"
-            value={(actionConfig.unit as string) || 'hours'}
-            onChange={(e) => updateField('unit', e.target.value)}
-          >
-            {WAIT_UNITS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-    );
+      case 'add_tag':
+        return (
+          <div className="flex flex-col gap-1">
+            <label className="field-label">Tag Name</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="e.g. vip, follow-up"
+              value={(actionConfig.tagName as string) || ''}
+              onChange={(e) => updateField('tagName', e.target.value)}
+            />
+          </div>
+        );
 
-  case 'enroll_sequence':
-    return (
-      <div className="flex flex-col gap-1">
-        <label className="field-label">Sequence ID</label>
-        <input
-          type="text"
-          className="form-input"
-          placeholder="Enter sequence ID"
-          value={(actionConfig.sequenceId as string) || ''}
-          onChange={(e) => updateField('sequenceId', e.target.value)}
-        />
-      </div>
-    );
+      case 'add_note':
+        return (
+          <div className="flex flex-col gap-1">
+            <label className="field-label">Content</label>
+            <textarea
+              className="form-input"
+              rows={3}
+              placeholder="Note content..."
+              value={(actionConfig.content as string) || ''}
+              onChange={(e) => updateField('content', e.target.value)}
+            />
+          </div>
+        );
 
-  case 'create_invoice':
-  case 'assign_questionnaire':
-    return (
-      <p className="text-muted text-sm">
-        Configuration will use trigger context data automatically.
-      </p>
-    );
-
-  case 'webhook':
-    return (
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-col gap-1">
-          <label className="field-label">URL</label>
-          <input
-            type="url"
-            className="form-input"
-            placeholder="https://example.com/webhook"
-            value={(actionConfig.url as string) || ''}
-            onChange={(e) => updateField('url', e.target.value)}
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="field-label">Method</label>
-          <select
-            className="form-input"
-            value={(actionConfig.method as string) || 'POST'}
-            onChange={(e) => updateField('method', e.target.value)}
-          >
-            {HTTP_METHODS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-    );
-
-  case 'add_tag':
-    return (
-      <div className="flex flex-col gap-1">
-        <label className="field-label">Tag Name</label>
-        <input
-          type="text"
-          className="form-input"
-          placeholder="e.g. vip, follow-up"
-          value={(actionConfig.tagName as string) || ''}
-          onChange={(e) => updateField('tagName', e.target.value)}
-        />
-      </div>
-    );
-
-  case 'add_note':
-    return (
-      <div className="flex flex-col gap-1">
-        <label className="field-label">Content</label>
-        <textarea
-          className="form-input"
-          rows={3}
-          placeholder="Note content..."
-          value={(actionConfig.content as string) || ''}
-          onChange={(e) => updateField('content', e.target.value)}
-        />
-      </div>
-    );
-
-  default:
-    return null;
+      default:
+        return null;
+    }
   }
-});
+);
 
 // ============================================================================
 // MAIN COMPONENT
@@ -460,9 +469,7 @@ export function AutomationBuilder({
   // ---- Form state ----
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [triggerEvent, setTriggerEvent] = useState<string>(
-    TRIGGER_EVENT_GROUPS[0].events[0].value
-  );
+  const [triggerEvent, setTriggerEvent] = useState<string>(TRIGGER_EVENT_GROUPS[0].events[0].value);
   const [conditions, setConditions] = useState<ConditionDraft[]>([]);
   const [actions, setActions] = useState<ActionDraft[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -472,7 +479,9 @@ export function AutomationBuilder({
 
   // ---- Load existing automation ----
   useEffect(() => {
-    if (!automationId) return;
+    if (!automationId) {
+      return;
+    }
 
     let cancelled = false;
 
@@ -482,7 +491,9 @@ export function AutomationBuilder({
         const data = await portalFetch<Automation>(
           `${API_ENDPOINTS.ADMIN.WORKFLOWS}/automations/${automationId}`
         );
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
         setName(data.name);
         setDescription(data.description || '');
@@ -506,23 +517,27 @@ export function AutomationBuilder({
         );
       } catch (err) {
         logger.error('Error loading automation:', err);
-        showNotification?.(
-          formatErrorMessage(err, 'Failed to load automation'),
-          'error'
-        );
+        showNotification?.(formatErrorMessage(err, 'Failed to load automation'), 'error');
       } finally {
-        if (!cancelled) setIsLoadingExisting(false);
+        if (!cancelled) {
+          setIsLoadingExisting(false);
+        }
       }
     };
 
     loadAutomation();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [automationId, portalFetch, showNotification]);
 
   // ---- Condition handlers ----
 
   const handleAddCondition = useCallback(() => {
-    setConditions((prev) => [...prev, { key: nextCondKey(), field: '', operator: 'equals', value: '' }]);
+    setConditions((prev) => [
+      ...prev,
+      { key: nextCondKey(), field: '', operator: 'equals', value: '' }
+    ]);
   }, []);
 
   const handleRemoveCondition = useCallback((key: string) => {
@@ -531,9 +546,7 @@ export function AutomationBuilder({
 
   const handleConditionChange = useCallback(
     (key: string, field: keyof ConditionDraft, value: string) => {
-      setConditions((prev) =>
-        prev.map((c) => (c.key === key ? { ...c, [field]: value } : c))
-      );
+      setConditions((prev) => prev.map((c) => (c.key === key ? { ...c, [field]: value } : c)));
     },
     []
   );
@@ -562,18 +575,13 @@ export function AutomationBuilder({
     );
   }, []);
 
-  const handleActionConfigChange = useCallback(
-    (key: string, field: string, value: unknown) => {
-      setActions((prev) =>
-        prev.map((a) =>
-          a.key === key
-            ? { ...a, actionConfig: { ...a.actionConfig, [field]: value } }
-            : a
-        )
-      );
-    },
-    []
-  );
+  const handleActionConfigChange = useCallback((key: string, field: string, value: unknown) => {
+    setActions((prev) =>
+      prev.map((a) =>
+        a.key === key ? { ...a, actionConfig: { ...a.actionConfig, [field]: value } } : a
+      )
+    );
+  }, []);
 
   // ---- Save ----
 
@@ -602,10 +610,10 @@ export function AutomationBuilder({
       };
 
       if (isEditMode) {
-        await portalFetch(
-          `${API_ENDPOINTS.ADMIN.WORKFLOWS}/automations/${automationId}`,
-          { method: 'PUT', body: payload }
-        );
+        await portalFetch(`${API_ENDPOINTS.ADMIN.WORKFLOWS}/automations/${automationId}`, {
+          method: 'PUT',
+          body: payload
+        });
         showNotification?.('Automation updated', 'success');
       } else {
         await portalFetch(`${API_ENDPOINTS.ADMIN.WORKFLOWS}/automations`, {
@@ -618,23 +626,30 @@ export function AutomationBuilder({
       onSave();
     } catch (err) {
       logger.error('Error saving automation:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to save automation'),
-        'error'
-      );
+      showNotification?.(formatErrorMessage(err, 'Failed to save automation'), 'error');
     } finally {
       setIsSaving(false);
     }
   }, [
-    name, description, triggerEvent, conditions, actions,
-    isEditMode, automationId, portalFetch, showNotification, onSave
+    name,
+    description,
+    triggerEvent,
+    conditions,
+    actions,
+    isEditMode,
+    automationId,
+    portalFetch,
+    showNotification,
+    onSave
   ]);
 
   // ---- Trigger event label lookup ----
   const triggerEventLabel = useMemo(() => {
     for (const group of TRIGGER_EVENT_GROUPS) {
       const found = group.events.find((e) => e.value === triggerEvent);
-      if (found) return found.label;
+      if (found) {
+        return found.label;
+      }
     }
     return triggerEvent;
   }, [triggerEvent]);
@@ -659,9 +674,7 @@ export function AutomationBuilder({
       {/* Header */}
       <div className="portal-card">
         <div className="portal-card-header">
-          <span className="cell-title">
-            {isEditMode ? 'Edit Automation' : 'New Automation'}
-          </span>
+          <span className="cell-title">{isEditMode ? 'Edit Automation' : 'New Automation'}</span>
         </div>
         <div className="card-body flex flex-col gap-3">
           <div className="flex flex-col gap-1">
@@ -678,7 +691,9 @@ export function AutomationBuilder({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="field-label" htmlFor="builder-desc">Description</label>
+            <label className="field-label" htmlFor="builder-desc">
+              Description
+            </label>
             <textarea
               id="builder-desc"
               className="form-input"
@@ -755,7 +770,9 @@ export function AutomationBuilder({
                   style={{ maxWidth: CONDITION_OPERATOR_MAX_WIDTH }}
                 >
                   {CONDITION_OPERATORS.map((op) => (
-                    <option key={op.value} value={op.value}>{op.label}</option>
+                    <option key={op.value} value={op.value}>
+                      {op.label}
+                    </option>
                   ))}
                 </select>
                 <input
@@ -819,7 +836,9 @@ export function AutomationBuilder({
                     <select
                       className="form-input"
                       value={action.actionType}
-                      onChange={(e) => handleActionTypeChange(action.key, e.target.value as ActionType)}
+                      onChange={(e) =>
+                        handleActionTypeChange(action.key, e.target.value as ActionType)
+                      }
                       style={{ maxWidth: ACTION_TYPE_SELECT_MAX_WIDTH }}
                     >
                       {ALL_ACTION_TYPES.map((type) => (
@@ -839,10 +858,7 @@ export function AutomationBuilder({
                   </button>
                 </div>
                 <div style={{ padding: '0 var(--spacing-3) var(--spacing-3)' }}>
-                  <ActionConfigForm
-                    action={action}
-                    onConfigChange={handleActionConfigChange}
-                  />
+                  <ActionConfigForm action={action} onConfigChange={handleActionConfigChange} />
                 </div>
               </div>
             );
@@ -862,12 +878,7 @@ export function AutomationBuilder({
 
       {/* Footer */}
       <div className="flex items-center justify-end gap-2">
-        <button
-          type="button"
-          className="btn-secondary"
-          onClick={onCancel}
-          disabled={isSaving}
-        >
+        <button type="button" className="btn-secondary" onClick={onCancel} disabled={isSaving}>
           Cancel
         </button>
         <button
@@ -876,11 +887,7 @@ export function AutomationBuilder({
           onClick={handleSave}
           disabled={isSaving}
         >
-          {isSaving ? (
-            <RefreshCw className="icon-xs loading-spin" />
-          ) : (
-            <Save className="icon-xs" />
-          )}
+          {isSaving ? <RefreshCw className="icon-xs loading-spin" /> : <Save className="icon-xs" />}
           {isEditMode ? 'Update Automation' : 'Create Automation'}
         </button>
       </div>

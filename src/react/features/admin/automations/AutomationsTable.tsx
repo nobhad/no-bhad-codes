@@ -10,15 +10,7 @@
 
 import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
-import {
-  Zap,
-  Inbox,
-  Plus,
-  RefreshCw,
-  Power,
-  PowerOff,
-  Trash2
-} from 'lucide-react';
+import { Zap, Inbox, Plus, RefreshCw, Power, PowerOff, Trash2 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter } from '@react/components/portal/TableFilters';
@@ -41,10 +33,7 @@ import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { formatErrorMessage } from '@/utils/error-utils';
 import { createLogger } from '@/utils/logger';
 import type { Automation } from './types';
-import {
-  TRIGGER_EVENT_GROUPS,
-  ACTION_TYPE_LABELS
-} from './types';
+import { TRIGGER_EVENT_GROUPS, ACTION_TYPE_LABELS } from './types';
 
 const logger = createLogger('AutomationsTable');
 
@@ -96,8 +85,7 @@ export function AutomationsTable({
   } = usePortalData<Automation[]>({
     getAuthToken,
     url: `${API_ENDPOINTS.ADMIN.WORKFLOWS}/automations`,
-    transform: (raw) =>
-      (raw as Record<string, unknown>).automations as Automation[] || []
+    transform: (raw) => ((raw as Record<string, unknown>).automations as Automation[]) || []
   });
 
   const items = useMemo(() => automations ?? [], [automations]);
@@ -105,7 +93,9 @@ export function AutomationsTable({
   // ---- Search ----
   const [search, setSearch] = useState('');
   const filteredItems = useMemo(() => {
-    if (!search) return items;
+    if (!search) {
+      return items;
+    }
     const query = search.toLowerCase();
     return items.filter(
       (a) =>
@@ -137,26 +127,26 @@ export function AutomationsTable({
 
   // ---- Handlers ----
 
-  const handleToggleActive = useCallback(async (automation: Automation) => {
-    const endpoint = automation.isActive ? 'deactivate' : 'activate';
-    try {
-      await portalFetch(
-        `${API_ENDPOINTS.ADMIN.WORKFLOWS}/automations/${automation.id}/${endpoint}`,
-        { method: 'PUT' }
-      );
-      showNotification?.(
-        `Automation ${automation.isActive ? 'deactivated' : 'activated'}`,
-        'success'
-      );
-      await refetch();
-    } catch (err) {
-      logger.error('Error toggling automation status:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to update automation'),
-        'error'
-      );
-    }
-  }, [portalFetch, showNotification, refetch]);
+  const handleToggleActive = useCallback(
+    async (automation: Automation) => {
+      const endpoint = automation.isActive ? 'deactivate' : 'activate';
+      try {
+        await portalFetch(
+          `${API_ENDPOINTS.ADMIN.WORKFLOWS}/automations/${automation.id}/${endpoint}`,
+          { method: 'PUT' }
+        );
+        showNotification?.(
+          `Automation ${automation.isActive ? 'deactivated' : 'activated'}`,
+          'success'
+        );
+        await refetch();
+      } catch (err) {
+        logger.error('Error toggling automation status:', err);
+        showNotification?.(formatErrorMessage(err, 'Failed to update automation'), 'error');
+      }
+    },
+    [portalFetch, showNotification, refetch]
+  );
 
   const handleCreate = useCallback(async () => {
     if (!createName.trim()) {
@@ -183,46 +173,48 @@ export function AutomationsTable({
       await refetch();
     } catch (err) {
       logger.error('Error creating automation:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to create automation'),
-        'error'
-      );
+      showNotification?.(formatErrorMessage(err, 'Failed to create automation'), 'error');
     } finally {
       setIsCreating(false);
     }
   }, [createName, createTrigger, createDescription, portalFetch, showNotification, refetch]);
 
-  const handleDelete = useCallback(async (automationId: number) => {
-    if (!confirm('Are you sure you want to delete this automation? This action cannot be undone.')) {
-      return;
-    }
+  const handleDelete = useCallback(
+    async (automationId: number) => {
+      if (
+        !confirm('Are you sure you want to delete this automation? This action cannot be undone.')
+      ) {
+        return;
+      }
 
-    setDeletingId(automationId);
-    try {
-      await portalFetch(
-        `${API_ENDPOINTS.ADMIN.WORKFLOWS}/automations/${automationId}`,
-        { method: 'DELETE' }
-      );
-      showNotification?.('Automation deleted', 'success');
-      await refetch();
-    } catch (err) {
-      logger.error('Error deleting automation:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to delete automation'),
-        'error'
-      );
-    } finally {
-      setDeletingId(null);
-    }
-  }, [portalFetch, showNotification, refetch]);
+      setDeletingId(automationId);
+      try {
+        await portalFetch(`${API_ENDPOINTS.ADMIN.WORKFLOWS}/automations/${automationId}`, {
+          method: 'DELETE'
+        });
+        showNotification?.('Automation deleted', 'success');
+        await refetch();
+      } catch (err) {
+        logger.error('Error deleting automation:', err);
+        showNotification?.(formatErrorMessage(err, 'Failed to delete automation'), 'error');
+      } finally {
+        setDeletingId(null);
+      }
+    },
+    [portalFetch, showNotification, refetch]
+  );
 
-  const handleRowClick = useCallback((automation: Automation) => {
-    onNavigate?.('automation-detail', String(automation.id));
-  }, [onNavigate]);
+  const handleRowClick = useCallback(
+    (automation: Automation) => {
+      onNavigate?.('automation-detail', String(automation.id));
+    },
+    [onNavigate]
+  );
 
-  const getTriggerLabel = useCallback((triggerEvent: string) =>
-    TRIGGER_EVENT_LABELS[triggerEvent] || triggerEvent,
-  []);
+  const getTriggerLabel = useCallback(
+    (triggerEvent: string) => TRIGGER_EVENT_LABELS[triggerEvent] || triggerEvent,
+    []
+  );
 
   // ---- Render ----
 
@@ -241,22 +233,9 @@ export function AutomationsTable({
       }
       actions={
         <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search automations..."
-          />
-          <IconButton
-            action="add"
-            onClick={() => setShowCreateForm(true)}
-            title="New Automation"
-          />
-          <IconButton
-            action="refresh"
-            onClick={refetch}
-            title="Refresh"
-            loading={isLoading}
-          />
+          <SearchFilter value={search} onChange={setSearch} placeholder="Search automations..." />
+          <IconButton action="add" onClick={() => setShowCreateForm(true)} title="New Automation" />
+          <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
         </>
       }
     >
@@ -282,7 +261,9 @@ export function AutomationsTable({
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="field-label" htmlFor="auto-trigger">Trigger Event</label>
+              <label className="field-label" htmlFor="auto-trigger">
+                Trigger Event
+              </label>
               <select
                 id="auto-trigger"
                 value={createTrigger}
@@ -302,7 +283,9 @@ export function AutomationsTable({
               </select>
             </div>
             <div className="flex flex-col gap-1">
-              <label className="field-label" htmlFor="auto-desc">Description</label>
+              <label className="field-label" htmlFor="auto-desc">
+                Description
+              </label>
               <textarea
                 id="auto-desc"
                 placeholder="Brief description of what this automation does..."
@@ -392,10 +375,7 @@ export function AutomationsTable({
                 <PortalTableCell>{automation.runCount}</PortalTableCell>
                 <PortalTableCell className="status-col" onClick={(e) => e.stopPropagation()}>
                   <div className="action-group">
-                    <StatusBadge
-                      status={automation.isActive ? 'completed' : 'pending'}
-                      size="sm"
-                    >
+                    <StatusBadge status={automation.isActive ? 'completed' : 'pending'} size="sm">
                       {automation.isActive ? 'Active' : 'Inactive'}
                     </StatusBadge>
                     <button
@@ -416,10 +396,7 @@ export function AutomationsTable({
                 <PortalTableCell className="date-col">
                   {automation.lastRunAt ? formatDate(automation.lastRunAt) : 'Never'}
                 </PortalTableCell>
-                <PortalTableCell
-                  className="col-actions"
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="action-group">
                     <button
                       type="button"

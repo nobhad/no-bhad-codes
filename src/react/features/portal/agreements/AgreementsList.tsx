@@ -47,10 +47,7 @@ const STATUS_LABELS: Record<string, string> = {
 // COMPONENT
 // ============================================
 
-export function AgreementsList({
-  getAuthToken,
-  onNavigate
-}: AgreementsListProps) {
+export function AgreementsList({ getAuthToken, onNavigate }: AgreementsListProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const { data, isLoading, error } = usePortalData<{ agreements: Agreement[] }>({
     getAuthToken,
@@ -60,25 +57,33 @@ export function AgreementsList({
 
   const agreements = data?.agreements || [];
 
-  const handleOpen = useCallback((id: number) => {
-    onNavigate?.('agreements', String(id));
-  }, [onNavigate]);
+  const handleOpen = useCallback(
+    (id: number) => {
+      onNavigate?.('agreements', String(id));
+    },
+    [onNavigate]
+  );
 
   if (isLoading) {
-    return <div ref={containerRef}><LoadingState message="Loading agreements..." /></div>;
+    return (
+      <div ref={containerRef}>
+        <LoadingState message="Loading agreements..." />
+      </div>
+    );
   }
 
   if (error) {
-    return <div ref={containerRef}><ErrorState message={error} /></div>;
+    return (
+      <div ref={containerRef}>
+        <ErrorState message={error} />
+      </div>
+    );
   }
 
   if (agreements.length === 0) {
     return (
       <div ref={containerRef}>
-        <EmptyState
-          icon={<FileCheck className="icon-lg" />}
-          message="No agreements yet"
-        />
+        <EmptyState icon={<FileCheck className="icon-lg" />} message="No agreements yet" />
       </div>
     );
   }
@@ -88,7 +93,8 @@ export function AgreementsList({
       {agreements.map((agreement) => {
         const completedSteps = agreement.steps?.filter((s) => s.status === 'completed').length || 0;
         const totalSteps = agreement.steps?.length || 0;
-        const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+        const progressPercent =
+          totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
         const isActionable = ['sent', 'viewed', 'in_progress'].includes(agreement.status);
         const variant = STATUS_VARIANT_MAP[agreement.status] || 'pending';
 
@@ -99,7 +105,11 @@ export function AgreementsList({
             onClick={() => handleOpen(agreement.id)}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleOpen(agreement.id); }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleOpen(agreement.id);
+              }
+            }}
           >
             <div className="portal-card-header">
               <span>{agreement.name}</span>
@@ -114,10 +124,7 @@ export function AgreementsList({
             {totalSteps > 0 && (
               <div className="portal-card-body">
                 <div className="progress-bar-track">
-                  <div
-                    className="progress-bar-fill"
-                    style={{ width: `${progressPercent}%` }}
-                  />
+                  <div className="progress-bar-fill" style={{ width: `${progressPercent}%` }} />
                 </div>
                 <span className="text-muted text-sm">
                   {completedSteps} of {totalSteps} steps
@@ -127,7 +134,14 @@ export function AgreementsList({
 
             {isActionable && (
               <div className="portal-card-body">
-                <button className="btn-primary btn-sm" type="button" onClick={(e) => { e.stopPropagation(); handleOpen(agreement.id); }}>
+                <button
+                  className="btn-primary btn-sm"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpen(agreement.id);
+                  }}
+                >
                   Continue <ArrowRight className="icon-xs" />
                 </button>
               </div>

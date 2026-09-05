@@ -32,8 +32,12 @@ const ALLOWED_FILE_TYPES = [
  * Format file size for display
  */
 function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
@@ -41,7 +45,9 @@ function formatFileSize(bytes: number): string {
  * Get icon for file type
  */
 function getFileIcon(type: string) {
-  if (type.startsWith('image/')) return Image;
+  if (type.startsWith('image/')) {
+    return Image;
+  }
   return FileText;
 }
 
@@ -54,25 +60,34 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const assets = useMemo(() => data.assets || {
-    files: [],
-    logoProvided: false,
-    existingAssets: '',
-    contentAccess: ''
-  }, [data.assets]);
+  const assets = useMemo(
+    () =>
+      data.assets || {
+        files: [],
+        logoProvided: false,
+        existingAssets: '',
+        contentAccess: ''
+      },
+    [data.assets]
+  );
 
-  const handleChange = useCallback((field: keyof AssetData, value: UploadedFile[] | boolean | string) => {
-    onUpdate({
-      assets: {
-        ...assets,
-        [field]: value
-      }
-    });
-  }, [assets, onUpdate]);
+  const handleChange = useCallback(
+    (field: keyof AssetData, value: UploadedFile[] | boolean | string) => {
+      onUpdate({
+        assets: {
+          ...assets,
+          [field]: value
+        }
+      });
+    },
+    [assets, onUpdate]
+  );
 
   const handleFileSelect = useCallback(
     (files: FileList | null) => {
-      if (!files) return;
+      if (!files) {
+        return;
+      }
       setUploadError(null);
 
       const newFiles: UploadedFile[] = [];
@@ -145,9 +160,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
     <div ref={containerRef}>
       {/* Section Header */}
       <div className="mb-4">
-        <h3 className="heading">
-          Upload Assets
-        </h3>
+        <h3 className="heading">Upload Assets</h3>
         <p className="text-secondary mt-1">
           Share any files, logos, or resources for your project.
         </p>
@@ -176,19 +189,10 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
           className="hidden"
         />
 
-        <Upload
-          className={cn(
-            'h-8 w-8 mb-3',
-            isDragging ? '' : 'text-secondary'
-          )}
-        />
+        <Upload className={cn('h-8 w-8 mb-3', isDragging ? '' : 'text-secondary')} />
 
-        <p className="mb-1">
-          Drag and drop files here
-        </p>
-        <p className="text-secondary mb-3">
-          or click to browse
-        </p>
+        <p className="mb-1">Drag and drop files here</p>
+        <p className="text-secondary mb-3">or click to browse</p>
 
         <button type="button" className="btn-secondary" onClick={handleBrowseClick}>
           Browse Files
@@ -200,11 +204,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
       </div>
 
       {/* Upload Error */}
-      {uploadError && (
-        <div className="error-state mt-4">
-          {uploadError}
-        </div>
-      )}
+      {uploadError && <div className="error-state mt-4">{uploadError}</div>}
 
       {/* Uploaded Files List */}
       {assets.files.length > 0 && (
@@ -217,18 +217,11 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
             {assets.files.map((file) => {
               const FileIcon = getFileIcon(file.type);
               return (
-                <div
-                  key={file.id}
-                  className="list-item"
-                >
+                <div key={file.id} className="list-item">
                   <FileIcon className="icon-sm text-secondary flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="truncate">
-                      {file.name}
-                    </p>
-                    <p className="text-secondary">
-                      {formatFileSize(file.size)}
-                    </p>
+                    <p className="truncate">{file.name}</p>
+                    <p className="text-secondary">{formatFileSize(file.size)}</p>
                   </div>
                   <button
                     type="button"
@@ -253,9 +246,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
             checked={assets.logoProvided}
             onCheckedChange={(checked) => handleChange('logoProvided', checked === true)}
           />
-          <span>
-            Logo included in uploaded files
-          </span>
+          <span>Logo included in uploaded files</span>
         </label>
       </div>
 
@@ -263,9 +254,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
 
       {/* Additional Asset Information */}
       <div className="mb-4">
-        <h3 className="heading">
-          Additional Resources
-        </h3>
+        <h3 className="heading">Additional Resources</h3>
         <p className="text-secondary mt-1">
           Tell Noelle about any other assets or content access needed.
         </p>
@@ -273,7 +262,9 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
 
       {/* Existing Assets */}
       <div className="flex flex-col gap-1">
-        <label className="field-label" htmlFor="assets-existing">Existing Assets</label>
+        <label className="field-label" htmlFor="assets-existing">
+          Existing Assets
+        </label>
         <textarea
           id="assets-existing"
           value={assets.existingAssets}
@@ -286,7 +277,9 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
 
       {/* Content Access */}
       <div className="flex flex-col gap-1 mt-4">
-        <label className="field-label" htmlFor="assets-content-access">Content & Access Details</label>
+        <label className="field-label" htmlFor="assets-content-access">
+          Content & Access Details
+        </label>
         <textarea
           id="assets-content-access"
           value={assets.contentAccess}

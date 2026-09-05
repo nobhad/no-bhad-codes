@@ -115,7 +115,9 @@ type ChartType = 'line' | 'bar' | 'pie';
 
 /** Resolve a CSS variable string like "var(--status-active)" to a hex/rgb value. */
 function resolveCssVar(value: string): string {
-  if (!value.startsWith('var(')) return value;
+  if (!value.startsWith('var(')) {
+    return value;
+  }
   const name = value.slice(4, -1).trim();
   // Read from document.body to pick up [data-page="admin"] scoped theme variables
   const resolved = getComputedStyle(document.body).getPropertyValue(name).trim();
@@ -126,7 +128,9 @@ function resolveCssVar(value: string): string {
 function colorWithAlpha(color: string, alpha: number): string {
   // Hex format: append 2-digit hex alpha
   if (color.startsWith('#') && (color.length === 7 || color.length === 4)) {
-    const hex = Math.round(alpha * 255).toString(16).padStart(2, '0');
+    const hex = Math.round(alpha * 255)
+      .toString(16)
+      .padStart(2, '0');
     return `${color}${hex}`;
   }
   // RGB format: convert to rgba
@@ -152,7 +156,9 @@ function ChartWidget({ data, type }: ChartWidgetProps) {
   const chartRef = useRef<ChartJS | null>(null);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current) {
+      return;
+    }
 
     // Destroy previous instance
     if (chartRef.current) {
@@ -161,7 +167,9 @@ function ChartWidget({ data, type }: ChartWidgetProps) {
     }
 
     // No data — don't render
-    if (!data || !data.labels?.length) return;
+    if (!data || !data.labels?.length) {
+      return;
+    }
 
     // Resolve CSS variable colors
     const textMuted = resolveCssVar('var(--color-text-tertiary)');
@@ -236,17 +244,17 @@ function ChartWidget({ data, type }: ChartWidgetProps) {
     const axesOptions =
       type !== 'pie'
         ? {
-          x: {
-            ticks: { color: textMuted, font: { size: 10 } },
-            grid: { color: colorWithAlpha(borderColor, 0.25) },
-            border: { color: borderColor }
-          },
-          y: {
-            ticks: { color: textMuted, font: { size: 10 } },
-            grid: { color: colorWithAlpha(borderColor, 0.25) },
-            border: { color: borderColor }
+            x: {
+              ticks: { color: textMuted, font: { size: 10 } },
+              grid: { color: colorWithAlpha(borderColor, 0.25) },
+              border: { color: borderColor }
+            },
+            y: {
+              ticks: { color: textMuted, font: { size: 10 } },
+              grid: { color: colorWithAlpha(borderColor, 0.25) },
+              border: { color: borderColor }
+            }
           }
-        }
         : undefined;
 
     const config: ChartConfiguration = {
@@ -292,18 +300,12 @@ function ChartWidget({ data, type }: ChartWidgetProps) {
 // ============================================
 
 const KpiCard = React.memo(({ kpi }: { kpi: KPI }) => {
-  const changeText = kpi.change !== undefined
-    ? `${kpi.change >= 0 ? '+' : ''}${kpi.change}% ${kpi.changeLabel ?? ''}`
-    : undefined;
+  const changeText =
+    kpi.change !== undefined
+      ? `${kpi.change >= 0 ? '+' : ''}${kpi.change}% ${kpi.changeLabel ?? ''}`
+      : undefined;
 
-  return (
-    <StatCard
-      label={kpi.label}
-      value={kpi.value}
-      icon={kpi.icon}
-      meta={changeText}
-    />
-  );
+  return <StatCard label={kpi.label} value={kpi.value} icon={kpi.icon} meta={changeText} />;
 });
 
 // ============================================
@@ -329,91 +331,100 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
   const MAX_RETRIES = 3;
   const RETRY_DELAY_MS = 2000;
 
-  const loadAnalytics = useCallback(async (retryCount = 0) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await apiFetch(`${API_ENDPOINTS.ADMIN.ANALYTICS}?range=${dateRange}`);
+  const loadAnalytics = useCallback(
+    async (retryCount = 0) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await apiFetch(`${API_ENDPOINTS.ADMIN.ANALYTICS}?range=${dateRange}`);
 
-      // Retry on 503 (backend still starting up)
-      if (response.status === 503 && retryCount < MAX_RETRIES) {
-        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
-        return loadAnalytics(retryCount + 1);
-      }
+        // Retry on 503 (backend still starting up)
+        if (response.status === 503 && retryCount < MAX_RETRIES) {
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+          return loadAnalytics(retryCount + 1);
+        }
 
-      if (!response.ok) {
-        const errorBody = await response.json().catch(() => null);
-        throw new Error(errorBody?.error || `Failed to load analytics (${response.status})`);
+        if (!response.ok) {
+          const errorBody = await response.json().catch(() => null);
+          throw new Error(errorBody?.error || `Failed to load analytics (${response.status})`);
+        }
+        const analyticsData = unwrapApiData<AnalyticsData>(await response.json());
+        setData(analyticsData);
+      } catch (err) {
+        setError(formatErrorMessage(err, 'Failed to load analytics'));
+      } finally {
+        setIsLoading(false);
       }
-      const analyticsData = unwrapApiData<AnalyticsData>(await response.json());
-      setData(analyticsData);
-    } catch (err) {
-      setError(formatErrorMessage(err, 'Failed to load analytics'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [dateRange]);
+    },
+    [dateRange]
+  );
 
   useEffect(() => {
     loadAnalytics();
   }, [loadAnalytics]);
 
-  const kpis: KPI[] = useMemo(() => data
-    ? [
-      {
-        id: 'revenue',
-        label: 'Revenue',
-        value: formatCurrency(data.kpis.revenue.value),
-        change: data.kpis.revenue.change,
-        changeLabel: 'vs last period',
-        icon: <DollarSign className="icon-lg" />
-      },
-      {
-        id: 'clients',
-        label: 'Total Clients',
-        value: data.kpis.clients.value,
-        change: data.kpis.clients.change,
-        changeLabel: 'new this period',
-        icon: <Users className="icon-lg" />
-      },
-      {
-        id: 'projects',
-        label: 'Active Projects',
-        value: data.kpis.projects.value,
-        change: data.kpis.projects.change,
-        changeLabel: 'vs last period',
-        icon: <Briefcase className="icon-lg" />
-      },
-      {
-        id: 'invoices',
-        label: 'Invoices Sent',
-        value: data.kpis.invoices.value,
-        change: data.kpis.invoices.change,
-        changeLabel: 'this period',
-        icon: <FileText className="icon-lg" />
-      },
-      {
-        id: 'conversion',
-        label: 'Conversion Rate',
-        value: `${data.kpis.conversionRate.value}%`,
-        change: data.kpis.conversionRate.change,
-        changeLabel: 'vs last period',
-        icon: <TrendingUp className="icon-lg" />
-      },
-      {
-        id: 'avgValue',
-        label: 'Avg Project Value',
-        value: formatCurrency(data.kpis.avgProjectValue.value),
-        change: data.kpis.avgProjectValue.change,
-        changeLabel: 'vs last period',
-        icon: <BarChart3 className="icon-lg" />
-      }
-    ]
-    : [], [data]);
+  const kpis: KPI[] = useMemo(
+    () =>
+      data
+        ? [
+            {
+              id: 'revenue',
+              label: 'Revenue',
+              value: formatCurrency(data.kpis.revenue.value),
+              change: data.kpis.revenue.change,
+              changeLabel: 'vs last period',
+              icon: <DollarSign className="icon-lg" />
+            },
+            {
+              id: 'clients',
+              label: 'Total Clients',
+              value: data.kpis.clients.value,
+              change: data.kpis.clients.change,
+              changeLabel: 'new this period',
+              icon: <Users className="icon-lg" />
+            },
+            {
+              id: 'projects',
+              label: 'Active Projects',
+              value: data.kpis.projects.value,
+              change: data.kpis.projects.change,
+              changeLabel: 'vs last period',
+              icon: <Briefcase className="icon-lg" />
+            },
+            {
+              id: 'invoices',
+              label: 'Invoices Sent',
+              value: data.kpis.invoices.value,
+              change: data.kpis.invoices.change,
+              changeLabel: 'this period',
+              icon: <FileText className="icon-lg" />
+            },
+            {
+              id: 'conversion',
+              label: 'Conversion Rate',
+              value: `${data.kpis.conversionRate.value}%`,
+              change: data.kpis.conversionRate.change,
+              changeLabel: 'vs last period',
+              icon: <TrendingUp className="icon-lg" />
+            },
+            {
+              id: 'avgValue',
+              label: 'Avg Project Value',
+              value: formatCurrency(data.kpis.avgProjectValue.value),
+              change: data.kpis.avgProjectValue.change,
+              changeLabel: 'vs last period',
+              icon: <BarChart3 className="icon-lg" />
+            }
+          ]
+        : [],
+    [data]
+  );
 
   // Export analytics data as CSV
   const handleExport = useCallback(() => {
-    if (!data) return;
+    if (!data) {
+      return;
+    }
     const exportRows = kpis.map((kpi) => ({
       metric: kpi.label,
       value: String(kpi.value),
@@ -455,8 +466,18 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
             ))}
           </PortalDropdownContent>
         </PortalDropdown>
-        <IconButton action="refresh" title="Refresh analytics" onClick={() => loadAnalytics()} disabled={isLoading} />
-        <IconButton action="download" title="Export analytics" onClick={handleExport} disabled={!data} />
+        <IconButton
+          action="refresh"
+          title="Refresh analytics"
+          onClick={() => loadAnalytics()}
+          disabled={isLoading}
+        />
+        <IconButton
+          action="download"
+          title="Export analytics"
+          onClick={handleExport}
+          disabled={!data}
+        />
       </div>
     );
 
@@ -465,7 +486,6 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
-
       {error && (
         <div className="data-table-card">
           <ErrorState message={error} onRetry={loadAnalytics} />
@@ -479,32 +499,44 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
           {activeSubtab === 'overview' && (
             <>
               <div className="kpi-cards-row">
-                {kpis.map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
+                {kpis.map((kpi) => (
+                  <KpiCard key={kpi.id} kpi={kpi} />
+                ))}
               </div>
               <div className="analytics-card-grid">
                 <div className="panel analytics-chart-panel">
                   <div className="panel-header">
-                    <h3><span className="title-full">Revenue Over Time</span></h3>
+                    <h3>
+                      <span className="title-full">Revenue Over Time</span>
+                    </h3>
                     <LineChart className="icon-md" />
                   </div>
                   <ChartWidget data={data?.revenueChart} type="line" />
                 </div>
                 <div className="panel analytics-chart-panel">
                   <div className="panel-header">
-                    <h3><span className="title-full">Projects by Status</span></h3>
+                    <h3>
+                      <span className="title-full">Projects by Status</span>
+                    </h3>
                     <PieChart className="icon-md" />
                   </div>
                   <ChartWidget data={data?.projectsChart} type="pie" />
                 </div>
                 <div className="panel analytics-chart-panel">
                   <div className="panel-header">
-                    <h3><span className="title-full">Lead Funnel</span></h3>
+                    <h3>
+                      <span className="title-full">Lead Funnel</span>
+                    </h3>
                     <BarChart3 className="icon-md" />
                   </div>
                   <ChartWidget data={data?.leadsChart} type="bar" />
                 </div>
                 <div className="panel analytics-chart-panel">
-                  <div className="panel-header"><h3><span className="title-full">Lead Sources</span></h3></div>
+                  <div className="panel-header">
+                    <h3>
+                      <span className="title-full">Lead Sources</span>
+                    </h3>
+                  </div>
                   <SourceBreakdown sources={data?.sourceBreakdown} />
                 </div>
               </div>
@@ -516,11 +548,15 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
               <div className="kpi-cards-row kpi-cards-row--3">
                 {kpis
                   .filter((kpi) => ['revenue', 'invoices', 'avgValue'].includes(kpi.id))
-                  .map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
+                  .map((kpi) => (
+                    <KpiCard key={kpi.id} kpi={kpi} />
+                  ))}
               </div>
               <div className="panel analytics-chart-panel">
                 <div className="panel-header">
-                  <h3><span className="title-full">Revenue Over Time</span></h3>
+                  <h3>
+                    <span className="title-full">Revenue Over Time</span>
+                  </h3>
                   <LineChart className="icon-md" />
                 </div>
                 <ChartWidget data={data?.revenueChart} type="line" />
@@ -533,18 +569,26 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
               <div className="kpi-cards-row kpi-cards-row--2">
                 {kpis
                   .filter((kpi) => ['clients', 'conversion'].includes(kpi.id))
-                  .map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
+                  .map((kpi) => (
+                    <KpiCard key={kpi.id} kpi={kpi} />
+                  ))}
               </div>
               <div className="analytics-card-grid">
                 <div className="panel analytics-chart-panel">
                   <div className="panel-header">
-                    <h3><span className="title-full">Lead Funnel</span></h3>
+                    <h3>
+                      <span className="title-full">Lead Funnel</span>
+                    </h3>
                     <BarChart3 className="icon-md" />
                   </div>
                   <ChartWidget data={data?.leadsChart} type="bar" />
                 </div>
                 <div className="panel analytics-chart-panel">
-                  <div className="panel-header"><h3><span className="title-full">Lead Sources</span></h3></div>
+                  <div className="panel-header">
+                    <h3>
+                      <span className="title-full">Lead Sources</span>
+                    </h3>
+                  </div>
                   <SourceBreakdown sources={data?.sourceBreakdown} />
                 </div>
               </div>
@@ -556,11 +600,15 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
               <div className="kpi-cards-row kpi-cards-row--2">
                 {kpis
                   .filter((kpi) => ['projects', 'avgValue'].includes(kpi.id))
-                  .map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
+                  .map((kpi) => (
+                    <KpiCard key={kpi.id} kpi={kpi} />
+                  ))}
               </div>
               <div className="panel analytics-chart-panel">
                 <div className="panel-header">
-                  <h3><span className="title-full">Projects by Status</span></h3>
+                  <h3>
+                    <span className="title-full">Projects by Status</span>
+                  </h3>
                   <PieChart className="icon-md" />
                 </div>
                 <ChartWidget data={data?.projectsChart} type="pie" />

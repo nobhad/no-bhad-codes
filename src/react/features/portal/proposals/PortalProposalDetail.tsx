@@ -8,8 +8,17 @@ import * as React from 'react';
 import { useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, FileText, Layers, DollarSign, Calendar, Check,
-  X, Wrench, ChevronDown, ChevronUp, Shield
+  ArrowLeft,
+  FileText,
+  Layers,
+  DollarSign,
+  Calendar,
+  Check,
+  X,
+  Wrench,
+  ChevronDown,
+  ChevronUp,
+  Shield
 } from 'lucide-react';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePortalData } from '@react/hooks/usePortalFetch';
@@ -36,7 +45,12 @@ export function PortalProposalDetail({
   const containerRef = useFadeIn<HTMLDivElement>();
   const proposalId = params.id ? parseInt(params.id, 10) : 0;
 
-  const { data: proposal, isLoading, error, refetch } = usePortalData<ProposalDetail>({
+  const {
+    data: proposal,
+    isLoading,
+    error,
+    refetch
+  } = usePortalData<ProposalDetail>({
     getAuthToken,
     url: `${API_ENDPOINTS.PROPOSALS}/${proposalId}`
   });
@@ -49,35 +63,45 @@ export function PortalProposalDetail({
 
   // Group features by category
   const featuresByCategory = useMemo(() => {
-    if (!proposal?.features) return new Map<string, PortalProposalFeature[]>();
+    if (!proposal?.features) {
+      return new Map<string, PortalProposalFeature[]>();
+    }
     const map = new Map<string, PortalProposalFeature[]>();
     for (const f of proposal.features) {
       const cat = f.featureCategory || 'Other';
-      if (!map.has(cat)) map.set(cat, []);
+      if (!map.has(cat)) {
+        map.set(cat, []);
+      }
       map.get(cat)!.push(f);
     }
     return map;
   }, [proposal?.features]);
 
   const includedFeatures = useMemo(
-    () => proposal?.features.filter(f => f.isIncludedInTier) ?? [],
+    () => proposal?.features.filter((f) => f.isIncludedInTier) ?? [],
     [proposal?.features]
   );
   const addonFeatures = useMemo(
-    () => proposal?.features.filter(f => f.isAddon) ?? [],
+    () => proposal?.features.filter((f) => f.isAddon) ?? [],
     [proposal?.features]
   );
 
   const toggleCategory = useCallback((cat: string) => {
-    setExpandedCategories(prev => {
+    setExpandedCategories((prev) => {
       const next = new Set(prev);
-      if (next.has(cat)) next.delete(cat); else next.add(cat);
+      if (next.has(cat)) {
+        next.delete(cat);
+      } else {
+        next.add(cat);
+      }
       return next;
     });
   }, []);
 
   const handleAccept = useCallback(async () => {
-    if (!proposal || accepting) return;
+    if (!proposal || accepting) {
+      return;
+    }
     setAccepting(true);
     try {
       const response = await apiPost(`${API_ENDPOINTS.PROPOSALS}/${proposal.id}/accept`);
@@ -105,10 +129,18 @@ export function PortalProposalDetail({
     }
   }, [proposal, accepting, showNotification, refetch]);
 
-  if (!proposalId) return <EmptyState icon={<FileText className="icon-lg" />} message="Proposal not found" />;
-  if (isLoading) return <LoadingState message="Loading proposal..." />;
-  if (error) return <ErrorState message={error} onRetry={refetch} />;
-  if (!proposal) return <EmptyState icon={<FileText className="icon-lg" />} message="Proposal not found" />;
+  if (!proposalId) {
+    return <EmptyState icon={<FileText className="icon-lg" />} message="Proposal not found" />;
+  }
+  if (isLoading) {
+    return <LoadingState message="Loading proposal..." />;
+  }
+  if (error) {
+    return <ErrorState message={error} onRetry={refetch} />;
+  }
+  if (!proposal) {
+    return <EmptyState icon={<FileText className="icon-lg" />} message="Proposal not found" />;
+  }
 
   const tierLabel = TIER_LABELS[proposal.selectedTier] || proposal.selectedTier;
   const maintenanceLabel = proposal.maintenanceOption
@@ -164,9 +196,7 @@ export function PortalProposalDetail({
           </div>
           <div className="portal-detail-item">
             <span className="label">Total Price</span>
-            <span className="text-primary text-lg">
-              {formatCurrency(proposal.finalPrice)}
-            </span>
+            <span className="text-primary text-lg">{formatCurrency(proposal.finalPrice)}</span>
           </div>
           {proposal.basePrice !== proposal.finalPrice && (
             <div className="portal-detail-item">
@@ -187,8 +217,10 @@ export function PortalProposalDetail({
           </div>
           <div className="portal-feature-list">
             {Array.from(featuresByCategory.entries()).map(([category, features]) => {
-              const included = features.filter(f => f.isIncludedInTier);
-              if (included.length === 0) return null;
+              const included = features.filter((f) => f.isIncludedInTier);
+              if (included.length === 0) {
+                return null;
+              }
               const isExpanded = expandedCategories.has(category);
               return (
                 <div key={category} className="portal-feature-category">
@@ -196,12 +228,18 @@ export function PortalProposalDetail({
                     className="portal-feature-category-header btn-ghost"
                     onClick={() => toggleCategory(category)}
                   >
-                    <span className="text-primary">{category} ({included.length})</span>
-                    {isExpanded ? <ChevronUp className="icon-xs" /> : <ChevronDown className="icon-xs" />}
+                    <span className="text-primary">
+                      {category} ({included.length})
+                    </span>
+                    {isExpanded ? (
+                      <ChevronUp className="icon-xs" />
+                    ) : (
+                      <ChevronDown className="icon-xs" />
+                    )}
                   </button>
                   {isExpanded && (
                     <ul className="portal-feature-items">
-                      {included.map(f => (
+                      {included.map((f) => (
                         <li key={f.featureId} className="portal-feature-item">
                           <Check className="icon-xs text-status-completed" />
                           <span>{f.featureName}</span>
@@ -223,7 +261,7 @@ export function PortalProposalDetail({
             <h3 className="text-primary">Add-On Features ({addonFeatures.length})</h3>
           </div>
           <ul className="portal-feature-items">
-            {addonFeatures.map(f => (
+            {addonFeatures.map((f) => (
               <li key={f.featureId} className="portal-feature-item">
                 <span>{f.featureName}</span>
                 {f.featurePrice > 0 && (
@@ -252,7 +290,8 @@ export function PortalProposalDetail({
               <div className="portal-detail-item">
                 <span className="label">Included</span>
                 <span className="text-primary">
-                  <Shield className="icon-xs text-status-completed" /> 3 months included with Best tier
+                  <Shield className="icon-xs text-status-completed" /> 3 months included with Best
+                  tier
                 </span>
               </div>
             )}
@@ -287,14 +326,18 @@ export function PortalProposalDetail({
             <h3 className="text-primary">Confirm Acceptance</h3>
           </div>
           <p className="text-secondary">
-            By accepting this proposal, you agree to the scope and pricing described above.
-            Your project will be set up and you will be guided through the next steps.
+            By accepting this proposal, you agree to the scope and pricing described above. Your
+            project will be set up and you will be guided through the next steps.
           </p>
           <div className="portal-detail-actions mt-2">
             <button className="btn btn-primary" onClick={handleAccept} disabled={accepting}>
               {accepting ? 'Accepting...' : 'Confirm Acceptance'}
             </button>
-            <button className="btn btn-secondary" onClick={() => setShowConfirm(false)} disabled={accepting}>
+            <button
+              className="btn btn-secondary"
+              onClick={() => setShowConfirm(false)}
+              disabled={accepting}
+            >
               <X className="icon-xs" />
               Cancel
             </button>
@@ -306,8 +349,8 @@ export function PortalProposalDetail({
       {proposal.status === 'accepted' && (
         <div className="portal-card" style={{ borderColor: 'var(--status-completed)' }}>
           <p className="text-primary">
-            <Check className="icon-xs text-status-completed" />{' '}
-            You accepted this proposal{proposal.reviewedAt ? ` on ${formatCardDate(proposal.reviewedAt)}` : ''}.
+            <Check className="icon-xs text-status-completed" /> You accepted this proposal
+            {proposal.reviewedAt ? ` on ${formatCardDate(proposal.reviewedAt)}` : ''}.
           </p>
         </div>
       )}

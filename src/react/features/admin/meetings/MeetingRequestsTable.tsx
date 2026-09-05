@@ -6,16 +6,7 @@
 
 import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
-import {
-  Calendar,
-  Inbox,
-  Check,
-  X,
-  CheckCircle,
-  Clock,
-  MapPin,
-  RefreshCw
-} from 'lucide-react';
+import { Calendar, Inbox, Check, X, CheckCircle, Clock, MapPin, RefreshCw } from 'lucide-react';
 import { getStatusVariant } from '@react/components/portal/StatusBadge';
 import { IconButton } from '@react/factories';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
@@ -61,12 +52,7 @@ type MeetingStatus =
   | 'completed'
   | 'cancelled';
 
-type LocationType =
-  | 'zoom'
-  | 'google_meet'
-  | 'phone'
-  | 'in_person'
-  | 'other';
+type LocationType = 'zoom' | 'google_meet' | 'phone' | 'in_person' | 'other';
 
 interface MeetingRequestAdmin {
   id: number;
@@ -161,7 +147,9 @@ function formatSlots(meeting: MeetingRequestAdmin): string {
 }
 
 function formatConfirmedDate(iso: string | null): string {
-  if (!iso) return '--';
+  if (!iso) {
+    return '--';
+  }
   try {
     return new Date(iso).toLocaleString(undefined, {
       month: 'short',
@@ -208,7 +196,7 @@ export function MeetingRequestsTable({
     getAuthToken,
     url: API_ENDPOINTS.MEETING_REQUESTS,
     transform: (raw) =>
-      (raw as Record<string, unknown>).meetingRequests as MeetingRequestAdmin[] || []
+      ((raw as Record<string, unknown>).meetingRequests as MeetingRequestAdmin[]) || []
   });
 
   const items = useMemo(() => meetingRequests ?? [], [meetingRequests]);
@@ -253,85 +241,94 @@ export function MeetingRequestsTable({
   // Stats
   const stats = useMemo(() => {
     const total = items.length;
-    const pending = items.filter((m) => m.status === 'requested' || m.status === 'rescheduled').length;
+    const pending = items.filter(
+      (m) => m.status === 'requested' || m.status === 'rescheduled'
+    ).length;
     const confirmed = items.filter((m) => m.status === 'confirmed').length;
     return { total, pending, confirmed };
   }, [items]);
 
   // Confirm action
-  const handleConfirm = useCallback(async (id: number) => {
-    if (!confirmDatetime) {
-      showNotification?.('Please select a date and time', 'error');
-      return;
-    }
-    setActionLoading(id);
-    try {
-      await portalFetch(`${API_ENDPOINTS.MEETING_REQUESTS}/${id}/confirm`, {
-        method: 'POST',
-        body: {
-          confirmedDatetime: confirmDatetime,
-          locationType: confirmLocation,
-          locationDetails: confirmLocationDetails || undefined
-        }
-      });
-      showNotification?.('Meeting confirmed', 'success');
-      setConfirmingId(null);
-      setConfirmDatetime('');
-      setConfirmLocationDetails('');
-      await refetch();
-    } catch (err) {
-      logger.error('Error confirming meeting:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to confirm meeting'),
-        'error'
-      );
-    } finally {
-      setActionLoading(null);
-    }
-  }, [confirmDatetime, confirmLocation, confirmLocationDetails, portalFetch, showNotification, refetch]);
+  const handleConfirm = useCallback(
+    async (id: number) => {
+      if (!confirmDatetime) {
+        showNotification?.('Please select a date and time', 'error');
+        return;
+      }
+      setActionLoading(id);
+      try {
+        await portalFetch(`${API_ENDPOINTS.MEETING_REQUESTS}/${id}/confirm`, {
+          method: 'POST',
+          body: {
+            confirmedDatetime: confirmDatetime,
+            locationType: confirmLocation,
+            locationDetails: confirmLocationDetails || undefined
+          }
+        });
+        showNotification?.('Meeting confirmed', 'success');
+        setConfirmingId(null);
+        setConfirmDatetime('');
+        setConfirmLocationDetails('');
+        await refetch();
+      } catch (err) {
+        logger.error('Error confirming meeting:', err);
+        showNotification?.(formatErrorMessage(err, 'Failed to confirm meeting'), 'error');
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [
+      confirmDatetime,
+      confirmLocation,
+      confirmLocationDetails,
+      portalFetch,
+      showNotification,
+      refetch
+    ]
+  );
 
   // Decline action
-  const handleDecline = useCallback(async (id: number) => {
-    setActionLoading(id);
-    try {
-      await portalFetch(`${API_ENDPOINTS.MEETING_REQUESTS}/${id}/decline`, {
-        method: 'POST',
-        body: { reason: declineReason || undefined }
-      });
-      showNotification?.('Meeting declined', 'success');
-      setDecliningId(null);
-      setDeclineReason('');
-      await refetch();
-    } catch (err) {
-      logger.error('Error declining meeting:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to decline meeting'),
-        'error'
-      );
-    } finally {
-      setActionLoading(null);
-    }
-  }, [declineReason, portalFetch, showNotification, refetch]);
+  const handleDecline = useCallback(
+    async (id: number) => {
+      setActionLoading(id);
+      try {
+        await portalFetch(`${API_ENDPOINTS.MEETING_REQUESTS}/${id}/decline`, {
+          method: 'POST',
+          body: { reason: declineReason || undefined }
+        });
+        showNotification?.('Meeting declined', 'success');
+        setDecliningId(null);
+        setDeclineReason('');
+        await refetch();
+      } catch (err) {
+        logger.error('Error declining meeting:', err);
+        showNotification?.(formatErrorMessage(err, 'Failed to decline meeting'), 'error');
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [declineReason, portalFetch, showNotification, refetch]
+  );
 
   // Complete action
-  const handleComplete = useCallback(async (id: number) => {
-    setActionLoading(id);
-    try {
-      await portalFetch(`${API_ENDPOINTS.MEETING_REQUESTS}/${id}/complete`, {
-        method: 'POST'
-      });
-      showNotification?.('Meeting marked as completed', 'success');
-      await refetch();
-    } catch (err) {
-      logger.error('Error completing meeting:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to complete meeting'),
-        'error'
-      );
-    } finally {
-      setActionLoading(null);
-    }
-  }, [portalFetch, showNotification, refetch]);
+  const handleComplete = useCallback(
+    async (id: number) => {
+      setActionLoading(id);
+      try {
+        await portalFetch(`${API_ENDPOINTS.MEETING_REQUESTS}/${id}/complete`, {
+          method: 'POST'
+        });
+        showNotification?.('Meeting marked as completed', 'success');
+        await refetch();
+      } catch (err) {
+        logger.error('Error completing meeting:', err);
+        showNotification?.(formatErrorMessage(err, 'Failed to complete meeting'), 'error');
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [portalFetch, showNotification, refetch]
+  );
 
   return (
     <TableLayout
@@ -348,22 +345,14 @@ export function MeetingRequestsTable({
       }
       actions={
         <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search by client..."
-          />
+          <SearchFilter value={search} onChange={setSearch} placeholder="Search by client..." />
           <FilterDropdown
-            sections={[
-              { key: 'status', label: 'STATUS', options: STATUS_FILTER_OPTIONS }
-            ]}
+            sections={[{ key: 'status', label: 'STATUS', options: STATUS_FILTER_OPTIONS }]}
             values={{ status: statusFilter }}
             onChange={(key, value) => {
               if (key === 'status') {
                 setStatusFilter((prev) =>
-                  prev.includes(value)
-                    ? prev.filter((v) => v !== value)
-                    : [...prev, value]
+                  prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
                 );
               }
             }}
@@ -392,9 +381,11 @@ export function MeetingRequestsTable({
             <PortalTableEmpty
               colSpan={TABLE_COL_COUNT}
               icon={<Inbox />}
-              message={search || statusFilter.length > 0
-                ? 'No meeting requests match your filters'
-                : 'No meeting requests yet'}
+              message={
+                search || statusFilter.length > 0
+                  ? 'No meeting requests match your filters'
+                  : 'No meeting requests yet'
+              }
             />
           ) : (
             filteredItems.map((meeting) => (
@@ -417,16 +408,16 @@ export function MeetingRequestsTable({
                   </PortalTableCell>
                   <PortalTableCell className="status-col">
                     <StatusBadge
-                      status={getStatusVariant(MEETING_STATUS_LABELS[meeting.status]?.variant || 'pending')}
+                      status={getStatusVariant(
+                        MEETING_STATUS_LABELS[meeting.status]?.variant || 'pending'
+                      )}
                       size="sm"
                     >
                       {MEETING_STATUS_LABELS[meeting.status]?.label || meeting.status}
                     </StatusBadge>
                   </PortalTableCell>
                   <PortalTableCell>
-                    <span className="text-sm">
-                      {formatSlots(meeting) || '--'}
-                    </span>
+                    <span className="text-sm">{formatSlots(meeting) || '--'}</span>
                   </PortalTableCell>
                   <PortalTableCell className="date-col">
                     {formatConfirmedDate(meeting.confirmed_datetime)}
@@ -505,12 +496,17 @@ export function MeetingRequestsTable({
                               className="form-input"
                             >
                               {LOCATION_TYPE_OPTIONS.map((opt) => (
-                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                <option key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </option>
                               ))}
                             </select>
                           </div>
                           <div className="flex flex-col gap-1 flex-1">
-                            <label className="field-label" htmlFor={`confirm-details-${meeting.id}`}>
+                            <label
+                              className="field-label"
+                              htmlFor={`confirm-details-${meeting.id}`}
+                            >
                               Details
                             </label>
                             <input

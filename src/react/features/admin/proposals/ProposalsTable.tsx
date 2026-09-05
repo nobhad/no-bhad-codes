@@ -1,9 +1,6 @@
 import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
-import {
-  FileText,
-  Inbox
-} from 'lucide-react';
+import { FileText, Inbox } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -105,12 +102,16 @@ function filterProposal(
     const matchesSearch =
       proposal.title.toLowerCase().includes(searchLower) ||
       proposal.clientName.toLowerCase().includes(searchLower);
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(proposal.status)) return false;
+    if (!statusFilter.includes(proposal.status)) {
+      return false;
+    }
   }
 
   return true;
@@ -122,25 +123,32 @@ function sortProposals(a: Proposal, b: Proposal, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'title':
-    return multiplier * a.title.localeCompare(b.title);
-  case 'client':
-    return multiplier * a.clientName.localeCompare(b.clientName);
-  case 'amount':
-    return multiplier * (a.amount - b.amount);
-  case 'createdAt':
-    return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-  default:
-    return 0;
+    case 'title':
+      return multiplier * a.title.localeCompare(b.title);
+    case 'client':
+      return multiplier * a.clientName.localeCompare(b.clientName);
+    case 'amount':
+      return multiplier * (a.amount - b.amount);
+    case 'createdAt':
+      return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    default:
+      return 0;
   }
 }
 
-export function ProposalsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ProposalsTableProps) {
+export function ProposalsTable({
+  getAuthToken,
+  showNotification,
+  onNavigate,
+  defaultPageSize = 25,
+  overviewMode = false
+}: ProposalsTableProps) {
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null);
-  const { clientOptions: entityClients, projectOptions: entityProjects } = useEntityOptions(createOpen);
+  const { clientOptions: entityClients, projectOptions: entityProjects } =
+    useEntityOptions(createOpen);
 
   // Data fetching via useListFetch
   const { data, isLoading, error, refetch, setData } = useListFetch<Proposal, ProposalStats>({
@@ -200,65 +208,92 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
   });
 
   // Status change handler
-  const handleStatusChange = useCallback(async (proposalId: number, newStatus: string) => {
-    await executeWithToast(
-      () => apiFetch(buildEndpoint.adminProposal(proposalId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      }),
-      { success: 'Proposal status updated', error: 'Failed to update proposal status' },
-      () => {
-        setData((prev) => prev ? {
-          ...prev,
-          items: prev.items.map((p) =>
-            p.id === proposalId
-              ? { ...p, status: newStatus as Proposal['status'] }
-              : p
-          )
-        } : prev);
-      }
-    );
-  }, [setData]);
+  const handleStatusChange = useCallback(
+    async (proposalId: number, newStatus: string) => {
+      await executeWithToast(
+        () =>
+          apiFetch(buildEndpoint.adminProposal(proposalId), {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+          }),
+        { success: 'Proposal status updated', error: 'Failed to update proposal status' },
+        () => {
+          setData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  items: prev.items.map((p) =>
+                    p.id === proposalId ? { ...p, status: newStatus as Proposal['status'] } : p
+                  )
+                }
+              : prev
+          );
+        }
+      );
+    },
+    [setData]
+  );
 
-  const handleSendProposal = useCallback(async (proposalId: number) => {
-    await executeWithToast(
-      () => apiPost(buildEndpoint.adminProposalSend(proposalId)),
-      { success: 'Proposal sent', error: 'Failed to send proposal' },
-      () => {
-        setData((prev) => prev ? {
-          ...prev,
-          items: prev.items.map((p) =>
-            p.id === proposalId ? { ...p, status: 'sent' as const, sentAt: new Date().toISOString() } : p
-          )
-        } : prev);
-      }
-    );
-  }, [setData]);
+  const handleSendProposal = useCallback(
+    async (proposalId: number) => {
+      await executeWithToast(
+        () => apiPost(buildEndpoint.adminProposalSend(proposalId)),
+        { success: 'Proposal sent', error: 'Failed to send proposal' },
+        () => {
+          setData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  items: prev.items.map((p) =>
+                    p.id === proposalId
+                      ? { ...p, status: 'sent' as const, sentAt: new Date().toISOString() }
+                      : p
+                  )
+                }
+              : prev
+          );
+        }
+      );
+    },
+    [setData]
+  );
 
-  const handleDuplicate = useCallback(async (proposalId: number) => {
-    await executeWithToast(
-      () => apiPost(buildEndpoint.adminProposalDuplicate(proposalId)),
-      { success: 'Proposal duplicated', error: 'Failed to duplicate proposal' },
-      () => refetch()
-    );
-  }, [refetch]);
+  const handleDuplicate = useCallback(
+    async (proposalId: number) => {
+      await executeWithToast(
+        () => apiPost(buildEndpoint.adminProposalDuplicate(proposalId)),
+        { success: 'Proposal duplicated', error: 'Failed to duplicate proposal' },
+        () => refetch()
+      );
+    },
+    [refetch]
+  );
 
   // Single delete handler
-  const handleDeleteProposal = useCallback(async (proposalId: number) => {
-    if (!window.confirm('Are you sure you want to delete this proposal?')) return;
-    await executeWithToast(
-      () => apiFetch(buildEndpoint.adminProposal(proposalId), { method: 'DELETE' }),
-      { success: 'Proposal deleted', error: 'Failed to delete proposal' },
-      () => {
-        setData((prev) => prev ? { ...prev, items: prev.items.filter((p) => p.id !== proposalId) } : prev);
+  const handleDeleteProposal = useCallback(
+    async (proposalId: number) => {
+      if (!window.confirm('Are you sure you want to delete this proposal?')) {
+        return;
       }
-    );
-  }, [setData]);
+      await executeWithToast(
+        () => apiFetch(buildEndpoint.adminProposal(proposalId), { method: 'DELETE' }),
+        { success: 'Proposal deleted', error: 'Failed to delete proposal' },
+        () => {
+          setData((prev) =>
+            prev ? { ...prev, items: prev.items.filter((p) => p.id !== proposalId) } : prev
+          );
+        }
+      );
+    },
+    [setData]
+  );
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
     const ids = selection.selectedItems.map((p) => p.id);
     await executeWithToast(
@@ -268,7 +303,9 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
         error: 'Failed to delete proposals'
       },
       () => {
-        setData((prev) => prev ? { ...prev, items: prev.items.filter((p) => !ids.includes(p.id)) } : prev);
+        setData((prev) =>
+          prev ? { ...prev, items: prev.items.filter((p) => !ids.includes(p.id)) } : prev
+        );
         selection.clearSelection();
       }
     );
@@ -288,7 +325,9 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
   // Handle bulk status change
   const handleBulkStatusChange = useCallback(
     async (newStatus: string) => {
-      if (selection.selectedCount === 0) return;
+      if (selection.selectedCount === 0) {
+        return;
+      }
 
       for (const p of selection.selectedItems) {
         await handleStatusChange(p.id, newStatus);
@@ -310,34 +349,45 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
   const clientOptions = useMemo(() => {
     const map = new Map<string, string>();
     entityClients.forEach((o) => map.set(o.value, o.label));
-    proposals.forEach((p) => { if (p.clientId && p.clientName) map.set(String(p.clientId), p.clientName); });
+    proposals.forEach((p) => {
+      if (p.clientId && p.clientName) {
+        map.set(String(p.clientId), p.clientName);
+      }
+    });
     return Array.from(map, ([value, label]) => ({ value, label }));
   }, [proposals, entityClients]);
 
   const projectTypeOptions = useMemo(() => {
     const types = new Set<string>();
-    proposals.forEach((p) => { if (p.projectType) types.add(p.projectType); });
+    proposals.forEach((p) => {
+      if (p.projectType) {
+        types.add(p.projectType);
+      }
+    });
     return Array.from(types, (t) => ({ value: t, label: t }));
   }, [proposals]);
 
   // Create handler
-  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
-    setCreateLoading(true);
-    try {
-      const res = await apiPost(API_ENDPOINTS.ADMIN.PROPOSALS, formData);
-      if (res.ok) {
-        showNotification?.('Proposal created successfully', 'success');
-        setCreateOpen(false);
-        refetch();
-      } else {
+  const handleCreate = useCallback(
+    async (formData: Record<string, unknown>) => {
+      setCreateLoading(true);
+      try {
+        const res = await apiPost(API_ENDPOINTS.ADMIN.PROPOSALS, formData);
+        if (res.ok) {
+          showNotification?.('Proposal created successfully', 'success');
+          setCreateOpen(false);
+          refetch();
+        } else {
+          showNotification?.('Failed to create proposal', 'error');
+        }
+      } catch {
         showNotification?.('Failed to create proposal', 'error');
+      } finally {
+        setCreateLoading(false);
       }
-    } catch {
-      showNotification?.('Failed to create proposal', 'error');
-    } finally {
-      setCreateLoading(false);
-    }
-  }, [showNotification, refetch]);
+    },
+    [showNotification, refetch]
+  );
 
   // Detail panel handlers
   const handleRowClick = useCallback((proposal: Proposal) => {
@@ -377,11 +427,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
         }
         actions={
           <>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search proposals..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search proposals..." />
             <FilterDropdown
               sections={PROPOSALS_FILTER_CONFIG}
               values={filterValues}
@@ -402,7 +448,9 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
             totalCount={filteredProposals.length}
             onClearSelection={selection.clearSelection}
             onSelectAll={() => selection.selectMany(filteredProposals)}
-            allSelected={selection.allSelected && selection.selectedCount === filteredProposals.length}
+            allSelected={
+              selection.allSelected && selection.selectedCount === filteredProposals.length
+            }
             statusOptions={bulkStatusOptions}
             onStatusChange={handleBulkStatusChange}
             onDelete={handleBulkDelete}
@@ -442,7 +490,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
                 sortDirection={sort?.column === 'title' ? sort.direction : null}
                 onClick={() => toggleSort('title')}
               >
-              Proposal
+                Proposal
               </PortalTableHead>
               <PortalTableHead
                 className="amount-col"
@@ -450,7 +498,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
                 sortDirection={sort?.column === 'amount' ? sort.direction : null}
                 onClick={() => toggleSort('amount')}
               >
-              Amount
+                Amount
               </PortalTableHead>
               <PortalTableHead className="status-col">Status</PortalTableHead>
               <PortalTableHead
@@ -459,7 +507,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
                 sortDirection={sort?.column === 'createdAt' ? sort.direction : null}
                 onClick={() => toggleSort('createdAt')}
               >
-              Dates
+                Dates
               </PortalTableHead>
               <PortalTableHead className="col-actions">Actions</PortalTableHead>
             </PortalTableRow>
@@ -528,8 +576,10 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
                     <div className="cell-content">
                       <span className="cell-title">{formatDate(proposal.createdAt)}</span>
                       {proposal.validUntil && (
-                        <span className={`cell-subtitle ${new Date(proposal.validUntil) < new Date() ? 'text-danger' : ''}`}>
-                        Valid until {formatDate(proposal.validUntil)}
+                        <span
+                          className={`cell-subtitle ${new Date(proposal.validUntil) < new Date() ? 'text-danger' : ''}`}
+                        >
+                          Valid until {formatDate(proposal.validUntil)}
                         </span>
                       )}
                     </div>
@@ -543,10 +593,31 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
                           onClick={() => handleSendProposal(proposal.id)}
                         />
                       )}
-                      <IconButton action="view" title="View" onClick={() => onNavigate?.('proposal-detail', String(proposal.id))} />
-                      <IconButton action="download" title="Download PDF" onClick={() => downloadFromUrl(`/api/proposals/${proposal.id}/pdf`, `proposal-${proposal.title || proposal.id}.pdf`)} />
-                      <IconButton action="duplicate" title="Duplicate" onClick={() => handleDuplicate(proposal.id)} />
-                      <IconButton action="delete" title="Delete" onClick={() => handleDeleteProposal(proposal.id)} />
+                      <IconButton
+                        action="view"
+                        title="View"
+                        onClick={() => onNavigate?.('proposal-detail', String(proposal.id))}
+                      />
+                      <IconButton
+                        action="download"
+                        title="Download PDF"
+                        onClick={() =>
+                          downloadFromUrl(
+                            `/api/proposals/${proposal.id}/pdf`,
+                            `proposal-${proposal.title || proposal.id}.pdf`
+                          )
+                        }
+                      />
+                      <IconButton
+                        action="duplicate"
+                        title="Duplicate"
+                        onClick={() => handleDuplicate(proposal.id)}
+                      />
+                      <IconButton
+                        action="delete"
+                        title="Delete"
+                        onClick={() => handleDeleteProposal(proposal.id)}
+                      />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>

@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import {
-  Inbox
-} from 'lucide-react';
+import { Inbox } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
@@ -24,7 +22,11 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useListFetch } from '@react/factories/useDataFetch';
-import { TIME_TRACKING_FILTER_CONFIG, TIME_TRACKING_DATE_RANGE_OPTIONS, TIME_TRACKING_BILLABLE_OPTIONS } from '../shared/filterConfigs';
+import {
+  TIME_TRACKING_FILTER_CONFIG,
+  TIME_TRACKING_DATE_RANGE_OPTIONS,
+  TIME_TRACKING_BILLABLE_OPTIONS
+} from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
@@ -92,8 +94,12 @@ function filterTimeEntry(
 
   const billableFilter = filters.billable;
   if (billableFilter && billableFilter.length > 0) {
-    if (billableFilter.includes('billable') && !entry.billable) return false;
-    if (billableFilter.includes('non-billable') && entry.billable) return false;
+    if (billableFilter.includes('billable') && !entry.billable) {
+      return false;
+    }
+    if (billableFilter.includes('non-billable') && entry.billable) {
+      return false;
+    }
   }
 
   return true;
@@ -104,18 +110,23 @@ function sortTimeEntries(a: TimeEntry, b: TimeEntry, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'date':
-    return multiplier * (a.date + a.startTime).localeCompare(b.date + b.startTime);
-  case 'duration':
-    return multiplier * (a.duration - b.duration);
-  case 'project':
-    return multiplier * (a.projectName || '').localeCompare(b.projectName || '');
-  default:
-    return 0;
+    case 'date':
+      return multiplier * (a.date + a.startTime).localeCompare(b.date + b.startTime);
+    case 'duration':
+      return multiplier * (a.duration - b.duration);
+    case 'project':
+      return multiplier * (a.projectName || '').localeCompare(b.projectName || '');
+    default:
+      return 0;
   }
 }
 
-export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNotification }: TimeTrackingTableProps) {
+export function TimeTrackingTable({
+  projectId,
+  onNavigate,
+  getAuthToken,
+  showNotification
+}: TimeTrackingTableProps) {
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -135,7 +146,9 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
   // Build dynamic endpoint with query params
   const timeEntriesEndpoint = useMemo(() => {
     const params = new URLSearchParams();
-    if (projectId) params.set('projectId', projectId);
+    if (projectId) {
+      params.set('projectId', projectId);
+    }
     params.set('range', dateRange);
     return `${API_ENDPOINTS.ADMIN.TIME_ENTRIES}?${params}`;
   }, [projectId, dateRange]);
@@ -187,7 +200,9 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
     try {
       const response = await apiPost(API_ENDPOINTS.ADMIN.TIME_ENTRIES_START, { projectId });
 
-      if (!response.ok) throw new Error('Failed to start timer');
+      if (!response.ok) {
+        throw new Error('Failed to start timer');
+      }
 
       const result = unwrapApiData<Record<string, unknown>>(await response.json());
       setActiveTimer({
@@ -203,12 +218,16 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
   }
 
   async function stopTimer() {
-    if (!activeTimer) return;
+    if (!activeTimer) {
+      return;
+    }
 
     try {
       const response = await apiPost(buildEndpoint.adminTimeEntryStop(activeTimer.entryId));
 
-      if (!response.ok) throw new Error('Failed to stop timer');
+      if (!response.ok) {
+        throw new Error('Failed to stop timer');
+      }
 
       setActiveTimer(null);
       setTimerDisplay('00:00:00');
@@ -222,7 +241,10 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
 
   const filteredEntries = useMemo(() => applyFilters(entries), [applyFilters, entries]);
 
-  const pagination = usePagination({ storageKey: 'admin_time_tracking_pagination', totalItems: filteredEntries.length });
+  const pagination = usePagination({
+    storageKey: 'admin_time_tracking_pagination',
+    totalItems: filteredEntries.length
+  });
   const paginatedEntries = filteredEntries.slice(
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
@@ -237,23 +259,26 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
     }
   }
 
-  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
-    setCreateLoading(true);
-    try {
-      const res = await apiPost(API_ENDPOINTS.ADMIN.TIME_ENTRIES, formData);
-      if (res.ok) {
-        showNotification?.('Time entry created successfully', 'success');
-        setCreateOpen(false);
-        refetch();
-      } else {
+  const handleCreate = useCallback(
+    async (formData: Record<string, unknown>) => {
+      setCreateLoading(true);
+      try {
+        const res = await apiPost(API_ENDPOINTS.ADMIN.TIME_ENTRIES, formData);
+        if (res.ok) {
+          showNotification?.('Time entry created successfully', 'success');
+          setCreateOpen(false);
+          refetch();
+        } else {
+          showNotification?.('Failed to create time entry', 'error');
+        }
+      } catch {
         showNotification?.('Failed to create time entry', 'error');
+      } finally {
+        setCreateLoading(false);
       }
-    } catch {
-      showNotification?.('Failed to create time entry', 'error');
-    } finally {
-      setCreateLoading(false);
-    }
-  }, [showNotification, refetch]);
+    },
+    [showNotification, refetch]
+  );
 
   return (
     <div>
@@ -264,8 +289,16 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
           <TableStats
             items={[
               { value: formatDuration(stats.totalHours * 60), label: 'total' },
-              { value: formatDuration(stats.billableHours * 60), label: 'billable', variant: 'completed' },
-              { value: formatDuration(stats.unbilledHours * 60), label: 'unbilled', variant: 'pending' },
+              {
+                value: formatDuration(stats.billableHours * 60),
+                label: 'billable',
+                variant: 'completed'
+              },
+              {
+                value: formatDuration(stats.unbilledHours * 60),
+                label: 'unbilled',
+                variant: 'pending'
+              },
               { value: formatCurrency(stats.totalValue), label: 'value' }
             ]}
             tooltip={`${formatDuration(stats.totalHours * 60)} Total • ${formatDuration(stats.billableHours * 60)} Billable • ${formatDuration(stats.unbilledHours * 60)} Unbilled • ${formatCurrency(stats.totalValue)} Value`}
@@ -273,22 +306,20 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
         }
         actions={
           <>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search entries..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search entries..." />
             <FilterDropdown
               sections={[
-                { key: 'dateRange', label: 'DATE RANGE', options: TIME_TRACKING_DATE_RANGE_OPTIONS },
+                {
+                  key: 'dateRange',
+                  label: 'DATE RANGE',
+                  options: TIME_TRACKING_DATE_RANGE_OPTIONS
+                },
                 { key: 'billable', label: 'BILLABLE', options: TIME_TRACKING_BILLABLE_OPTIONS }
               ]}
               values={{ ...filterValues, dateRange: dateRange ? [dateRange] : [] }}
               onChange={handleFilterChange}
             />
-            {!activeTimer && (
-              <IconButton action="start" onClick={startTimer} title="Start Timer" />
-            )}
+            {!activeTimer && <IconButton action="start" onClick={startTimer} title="Start Timer" />}
             <IconButton action="add" onClick={() => setCreateOpen(true)} title="Add Entry" />
           </>
         }
@@ -333,7 +364,7 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
                 sortDirection={sort?.column === 'project' ? sort.direction : null}
                 onClick={() => toggleSort('project')}
               >
-              Project
+                Project
               </PortalTableHead>
               <PortalTableHead
                 className="date-col"
@@ -341,7 +372,7 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
                 sortDirection={sort?.column === 'date' ? sort.direction : null}
                 onClick={() => toggleSort('date')}
               >
-              Date
+                Date
               </PortalTableHead>
               <PortalTableHead>Time</PortalTableHead>
               <PortalTableHead
@@ -350,7 +381,7 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
                 sortDirection={sort?.column === 'duration' ? sort.direction : null}
                 onClick={() => toggleSort('duration')}
               >
-              Duration
+                Duration
               </PortalTableHead>
               <PortalTableHead className="text-center">Billable</PortalTableHead>
               <PortalTableHead className="col-actions">Actions</PortalTableHead>
@@ -380,24 +411,42 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
                   <PortalTableCell>
                     {entry.projectName && (
                       <button
-                        onClick={(e) => { e.stopPropagation(); onNavigate?.('projects', entry.projectId != null ? String(entry.projectId) : undefined); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigate?.(
+                            'projects',
+                            entry.projectId != null ? String(entry.projectId) : undefined
+                          );
+                        }}
                         className="link-btn"
                       >
                         {entry.projectName}
                       </button>
                     )}
                   </PortalTableCell>
-                  <PortalTableCell className="date-col">{formatDateShort(entry.date)}</PortalTableCell>
+                  <PortalTableCell className="date-col">
+                    {formatDateShort(entry.date)}
+                  </PortalTableCell>
                   <PortalTableCell className="mono-text">
                     {entry.startTime} - {entry.endTime || 'ongoing'}
                   </PortalTableCell>
-                  <PortalTableCell className="text-right mono-text">{formatDuration(entry.duration)}</PortalTableCell>
+                  <PortalTableCell className="text-right mono-text">
+                    {formatDuration(entry.duration)}
+                  </PortalTableCell>
                   <PortalTableCell className="text-center">
-                    <span className={entry.billable ? 'status-dot status-completed' : 'status-dot status-muted'} />
+                    <span
+                      className={
+                        entry.billable ? 'status-dot status-completed' : 'status-dot status-muted'
+                      }
+                    />
                   </PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
-                      <IconButton action="view" title="View entry" onClick={() => onNavigate?.('time-entry', String(entry.id))} />
+                      <IconButton
+                        action="view"
+                        title="View entry"
+                        onClick={() => onNavigate?.('time-entry', String(entry.id))}
+                      />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>

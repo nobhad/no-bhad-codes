@@ -27,7 +27,9 @@ export function TrafficLive(_props: TrafficViewProps) {
   const { data, isLoading, error, refetch } = useDataFetch<TrafficRealtimeResponse | null>({
     fetchFn: async (_params, _headers, signal) => {
       const res = await apiFetch(API_ENDPOINTS.ANALYTICS_REALTIME, { signal });
-      if (!res.ok) throw new Error('Failed to load live traffic');
+      if (!res.ok) {
+        throw new Error('Failed to load live traffic');
+      }
       return unwrapApiData<TrafficRealtimeResponse>(await res.json());
     },
     initialData: null
@@ -111,12 +113,16 @@ export function TrafficLive(_props: TrafficViewProps) {
             ) : (
               sessions.map((session) => (
                 <PortalTableRow key={session.session_id}>
-                  <PortalTableCell className="traffic-cell-path">{session.visitor_id}</PortalTableCell>
+                  <PortalTableCell className="traffic-cell-path">
+                    {session.visitor_id}
+                  </PortalTableCell>
                   <PortalTableCell>
                     {session.device_type || '—'} · {session.browser || '—'}
                   </PortalTableCell>
                   <PortalTableCell>{session.page_views}</PortalTableCell>
-                  <PortalTableCell>{formatRelativeTime(session.last_activity, nowMs)}</PortalTableCell>
+                  <PortalTableCell>
+                    {formatRelativeTime(session.last_activity, nowMs)}
+                  </PortalTableCell>
                 </PortalTableRow>
               ))
             )}

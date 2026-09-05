@@ -1,9 +1,6 @@
 import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
-import {
-  GitBranch,
-  Inbox
-} from 'lucide-react';
+import { GitBranch, Inbox } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -92,12 +89,16 @@ function filterWorkflow(
       workflow.name.toLowerCase().includes(query) ||
       workflow.description?.toLowerCase().includes(query) ||
       workflow.trigger.toLowerCase().includes(query);
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(workflow.status)) return false;
+    if (!statusFilter.includes(workflow.status)) {
+      return false;
+    }
   }
 
   return true;
@@ -108,16 +109,16 @@ function sortWorkflows(a: Workflow, b: Workflow, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'name':
-    return a.name.localeCompare(b.name) * multiplier;
-  case 'runCount':
-    return (a.runCount - b.runCount) * multiplier;
-  case 'successRate':
-    return (a.successRate - b.successRate) * multiplier;
-  case 'updatedAt':
-    return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * multiplier;
-  default:
-    return 0;
+    case 'name':
+      return a.name.localeCompare(b.name) * multiplier;
+    case 'runCount':
+      return (a.runCount - b.runCount) * multiplier;
+    case 'successRate':
+      return (a.successRate - b.successRate) * multiplier;
+    case 'updatedAt':
+      return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * multiplier;
+    default:
+      return 0;
   }
 }
 
@@ -129,7 +130,13 @@ const DEFAULT_STATS: WorkflowStats = {
   avgSuccessRate: 0
 };
 
-export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: WorkflowsTableProps) {
+export function WorkflowsTable({
+  getAuthToken,
+  showNotification,
+  onNavigate,
+  defaultPageSize = 25,
+  overviewMode = false
+}: WorkflowsTableProps) {
   const containerRef = useFadeIn();
 
   const { data, isLoading, error, refetch, setData } = useListFetch<Workflow, WorkflowStats>({
@@ -191,42 +198,71 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
     [setFilter]
   );
 
-  const updateWorkflowStatus = useCallback(async (workflowId: number, newStatus: string) => {
-    await executeUpdateWithToast(
-      'workflow status',
-      () => apiPost(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_STATUS, { workflowIds: [workflowId], status: newStatus }),
-      () => setData((prev) =>
-        prev ? { ...prev, items: prev.items.map((w) =>
-          w.id === workflowId ? { ...w, status: newStatus as Workflow['status'] } : w
-        ) } : prev
-      )
-    );
-  }, [setData]);
+  const updateWorkflowStatus = useCallback(
+    async (workflowId: number, newStatus: string) => {
+      await executeUpdateWithToast(
+        'workflow status',
+        () =>
+          apiPost(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_STATUS, {
+            workflowIds: [workflowId],
+            status: newStatus
+          }),
+        () =>
+          setData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  items: prev.items.map((w) =>
+                    w.id === workflowId ? { ...w, status: newStatus as Workflow['status'] } : w
+                  )
+                }
+              : prev
+          )
+      );
+    },
+    [setData]
+  );
 
-  const handleBulkStatusChange = useCallback(async (newStatus: string) => {
-    if (selection.selectedCount === 0) return;
-
-    setBulkLoading(true);
-    const workflowIds = Array.from(selection.selectedIds);
-    await executeWithToast(
-      () => apiPost(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_STATUS, { workflowIds, status: newStatus }),
-      { success: `Updated ${workflowIds.length} workflow${workflowIds.length !== 1 ? 's' : ''}`, error: 'Failed to update workflows' },
-      () => {
-        setData((prev) =>
-          prev ? { ...prev, items: prev.items.map((w) =>
-            selection.selectedIds.has(w.id)
-              ? { ...w, status: newStatus as Workflow['status'] }
-              : w
-          ) } : prev
-        );
-        selection.clearSelection();
+  const handleBulkStatusChange = useCallback(
+    async (newStatus: string) => {
+      if (selection.selectedCount === 0) {
+        return;
       }
-    );
-    setBulkLoading(false);
-  }, [selection, setData]);
+
+      setBulkLoading(true);
+      const workflowIds = Array.from(selection.selectedIds);
+      await executeWithToast(
+        () =>
+          apiPost(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_STATUS, { workflowIds, status: newStatus }),
+        {
+          success: `Updated ${workflowIds.length} workflow${workflowIds.length !== 1 ? 's' : ''}`,
+          error: 'Failed to update workflows'
+        },
+        () => {
+          setData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  items: prev.items.map((w) =>
+                    selection.selectedIds.has(w.id)
+                      ? { ...w, status: newStatus as Workflow['status'] }
+                      : w
+                  )
+                }
+              : prev
+          );
+          selection.clearSelection();
+        }
+      );
+      setBulkLoading(false);
+    },
+    [selection, setData]
+  );
 
   const handleBulkDelete = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
     if (!confirm(`Are you sure you want to delete ${selection.selectedCount} workflow(s)?`)) {
       return;
@@ -236,10 +272,15 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
     const workflowIds = Array.from(selection.selectedIds);
     await executeWithToast(
       () => apiPost(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_DELETE, { workflowIds }),
-      { success: `Deleted ${workflowIds.length} workflow${workflowIds.length !== 1 ? 's' : ''}`, error: 'Failed to delete workflows' },
+      {
+        success: `Deleted ${workflowIds.length} workflow${workflowIds.length !== 1 ? 's' : ''}`,
+        error: 'Failed to delete workflows'
+      },
       () => {
         setData((prev) =>
-          prev ? { ...prev, items: prev.items.filter((w) => !selection.selectedIds.has(w.id)) } : prev
+          prev
+            ? { ...prev, items: prev.items.filter((w) => !selection.selectedIds.has(w.id)) }
+            : prev
         );
         selection.clearSelection();
       }
@@ -250,12 +291,9 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
   // Detail panel state
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
 
-  const handleRowClick = useCallback(
-    (workflow: Workflow) => {
-      setSelectedWorkflow(workflow);
-    },
-    []
-  );
+  const handleRowClick = useCallback((workflow: Workflow) => {
+    setSelectedWorkflow(workflow);
+  }, []);
 
   const handleClosePanel = useCallback(() => {
     setSelectedWorkflow(null);
@@ -294,11 +332,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
         }
         actions={
           <>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search workflows..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search workflows..." />
             <FilterDropdown
               sections={filterSections}
               values={filterValues}
@@ -310,12 +344,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
               disabled={isExporting || filteredWorkflows.length === 0}
               title="Export to CSV"
             />
-            <IconButton
-              action="refresh"
-              onClick={refetch}
-              disabled={isLoading}
-              title="Refresh"
-            />
+            <IconButton action="refresh" onClick={refetch} disabled={isLoading} title="Refresh" />
           </>
         }
         bulkActions={
@@ -324,7 +353,9 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
             totalCount={filteredWorkflows.length}
             onClearSelection={selection.clearSelection}
             onSelectAll={() => selection.selectMany(filteredWorkflows)}
-            allSelected={selection.allSelected && selection.selectedCount === filteredWorkflows.length}
+            allSelected={
+              selection.allSelected && selection.selectedCount === filteredWorkflows.length
+            }
             statusOptions={BULK_STATUS_OPTIONS}
             onStatusChange={handleBulkStatusChange}
             onDelete={handleBulkDelete}
@@ -355,7 +386,13 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
               {!overviewMode && (
                 <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
-                    checked={selection.allSelected ? true : selection.someSelected ? 'indeterminate' : false}
+                    checked={
+                      selection.allSelected
+                        ? true
+                        : selection.someSelected
+                          ? 'indeterminate'
+                          : false
+                    }
                     onCheckedChange={selection.toggleSelectAll}
                     aria-label="Select all"
                   />
@@ -367,7 +404,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                 sortDirection={sort?.column === 'name' ? sort.direction : null}
                 onClick={() => toggleSort('name')}
               >
-              Workflow
+                Workflow
               </PortalTableHead>
               <PortalTableHead className="status-col">Status</PortalTableHead>
               {!overviewMode && (
@@ -378,7 +415,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                     sortDirection={sort?.column === 'updatedAt' ? sort.direction : null}
                     onClick={() => toggleSort('updatedAt')}
                   >
-                  Updated
+                    Updated
                   </PortalTableHead>
                   <PortalTableHead className="col-actions">Actions</PortalTableHead>
                 </>
@@ -406,10 +443,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                   onClick={() => handleRowClick(workflow)}
                 >
                   {!overviewMode && (
-                    <PortalTableCell
-                      className="col-checkbox"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={selection.isSelected(workflow)}
                         onCheckedChange={() => selection.toggleSelection(workflow)}
@@ -422,7 +456,9 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                       <GitBranch className="icon-sm" />
                       <div className="cell-content">
                         <span className="cell-title">{workflow.name}</span>
-                        <span className="cell-subtitle">{workflow.trigger} · {workflow.steps} steps</span>
+                        <span className="cell-subtitle">
+                          {workflow.trigger} · {workflow.steps} steps
+                        </span>
                         <span className="status-stacked">
                           <StatusBadge status={getStatusVariant(workflow.status)} size="sm">
                             {WORKFLOW_STATUS_CONFIG[workflow.status]?.label || workflow.status}
@@ -449,10 +485,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                             title="Configure"
                             onClick={() => onNavigate?.('workflow-editor', String(workflow.id))}
                           />
-                          <IconButton
-                            action="delete"
-                            title="Delete"
-                          />
+                          <IconButton action="delete" title="Delete" />
                         </div>
                       </PortalTableCell>
                     </>

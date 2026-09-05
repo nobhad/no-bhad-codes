@@ -22,11 +22,7 @@ import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 import { formatErrorMessage } from '@/utils/error-utils';
 import { createLogger } from '@/utils/logger';
 import type { MeetingRequest, MeetingStatus } from './types';
-import {
-  MEETING_TYPE_LABELS,
-  MEETING_STATUS_CONFIG,
-  LOCATION_TYPE_LABELS
-} from './types';
+import { MEETING_TYPE_LABELS, MEETING_STATUS_CONFIG, LOCATION_TYPE_LABELS } from './types';
 
 const logger = createLogger('MeetingRequestsList');
 
@@ -38,7 +34,9 @@ const logger = createLogger('MeetingRequestsList');
 const CANCELLABLE_STATUSES: MeetingStatus[] = ['requested', 'rescheduled'];
 
 function formatDatetime(iso: string | null): string {
-  if (!iso) return '--';
+  if (!iso) {
+    return '--';
+  }
   try {
     return new Date(iso).toLocaleString(undefined, {
       weekday: 'short',
@@ -62,10 +60,7 @@ interface MeetingCardProps {
   onCancel: (meeting: MeetingRequest) => void;
 }
 
-const MeetingCard = React.memo(({
-  meeting,
-  onCancel
-}: MeetingCardProps) => {
+const MeetingCard = React.memo(({ meeting, onCancel }: MeetingCardProps) => {
   const statusConfig = MEETING_STATUS_CONFIG[meeting.status];
   const typeLabel = MEETING_TYPE_LABELS[meeting.meetingType] || meeting.meetingType;
   const canCancel = CANCELLABLE_STATUSES.includes(meeting.status);
@@ -119,23 +114,15 @@ const MeetingCard = React.memo(({
               <span className="text-muted">Awaiting confirmation</span>
             </div>
             <div className="flex flex-col gap-1 ml-5">
-              <span className="text-muted text-xs">
-                Preferred times:
-              </span>
+              <span className="text-muted text-xs">Preferred times:</span>
               {meeting.preferredSlot1 && (
-                <span className="text-sm">
-                  1. {formatDatetime(meeting.preferredSlot1)}
-                </span>
+                <span className="text-sm">1. {formatDatetime(meeting.preferredSlot1)}</span>
               )}
               {meeting.preferredSlot2 && (
-                <span className="text-sm">
-                  2. {formatDatetime(meeting.preferredSlot2)}
-                </span>
+                <span className="text-sm">2. {formatDatetime(meeting.preferredSlot2)}</span>
               )}
               {meeting.preferredSlot3 && (
-                <span className="text-sm">
-                  3. {formatDatetime(meeting.preferredSlot3)}
-                </span>
+                <span className="text-sm">3. {formatDatetime(meeting.preferredSlot3)}</span>
               )}
             </div>
             <div className="flex items-center gap-2">
@@ -152,16 +139,10 @@ const MeetingCard = React.memo(({
           </div>
         )}
 
-        {meeting.clientNotes && (
-          <p className="text-muted text-sm mt-2">
-            {meeting.clientNotes}
-          </p>
-        )}
+        {meeting.clientNotes && <p className="text-muted text-sm mt-2">{meeting.clientNotes}</p>}
 
         {meeting.projectName && (
-          <p className="text-muted text-xs mt-1">
-            Project: {meeting.projectName}
-          </p>
+          <p className="text-muted text-xs mt-1">Project: {meeting.projectName}</p>
         )}
       </div>
 
@@ -198,91 +179,85 @@ export interface MeetingRequestsListProps {
 // COMPONENT
 // ============================================================================
 
-export const MeetingRequestsList = React.memo(({
-  getAuthToken,
-  showNotification
-}: MeetingRequestsListProps) => {
-  const {
-    data: meetings,
-    isLoading,
-    error,
-    refetch,
-    portalFetch
-  } = usePortalData<MeetingRequest[]>({
-    getAuthToken,
-    url: API_ENDPOINTS.MEETING_REQUESTS_MY,
-    transform: (raw) => (raw as Record<string, unknown>).meetingRequests as MeetingRequest[] || []
-  });
+export const MeetingRequestsList = React.memo(
+  ({ getAuthToken, showNotification }: MeetingRequestsListProps) => {
+    const {
+      data: meetings,
+      isLoading,
+      error,
+      refetch,
+      portalFetch
+    } = usePortalData<MeetingRequest[]>({
+      getAuthToken,
+      url: API_ENDPOINTS.MEETING_REQUESTS_MY,
+      transform: (raw) =>
+        ((raw as Record<string, unknown>).meetingRequests as MeetingRequest[]) || []
+    });
 
-  const items = useMemo(() => meetings ?? [], [meetings]);
+    const items = useMemo(() => meetings ?? [], [meetings]);
 
-  const [cancelTarget, setCancelTarget] = useState<MeetingRequest | null>(null);
-  const [isCancelling, setIsCancelling] = useState(false);
+    const [cancelTarget, setCancelTarget] = useState<MeetingRequest | null>(null);
+    const [isCancelling, setIsCancelling] = useState(false);
 
-  const handleCancel = useCallback(async () => {
-    if (!cancelTarget) return;
-    setIsCancelling(true);
-    try {
-      await portalFetch(`${API_ENDPOINTS.MEETING_REQUESTS}/${cancelTarget.id}/cancel`, {
-        method: 'POST'
-      });
-      showNotification?.('Meeting request cancelled', 'success');
-      setCancelTarget(null);
-      await refetch();
-    } catch (err) {
-      logger.error('Error cancelling meeting request:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to cancel meeting request'),
-        'error'
-      );
-    } finally {
-      setIsCancelling(false);
+    const handleCancel = useCallback(async () => {
+      if (!cancelTarget) {
+        return;
+      }
+      setIsCancelling(true);
+      try {
+        await portalFetch(`${API_ENDPOINTS.MEETING_REQUESTS}/${cancelTarget.id}/cancel`, {
+          method: 'POST'
+        });
+        showNotification?.('Meeting request cancelled', 'success');
+        setCancelTarget(null);
+        await refetch();
+      } catch (err) {
+        logger.error('Error cancelling meeting request:', err);
+        showNotification?.(formatErrorMessage(err, 'Failed to cancel meeting request'), 'error');
+      } finally {
+        setIsCancelling(false);
+      }
+    }, [cancelTarget, portalFetch, showNotification, refetch]);
+
+    if (isLoading) {
+      return <LoadingState message="Loading meeting requests..." />;
     }
-  }, [cancelTarget, portalFetch, showNotification, refetch]);
 
-  if (isLoading) {
-    return <LoadingState message="Loading meeting requests..." />;
-  }
+    if (error) {
+      return <ErrorState message={error} onRetry={refetch} />;
+    }
 
-  if (error) {
-    return <ErrorState message={error} onRetry={refetch} />;
-  }
+    if (items.length === 0) {
+      return <EmptyState icon={<Inbox className="icon-lg" />} message="No meeting requests yet." />;
+    }
 
-  if (items.length === 0) {
     return (
-      <EmptyState
-        icon={<Inbox className="icon-lg" />}
-        message="No meeting requests yet."
-      />
+      <>
+        <div className="portal-cards-list">
+          {items.map((meeting) => (
+            <MeetingCard key={meeting.id} meeting={meeting} onCancel={setCancelTarget} />
+          ))}
+        </div>
+
+        {/* Cancel Confirmation */}
+        <ConfirmDialog
+          open={!!cancelTarget}
+          onOpenChange={(open) => {
+            if (!open) {
+              setCancelTarget(null);
+            }
+          }}
+          title="Cancel Meeting Request"
+          description={`Are you sure you want to cancel this ${cancelTarget ? MEETING_TYPE_LABELS[cancelTarget.meetingType] : ''} request?`}
+          confirmText="Cancel Request"
+          variant="danger"
+          loading={isCancelling}
+          onConfirm={handleCancel}
+        />
+      </>
     );
   }
-
-  return (
-    <>
-      <div className="portal-cards-list">
-        {items.map((meeting) => (
-          <MeetingCard
-            key={meeting.id}
-            meeting={meeting}
-            onCancel={setCancelTarget}
-          />
-        ))}
-      </div>
-
-      {/* Cancel Confirmation */}
-      <ConfirmDialog
-        open={!!cancelTarget}
-        onOpenChange={(open) => { if (!open) setCancelTarget(null); }}
-        title="Cancel Meeting Request"
-        description={`Are you sure you want to cancel this ${cancelTarget ? MEETING_TYPE_LABELS[cancelTarget.meetingType] : ''} request?`}
-        confirmText="Cancel Request"
-        variant="danger"
-        loading={isCancelling}
-        onConfirm={handleCancel}
-      />
-    </>
-  );
-});
+);
 
 // MeetingCard is defined above the main component (see line ~56)
 

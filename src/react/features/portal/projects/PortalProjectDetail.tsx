@@ -18,7 +18,13 @@ import {
   Receipt,
   DollarSign
 } from 'lucide-react';
-import { IconButton, TabList, TabPanel, formatRelativeTime, formatCurrency } from '@react/factories';
+import {
+  IconButton,
+  TabList,
+  TabPanel,
+  formatRelativeTime,
+  formatCurrency
+} from '@react/factories';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { StatCard } from '@react/components/portal/StatCard';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
@@ -64,14 +70,14 @@ function formatDate(dateString: string): string {
  */
 function getUpdateIcon(type: PortalProjectUpdate['update_type']) {
   switch (type) {
-  case 'milestone':
-    return <Flag />;
-  case 'status':
-    return <CheckCircle2 />;
-  case 'deliverable':
-    return <FileText />;
-  default:
-    return <MessageSquare />;
+    case 'milestone':
+      return <Flag />;
+    case 'status':
+      return <CheckCircle2 />;
+    case 'deliverable':
+      return <FileText />;
+    default:
+      return <MessageSquare />;
   }
 }
 
@@ -129,8 +135,14 @@ export function PortalProjectDetail({
   showNotification: _showNotification
 }: PortalProjectDetailProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const milestonesRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_MEDIUM, GSAP.STAGGER_DELAY_MEDIUM);
-  const updatesRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_MEDIUM, GSAP.STAGGER_DELAY_LONG);
+  const milestonesRef = useStaggerChildren<HTMLDivElement>(
+    GSAP.STAGGER_MEDIUM,
+    GSAP.STAGGER_DELAY_MEDIUM
+  );
+  const updatesRef = useStaggerChildren<HTMLDivElement>(
+    GSAP.STAGGER_MEDIUM,
+    GSAP.STAGGER_DELAY_LONG
+  );
 
   const [project, setProject] = React.useState<PortalProject | null>(null);
   const [milestones, setMilestones] = React.useState<PortalProjectMilestone[]>([]);
@@ -178,9 +190,10 @@ export function PortalProjectDetail({
 
         if (milestonesResponse.ok) {
           const milestonesData = await milestonesResponse.json();
-          const milestonesArray = milestonesData.milestones
-            || milestonesData.data?.milestones
-            || (Array.isArray(milestonesData) ? milestonesData : []);
+          const milestonesArray =
+            milestonesData.milestones ||
+            milestonesData.data?.milestones ||
+            (Array.isArray(milestonesData) ? milestonesData : []);
           setMilestones(milestonesArray);
         }
       } catch (err) {
@@ -193,9 +206,10 @@ export function PortalProjectDetail({
 
         if (updatesResponse.ok) {
           const updatesData = await updatesResponse.json();
-          const updatesArray = updatesData.updates
-            || updatesData.data?.updates
-            || (Array.isArray(updatesData) ? updatesData : []);
+          const updatesArray =
+            updatesData.updates ||
+            updatesData.data?.updates ||
+            (Array.isArray(updatesData) ? updatesData : []);
           setUpdates(updatesArray);
         }
       } catch (err) {
@@ -208,9 +222,8 @@ export function PortalProjectDetail({
 
         if (filesResponse.ok) {
           const filesData = await filesResponse.json();
-          const filesArray = filesData.files
-            || filesData.data?.files
-            || (Array.isArray(filesData) ? filesData : []);
+          const filesArray =
+            filesData.files || filesData.data?.files || (Array.isArray(filesData) ? filesData : []);
           setFiles(filesArray);
         }
       } catch (err) {
@@ -223,9 +236,10 @@ export function PortalProjectDetail({
 
         if (threadsResponse.ok) {
           const threadsData = await threadsResponse.json();
-          const threadsArray = threadsData.threads
-            || threadsData.data?.threads
-            || (Array.isArray(threadsData) ? threadsData : []);
+          const threadsArray =
+            threadsData.threads ||
+            threadsData.data?.threads ||
+            (Array.isArray(threadsData) ? threadsData : []);
           setThreads(threadsArray);
         }
       } catch (err) {
@@ -238,9 +252,10 @@ export function PortalProjectDetail({
 
         if (invoicesResponse.ok) {
           const invoicesData = await invoicesResponse.json();
-          const invoicesArray = invoicesData.invoices
-            || invoicesData.data?.invoices
-            || (Array.isArray(invoicesData) ? invoicesData : []);
+          const invoicesArray =
+            invoicesData.invoices ||
+            invoicesData.data?.invoices ||
+            (Array.isArray(invoicesData) ? invoicesData : []);
           setInvoices(invoicesArray);
         }
       } catch (err) {
@@ -286,29 +301,25 @@ export function PortalProjectDetail({
     ? PORTAL_PROJECT_STATUS_CONFIG[project.status as PortalProjectStatus]
     : null;
   const statusLabel = statusConfig?.label || project?.status;
-  const completedMilestones = milestones.filter(m => m.is_completed).length;
-  const progress = milestones.length > 0
-    ? Math.round((completedMilestones / milestones.length) * 100)
-    : (project?.progress ?? 0);
+  const completedMilestones = milestones.filter((m) => m.is_completed).length;
+  const progress =
+    milestones.length > 0
+      ? Math.round((completedMilestones / milestones.length) * 100)
+      : (project?.progress ?? 0);
 
   return (
     <div ref={containerRef}>
       {isLoading ? (
         <LoadingState message="Loading project..." />
       ) : error || !project ? (
-        <ErrorState
-          message={error ?? 'Project not found'}
-          onRetry={fetchProjectDetails}
-        />
+        <ErrorState message={error ?? 'Project not found'} onRetry={fetchProjectDetails} />
       ) : (
         <>
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
               {/* Back Button */}
-              {onBack && (
-                <IconButton action="back" onClick={onBack} title="Back to projects" />
-              )}
+              {onBack && <IconButton action="back" onClick={onBack} title="Back to projects" />}
 
               {/* Project Info */}
               <div className="portal-card-title-group flex-col">
@@ -316,11 +327,7 @@ export function PortalProjectDetail({
                   <h2 className="heading m-0">{project.name}</h2>
                   <span className="badge">{statusLabel}</span>
                 </div>
-                {project.description && (
-                  <p className="text-secondary m-0">
-                    {project.description}
-                  </p>
-                )}
+                {project.description && <p className="text-secondary m-0">{project.description}</p>}
               </div>
             </div>
 
@@ -358,17 +365,11 @@ export function PortalProjectDetail({
 
           {/* Tab Content */}
           <TabPanel tabId="milestones" isActive={activeTab === 'milestones'}>
-            <MilestonesList
-              milestones={milestones}
-              containerRef={milestonesRef}
-            />
+            <MilestonesList milestones={milestones} containerRef={milestonesRef} />
           </TabPanel>
 
           <TabPanel tabId="updates" isActive={activeTab === 'updates'}>
-            <UpdatesTimeline
-              updates={updates}
-              containerRef={updatesRef}
-            />
+            <UpdatesTimeline updates={updates} containerRef={updatesRef} />
           </TabPanel>
 
           <TabPanel tabId="files" isActive={activeTab === 'files'}>
@@ -427,7 +428,9 @@ function MilestonesList({ milestones, containerRef }: MilestonesListProps) {
             {/* Content */}
             <div className="flex-1">
               <div className="flex items-center justify-between gap-2">
-                <span className={milestone.is_completed ? 'text-secondary line-through' : undefined}>
+                <span
+                  className={milestone.is_completed ? 'text-secondary line-through' : undefined}
+                >
                   {milestone.title}
                 </span>
                 {milestone.due_date && (
@@ -438,9 +441,7 @@ function MilestonesList({ milestones, containerRef }: MilestonesListProps) {
                 )}
               </div>
               {milestone.description && (
-                <p className="text-secondary m-0 mt-1">
-                  {milestone.description}
-                </p>
+                <p className="text-secondary m-0 mt-1">{milestone.description}</p>
               )}
               {milestone.is_completed && milestone.completed_date && (
                 <span className="text-secondary">
@@ -494,11 +495,7 @@ function UpdatesTimeline({ updates, containerRef }: UpdatesTimelineProps) {
                 <span className="text-secondary">{formatRelativeTime(update.created_at)}</span>
               </div>
               <p className="text-secondary m-0 mt-1">{update.content}</p>
-              {update.created_by && (
-                <span className="text-secondary">
-                  by {update.created_by}
-                </span>
-              )}
+              {update.created_by && <span className="text-secondary">by {update.created_by}</span>}
             </div>
           </div>
         ))}
@@ -521,9 +518,15 @@ function FilesList({ files }: { files: ProjectFile[] }) {
   }
 
   const formatFileSize = (bytes?: number): string => {
-    if (!bytes) return '';
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    if (!bytes) {
+      return '';
+    }
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    }
+    if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    }
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
@@ -535,13 +538,9 @@ function FilesList({ files }: { files: ProjectFile[] }) {
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <FileText className="icon-xs flex-shrink-0 text-secondary" />
               <div className="flex flex-col min-w-0">
-                <span className="truncate">
-                  {file.original_name}
-                </span>
+                <span className="truncate">{file.original_name}</span>
                 <div className="flex items-center gap-2 text-secondary">
-                  {file.file_size != null && (
-                    <span>{formatFileSize(file.file_size)}</span>
-                  )}
+                  {file.file_size != null && <span>{formatFileSize(file.file_size)}</span>}
                   <span>{formatDate(file.created_at)}</span>
                 </div>
               </div>
@@ -580,15 +579,13 @@ function ThreadsList({ threads }: { threads: ProjectThread[] }) {
         <div key={thread.id} className="portal-card">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <MessageSquare className={`icon-xs flex-shrink-0${thread.is_read !== false ? ' text-secondary' : ''}`} />
+              <MessageSquare
+                className={`icon-xs flex-shrink-0${thread.is_read !== false ? ' text-secondary' : ''}`}
+              />
               <div className="flex flex-col min-w-0">
-                <span className="truncate">
-                  {thread.subject}
-                </span>
+                <span className="truncate">{thread.subject}</span>
                 <div className="flex items-center gap-2 text-secondary">
-                  {thread.message_count != null && (
-                    <span>{thread.message_count} messages</span>
-                  )}
+                  {thread.message_count != null && <span>{thread.message_count} messages</span>}
                   {thread.last_message_at && (
                     <span>{formatRelativeTime(thread.last_message_at)}</span>
                   )}
@@ -623,21 +620,15 @@ function InvoicesList({ invoices }: { invoices: ProjectInvoice[] }) {
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <DollarSign className="icon-xs flex-shrink-0 text-secondary" />
               <div className="flex flex-col min-w-0">
-                <span>
-                  {invoice.invoice_number || `Invoice #${invoice.id}`}
-                </span>
+                <span>{invoice.invoice_number || `Invoice #${invoice.id}`}</span>
                 <div className="flex items-center gap-2 text-secondary">
                   <span>{formatCurrency(invoice.amount)}</span>
-                  {invoice.due_date && (
-                    <span>Due {formatDate(invoice.due_date)}</span>
-                  )}
+                  {invoice.due_date && <span>Due {formatDate(invoice.due_date)}</span>}
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <StatusBadge status={getStatusVariant(invoice.status)}>
-                {invoice.status}
-              </StatusBadge>
+              <StatusBadge status={getStatusVariant(invoice.status)}>{invoice.status}</StatusBadge>
               <a
                 href={buildEndpoint.invoicePdf(invoice.id)}
                 className="btn-ghost flex-shrink-0"

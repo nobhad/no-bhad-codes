@@ -7,11 +7,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { PortalModal } from '@react/components/portal/PortalModal';
 import { FormDropdown } from '@react/components/portal/FormDropdown';
-import {
-  CHANNEL_OPTIONS,
-  EVENT_OPTIONS,
-  type NotificationFormData
-} from './types';
+import { CHANNEL_OPTIONS, EVENT_OPTIONS, type NotificationFormData } from './types';
 
 interface NotificationFormModalProps {
   open: boolean;
@@ -32,7 +28,9 @@ export function NotificationFormModal({
   const isEditing = initialData.name !== '';
 
   React.useEffect(() => {
-    if (open) setForm(initialData);
+    if (open) {
+      setForm(initialData);
+    }
   }, [open, initialData]);
 
   const handleChange = (field: keyof NotificationFormData, value: string | boolean) => {
@@ -51,7 +49,11 @@ export function NotificationFormModal({
       title={isEditing ? 'Edit Notification' : 'Add Notification'}
       footer={
         <>
-          <button className="btn btn-secondary" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+          <button
+            className="btn btn-secondary"
+            onClick={() => onOpenChange(false)}
+            disabled={isSubmitting}
+          >
             Cancel
           </button>
           <button className="btn btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
@@ -62,7 +64,9 @@ export function NotificationFormModal({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="form-field">
-          <label className="field-label" htmlFor="notification-name">Name</label>
+          <label className="field-label" htmlFor="notification-name">
+            Name
+          </label>
           <input
             id="notification-name"
             className="form-input"
@@ -73,7 +77,9 @@ export function NotificationFormModal({
           />
         </div>
         <div className="form-field">
-          <label className="field-label" htmlFor="notification-channel">Channel</label>
+          <label className="field-label" htmlFor="notification-channel">
+            Channel
+          </label>
           <FormDropdown
             id="notification-channel"
             value={form.channel}
@@ -82,7 +88,9 @@ export function NotificationFormModal({
           />
         </div>
         <div className="form-field">
-          <label className="field-label" htmlFor="notification-event">Event</label>
+          <label className="field-label" htmlFor="notification-event">
+            Event
+          </label>
           <FormDropdown
             id="notification-event"
             value={form.event}

@@ -58,8 +58,12 @@ interface InvoicesTableProps {
  * Check if an invoice is overdue
  */
 function isOverdue(invoice: Invoice): boolean {
-  if (invoice.status === 'paid' || invoice.status === 'cancelled') return false;
-  if (!invoice.due_date) return false;
+  if (invoice.status === 'paid' || invoice.status === 'cancelled') {
+    return false;
+  }
+  if (!invoice.due_date) {
+    return false;
+  }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -73,7 +77,9 @@ function isOverdue(invoice: Invoice): boolean {
  * Get display status considering overdue
  */
 function getDisplayStatus(invoice: Invoice): InvoiceStatus {
-  if (isOverdue(invoice)) return 'overdue';
+  if (isOverdue(invoice)) {
+    return 'overdue';
+  }
   return invoice.status;
 }
 
@@ -91,7 +97,9 @@ function filterInvoice(
       invoice.client_name?.toLowerCase().includes(searchLower) ||
       invoice.project_name?.toLowerCase().includes(searchLower);
 
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   // Status filter
@@ -101,7 +109,9 @@ function filterInvoice(
     const matchesStatus =
       (statusFilter.includes('overdue') && isOverdue(invoice)) ||
       statusFilter.includes(displayStatus);
-    if (!matchesStatus) return false;
+    if (!matchesStatus) {
+      return false;
+    }
   }
 
   return true;
@@ -113,24 +123,25 @@ function sortInvoices(a: Invoice, b: Invoice, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'invoice_number':
-    return multiplier * (a.invoice_number || '').localeCompare(b.invoice_number || '');
-  case 'client':
-    return multiplier * (a.client_name || '').localeCompare(b.client_name || '');
-  case 'amount': {
-    const aAmount = typeof a.amount_total === 'string' ? parseFloat(a.amount_total) : (a.amount_total || 0);
-    const bAmount = typeof b.amount_total === 'string' ? parseFloat(b.amount_total) : (b.amount_total || 0);
-    return multiplier * (aAmount - bAmount);
-  }
-  case 'status':
-    return multiplier * getDisplayStatus(a).localeCompare(getDisplayStatus(b));
-  case 'due_date':
-    return (
-      multiplier *
-        (new Date(a.due_date || 0).getTime() - new Date(b.due_date || 0).getTime())
-    );
-  default:
-    return 0;
+    case 'invoice_number':
+      return multiplier * (a.invoice_number || '').localeCompare(b.invoice_number || '');
+    case 'client':
+      return multiplier * (a.client_name || '').localeCompare(b.client_name || '');
+    case 'amount': {
+      const aAmount =
+        typeof a.amount_total === 'string' ? parseFloat(a.amount_total) : a.amount_total || 0;
+      const bAmount =
+        typeof b.amount_total === 'string' ? parseFloat(b.amount_total) : b.amount_total || 0;
+      return multiplier * (aAmount - bAmount);
+    }
+    case 'status':
+      return multiplier * getDisplayStatus(a).localeCompare(getDisplayStatus(b));
+    case 'due_date':
+      return (
+        multiplier * (new Date(a.due_date || 0).getTime() - new Date(b.due_date || 0).getTime())
+      );
+    default:
+      return 0;
   }
 }
 
@@ -155,7 +166,6 @@ export function InvoicesTable({
     error,
     stats,
     refetch,
-    markAsPaid,
     sendInvoice,
     downloadPdf,
     bulkDelete,
@@ -233,7 +243,9 @@ export function InvoicesTable({
 
   // Handle bulk mark paid
   const handleBulkMarkPaid = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
     const ids = selection.selectedItems.map((i) => i.id);
     const result = await bulkMarkPaid(ids);
@@ -245,7 +257,9 @@ export function InvoicesTable({
 
   // Handle bulk send
   const handleBulkSend = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
     const ids = selection.selectedItems.map((i) => i.id);
     const result = await bulkSend(ids);
@@ -257,7 +271,9 @@ export function InvoicesTable({
 
   // Handle bulk delete
   const handleBulkDelete = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
     const ids = selection.selectedItems.map((i) => i.id);
     const result = await bulkDelete(ids);
@@ -268,16 +284,6 @@ export function InvoicesTable({
   }, [selection, bulkDelete, refetch]);
 
   // Handle single invoice actions
-  const handleMarkPaid = useCallback(
-    async (invoiceId: number) => {
-      setActionLoading({ type: 'markPaid', id: invoiceId });
-      const success = await markAsPaid(invoiceId);
-      setActionLoading(null);
-      notifyResult(success, { success: 'Invoice marked as paid', error: 'Failed to mark invoice as paid' });
-    },
-    [markAsPaid]
-  );
-
   const handleSend = useCallback(
     async (invoiceId: number) => {
       setActionLoading({ type: 'send', id: invoiceId });
@@ -303,32 +309,42 @@ export function InvoicesTable({
   );
 
   // Handle row click — opens detail panel
-  const handleRowClick = useCallback(
-    (invoice: Invoice) => {
-      setSelectedInvoice(invoice);
-    },
-    []
-  );
+  const handleRowClick = useCallback((invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+  }, []);
 
   // Open payment recording modal
-  const handleOpenPaymentModal = useCallback((invoice: Invoice) => {
-    const amount = typeof invoice.amount_total === 'string' ? parseFloat(invoice.amount_total) : invoice.amount_total || 0;
-    const paid = typeof invoice.amount_paid === 'string' ? parseFloat(invoice.amount_paid) : invoice.amount_paid || 0;
-    setPaymentInvoice({ ...invoice, amount_total: amount - paid } as Invoice);
-    setPaymentMethod('check');
-    setPaymentReference('');
-    setPaymentDate(new Date().toISOString().split('T')[0]);
-    setPaymentNotes('');
-    paymentModal.open();
-  }, [paymentModal]);
+  const handleOpenPaymentModal = useCallback(
+    (invoice: Invoice) => {
+      const amount =
+        typeof invoice.amount_total === 'string'
+          ? parseFloat(invoice.amount_total)
+          : invoice.amount_total || 0;
+      const paid =
+        typeof invoice.amount_paid === 'string'
+          ? parseFloat(invoice.amount_paid)
+          : invoice.amount_paid || 0;
+      setPaymentInvoice({ ...invoice, amount_total: amount - paid } as Invoice);
+      setPaymentMethod('check');
+      setPaymentReference('');
+      setPaymentDate(new Date().toISOString().split('T')[0]);
+      setPaymentNotes('');
+      paymentModal.open();
+    },
+    [paymentModal]
+  );
 
   // Record payment via API
   const handleRecordPayment = useCallback(async () => {
-    if (!paymentInvoice) return;
+    if (!paymentInvoice) {
+      return;
+    }
     setIsRecordingPayment(true);
     try {
-      const amount = typeof paymentInvoice.amount_total === 'string'
-        ? parseFloat(paymentInvoice.amount_total) : paymentInvoice.amount_total || 0;
+      const amount =
+        typeof paymentInvoice.amount_total === 'string'
+          ? parseFloat(paymentInvoice.amount_total)
+          : paymentInvoice.amount_total || 0;
       const refWithDate = paymentReference ? `${paymentReference} (${paymentDate})` : paymentDate;
       const { apiPost: post } = await import('@/utils/api-client');
       const res = await post(
@@ -348,7 +364,15 @@ export function InvoicesTable({
     } finally {
       setIsRecordingPayment(false);
     }
-  }, [paymentInvoice, paymentMethod, paymentReference, paymentDate, paymentNotes, paymentModal, refetch]);
+  }, [
+    paymentInvoice,
+    paymentMethod,
+    paymentReference,
+    paymentDate,
+    paymentNotes,
+    paymentModal,
+    refetch
+  ]);
 
   // Custom bulk actions
   const bulkActions = useMemo(
@@ -384,11 +408,7 @@ export function InvoicesTable({
         }
         actions={
           <>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search invoices..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search invoices..." />
             <FilterDropdown
               sections={INVOICES_FILTER_CONFIG}
               values={{ status: filterValues.status || 'all' }}
@@ -414,7 +434,9 @@ export function InvoicesTable({
             totalCount={filteredInvoices.length}
             onClearSelection={selection.clearSelection}
             onSelectAll={() => selection.selectMany(filteredInvoices)}
-            allSelected={selection.allSelected && selection.selectedCount === filteredInvoices.length}
+            allSelected={
+              selection.allSelected && selection.selectedCount === filteredInvoices.length
+            }
             actions={bulkActions}
             onDelete={deleteDialog.open}
             deleteLoading={deleteDialog.isLoading}
@@ -591,7 +613,9 @@ export function InvoicesTable({
                           <IconButton
                             action="send"
                             onClick={() => handleSend(invoice.id)}
-                            disabled={actionLoading?.type === 'send' && actionLoading?.id === invoice.id}
+                            disabled={
+                              actionLoading?.type === 'send' && actionLoading?.id === invoice.id
+                            }
                             title="Send invoice"
                           />
                         )}
@@ -622,7 +646,9 @@ export function InvoicesTable({
                           <IconButton
                             action="pdf"
                             onClick={() => handleDownloadPdf(invoice.id)}
-                            disabled={actionLoading?.type === 'download' && actionLoading?.id === invoice.id}
+                            disabled={
+                              actionLoading?.type === 'download' && actionLoading?.id === invoice.id
+                            }
                             title="Download PDF"
                           />
                         )}
@@ -678,13 +704,22 @@ export function InvoicesTable({
       {/* PDF Preview Modal */}
       <PortalModal
         open={!!previewInvoice}
-        onOpenChange={(open) => { if (!open) setPreviewInvoice(null); }}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPreviewInvoice(null);
+          }
+        }}
         title={previewInvoice?.invoice_number || 'Invoice Preview'}
         icon={<Eye />}
         size="lg"
         footer={
           previewInvoice ? (
-            <button className="btn-secondary" onClick={() => { handleDownloadPdf(previewInvoice.id); }}>
+            <button
+              className="btn-secondary"
+              onClick={() => {
+                handleDownloadPdf(previewInvoice.id);
+              }}
+            >
               <Download className="icon-sm" /> Download
             </button>
           ) : undefined
@@ -704,15 +739,30 @@ export function InvoicesTable({
       {/* Payment Recording Modal */}
       <PortalModal
         open={paymentModal.isOpen}
-        onOpenChange={(open) => { if (!open) { paymentModal.close(); setPaymentInvoice(null); } }}
+        onOpenChange={(open) => {
+          if (!open) {
+            paymentModal.close();
+            setPaymentInvoice(null);
+          }
+        }}
         title="Record Payment"
         icon={<Check />}
         footer={
           <div className="action-group">
-            <button className="btn-secondary" onClick={() => { paymentModal.close(); setPaymentInvoice(null); }}>
+            <button
+              className="btn-secondary"
+              onClick={() => {
+                paymentModal.close();
+                setPaymentInvoice(null);
+              }}
+            >
               Cancel
             </button>
-            <button className="btn-primary" onClick={handleRecordPayment} disabled={isRecordingPayment || !paymentMethod}>
+            <button
+              className="btn-primary"
+              onClick={handleRecordPayment}
+              disabled={isRecordingPayment || !paymentMethod}
+            >
               {isRecordingPayment ? 'Recording...' : 'Record Payment'}
             </button>
           </div>
@@ -721,11 +771,16 @@ export function InvoicesTable({
         {paymentInvoice && (
           <div className="form-stack">
             <p className="text-secondary">
-              Recording payment of {formatCurrency(paymentInvoice.amount_total)} for {paymentInvoice.invoice_number}
+              Recording payment of {formatCurrency(paymentInvoice.amount_total)} for{' '}
+              {paymentInvoice.invoice_number}
             </p>
             <div className="form-field">
               <label className="form-label">Payment Method</label>
-              <select className="form-input" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+              <select
+                className="form-input"
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              >
                 <option value="check">Check</option>
                 <option value="venmo">Venmo</option>
                 <option value="paypal">PayPal</option>
@@ -738,15 +793,32 @@ export function InvoicesTable({
             </div>
             <div className="form-field">
               <label className="form-label">Reference / Check Number</label>
-              <input className="form-input" type="text" value={paymentReference} onChange={(e) => setPaymentReference(e.target.value)} placeholder={paymentMethod === 'check' ? 'Check #1234' : 'Transaction ID'} />
+              <input
+                className="form-input"
+                type="text"
+                value={paymentReference}
+                onChange={(e) => setPaymentReference(e.target.value)}
+                placeholder={paymentMethod === 'check' ? 'Check #1234' : 'Transaction ID'}
+              />
             </div>
             <div className="form-field">
               <label className="form-label">Payment Date</label>
-              <input className="form-input" type="date" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
+              <input
+                className="form-input"
+                type="date"
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
+              />
             </div>
             <div className="form-field">
               <label className="form-label">Notes (optional)</label>
-              <textarea className="form-input" value={paymentNotes} onChange={(e) => setPaymentNotes(e.target.value)} placeholder="Additional notes" rows={2} />
+              <textarea
+                className="form-input"
+                value={paymentNotes}
+                onChange={(e) => setPaymentNotes(e.target.value)}
+                placeholder="Additional notes"
+                rows={2}
+              />
             </div>
           </div>
         )}

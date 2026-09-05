@@ -21,7 +21,10 @@ import { PortalProviders } from './PortalProviders';
 import { PortalRoutes } from './PortalRoutes';
 import { ErrorBoundary } from '../components/portal/ErrorBoundary';
 import { CommandPalette, useCommandPalette } from '../components/portal/CommandPalette';
-import { KeyboardShortcutsOverlay, useKeyboardShortcuts } from '../components/portal/KeyboardShortcutsOverlay';
+import {
+  KeyboardShortcutsOverlay,
+  useKeyboardShortcuts
+} from '../components/portal/KeyboardShortcutsOverlay';
 import { usePortalStore } from '../stores/portal-store';
 import { usePortalAuth } from '../hooks/usePortalAuth';
 import { SubtabProvider } from '../contexts/SubtabContext';
@@ -61,7 +64,9 @@ function AdminKeyboardShortcuts() {
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    if (role !== 'admin') return;
+    if (role !== 'admin') {
+      return;
+    }
 
     function handleKeydown(e: KeyboardEvent) {
       // Skip if user is typing in an input
@@ -121,7 +126,9 @@ function GlobalKeyboardShortcuts() {
       }
 
       // Skip if modifier keys are held (let browser/OS handle)
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) {
+        return;
+      }
 
       const key = e.key.toLowerCase();
 
@@ -164,9 +171,7 @@ function GlobalKeyboardShortcuts() {
       // since global keyboard shortcuts must find the active search/refresh
       // regardless of which component rendered them.
       if (key === '/') {
-        const searchInput = document.querySelector<HTMLInputElement>(
-          '[data-shortcut="search"]'
-        );
+        const searchInput = document.querySelector<HTMLInputElement>('[data-shortcut="search"]');
         if (searchInput) {
           e.preventDefault();
           searchInput.focus();
@@ -176,9 +181,7 @@ function GlobalKeyboardShortcuts() {
 
       // "r" clicks the refresh button
       if (key === 'r') {
-        const refreshBtn = document.querySelector<HTMLButtonElement>(
-          '[data-shortcut="refresh"]'
-        );
+        const refreshBtn = document.querySelector<HTMLButtonElement>('[data-shortcut="refresh"]');
         if (refreshBtn) {
           e.preventDefault();
           refreshBtn.click();
@@ -189,7 +192,9 @@ function GlobalKeyboardShortcuts() {
     document.addEventListener('keydown', handleKeydown);
     return () => {
       document.removeEventListener('keydown', handleKeydown);
-      if (gTimerRef.current) clearTimeout(gTimerRef.current);
+      if (gTimerRef.current) {
+        clearTimeout(gTimerRef.current);
+      }
     };
   }, [switchTab, navigate]);
 

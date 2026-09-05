@@ -32,7 +32,9 @@ export function mountAuthGate(container: HTMLElement, options: AuthGateMountOpti
 
 export function autoMountAuthGate(): void {
   const container = document.getElementById('auth-gate');
-  if (!container) return;
+  if (!container) {
+    return;
+  }
 
   const ds = container.dataset;
   const portalType = (ds.portalType === 'admin' ? 'admin' : 'client') as 'admin' | 'client';

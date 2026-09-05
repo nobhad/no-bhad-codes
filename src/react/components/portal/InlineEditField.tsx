@@ -81,7 +81,9 @@ export function InlineEditField({
 
   // Enter edit mode
   const startEditing = useCallback(() => {
-    if (readOnly) return;
+    if (readOnly) {
+      return;
+    }
     setIsEditing(true);
     setEditValue(value);
     setError(null);
@@ -140,15 +142,18 @@ export function InlineEditField({
   }, [editValue, value, required, validate, onSave, label]);
 
   // Handle key down
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === KEYS.ENTER) {
-      e.preventDefault();
-      saveValue();
-    } else if (e.key === KEYS.ESCAPE) {
-      e.preventDefault();
-      cancelEditing();
-    }
-  }, [saveValue, cancelEditing]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === KEYS.ENTER) {
+        e.preventDefault();
+        saveValue();
+      } else if (e.key === KEYS.ESCAPE) {
+        e.preventDefault();
+        cancelEditing();
+      }
+    },
+    [saveValue, cancelEditing]
+  );
 
   // Handle blur
   const handleBlur = useCallback(() => {
@@ -241,9 +246,7 @@ export function InlineEditField({
           aria-label={readOnly ? undefined : `Edit ${label}`}
         >
           <span>{displayValue || placeholder}</span>
-          {!readOnly && (
-            <Pencil className="inline-edit-pencil" />
-          )}
+          {!readOnly && <Pencil className="inline-edit-pencil" />}
         </div>
       )}
     </div>
@@ -301,7 +304,9 @@ export function InlineEditSelect({
 
   // Enter edit mode
   const startEditing = useCallback(() => {
-    if (readOnly) return;
+    if (readOnly) {
+      return;
+    }
     setIsEditing(true);
     setEditValue(value);
   }, [readOnly, value]);
@@ -313,28 +318,31 @@ export function InlineEditSelect({
   }, [value]);
 
   // Save value
-  const saveValue = useCallback(async (newValue: string) => {
-    if (newValue === value) {
-      setIsEditing(false);
-      return;
-    }
-
-    setIsSaving(true);
-
-    try {
-      const success = await onSave(newValue);
-      if (success) {
+  const saveValue = useCallback(
+    async (newValue: string) => {
+      if (newValue === value) {
         setIsEditing(false);
+        return;
       }
-    } catch (err) {
-      logger.error('[InlineEditSelect] Save error:', err);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [value, onSave]);
+
+      setIsSaving(true);
+
+      try {
+        const success = await onSave(newValue);
+        if (success) {
+          setIsEditing(false);
+        }
+      } catch (err) {
+        logger.error('[InlineEditSelect] Save error:', err);
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [value, onSave]
+  );
 
   // Get display label for current value
-  const displayLabel = options.find(o => o.value === value)?.label || value || '-';
+  const displayLabel = options.find((o) => o.value === value)?.label || value || '-';
 
   return (
     <div className={cn('inline-edit-row', className)}>
@@ -363,7 +371,7 @@ export function InlineEditSelect({
             className="inline-edit-select"
             aria-label={label}
           >
-            {options.map(opt => (
+            {options.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
@@ -373,10 +381,7 @@ export function InlineEditSelect({
         </div>
       ) : (
         <div
-          className={cn(
-            'inline-edit-value',
-            !readOnly && 'editable'
-          )}
+          className={cn('inline-edit-value', !readOnly && 'editable')}
           onClick={startEditing}
           role={readOnly ? undefined : 'button'}
           tabIndex={readOnly ? undefined : 0}
@@ -389,9 +394,7 @@ export function InlineEditSelect({
           aria-label={readOnly ? undefined : `Edit ${label}`}
         >
           <span>{displayLabel}</span>
-          {!readOnly && (
-            <Pencil className="inline-edit-pencil" />
-          )}
+          {!readOnly && <Pencil className="inline-edit-pencil" />}
         </div>
       )}
     </div>

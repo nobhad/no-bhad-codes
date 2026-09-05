@@ -54,9 +54,12 @@ export function AgreementFlow({
 
   // Auto-expand the current active step
   useEffect(() => {
-    if (!agreement) return;
+    if (!agreement) {
+      return;
+    }
     const activeStep = agreement.steps.find(
-      (s) => s.status === 'active' || (s.status === 'pending' && s.stepOrder === agreement.currentStep)
+      (s) =>
+        s.status === 'active' || (s.status === 'pending' && s.stepOrder === agreement.currentStep)
     );
     if (activeStep) {
       setExpandedStep(activeStep.id);
@@ -65,7 +68,9 @@ export function AgreementFlow({
 
   // GSAP animation when expanded step changes
   useEffect(() => {
-    if (expandedStep === null) return;
+    if (expandedStep === null) {
+      return;
+    }
     const el = stepRefs.current.get(expandedStep);
     if (el) {
       gsap.from(el.querySelector('.agreement-step__body'), {
@@ -77,18 +82,21 @@ export function AgreementFlow({
     }
   }, [expandedStep]);
 
-  const handleStepComplete = useCallback(async (step: AgreementStep) => {
-    try {
-      await portalFetch(buildEndpoint.agreementStepComplete(step.id), {
-        method: 'POST',
-        body: { agreementId }
-      });
-      showNotification?.('Step completed!', 'success');
-      refetch();
-    } catch {
-      showNotification?.('Failed to complete step', 'error');
-    }
-  }, [agreementId, portalFetch, showNotification, refetch]);
+  const handleStepComplete = useCallback(
+    async (step: AgreementStep) => {
+      try {
+        await portalFetch(buildEndpoint.agreementStepComplete(step.id), {
+          method: 'POST',
+          body: { agreementId }
+        });
+        showNotification?.('Step completed!', 'success');
+        refetch();
+      } catch {
+        showNotification?.('Failed to complete step', 'error');
+      }
+    },
+    [agreementId, portalFetch, showNotification, refetch]
+  );
 
   const handleToggleStep = useCallback((stepId: number) => {
     setExpandedStep((prev) => (prev === stepId ? null : stepId));
@@ -134,12 +142,17 @@ export function AgreementFlow({
           const isExpanded = expandedStep === step.id;
           const isCompleted = step.status === 'completed';
           const isLocked = step.status === 'pending' && step.stepOrder > agreement.currentStep;
-          const label = STEP_TYPE_LABELS[step.stepType as StepType] || step.customTitle || step.stepType;
+          const label =
+            STEP_TYPE_LABELS[step.stepType as StepType] || step.customTitle || step.stepType;
 
           return (
             <div
               key={step.id}
-              ref={(el) => { if (el) stepRefs.current.set(step.id, el); }}
+              ref={(el) => {
+                if (el) {
+                  stepRefs.current.set(step.id, el);
+                }
+              }}
               className={`portal-card agreement-step ${isCompleted ? 'agreement-step--completed' : ''} ${isLocked ? 'agreement-step--locked opacity-50' : ''}`}
             >
               {/* Step header */}
@@ -147,7 +160,10 @@ export function AgreementFlow({
                 className="agreement-step__header layout-row-between w-full text-left btn-unstyled"
                 onClick={() => !isLocked && handleToggleStep(step.id)}
                 disabled={isLocked}
-                style={{ padding: 'var(--space-1-5) 0', cursor: isLocked ? 'not-allowed' : 'pointer' }}
+                style={{
+                  padding: 'var(--space-1-5) 0',
+                  cursor: isLocked ? 'not-allowed' : 'pointer'
+                }}
               >
                 <div className="layout-row gap-2">
                   {isCompleted ? (
@@ -155,16 +171,23 @@ export function AgreementFlow({
                   ) : isLocked ? (
                     <Lock size={18} className="text-muted" />
                   ) : (
-                    <div className="flex items-center justify-center font-semibold text-accent" style={{ width: '1.125rem', height: '1.125rem', borderRadius: '50%', border: 'var(--border-width) solid var(--color-accent)', fontSize: 'var(--font-size-xs)' }}>
+                    <div
+                      className="flex items-center justify-center font-semibold text-accent"
+                      style={{
+                        width: '1.125rem',
+                        height: '1.125rem',
+                        borderRadius: '50%',
+                        border: 'var(--border-width) solid var(--color-accent)',
+                        fontSize: 'var(--font-size-xs)'
+                      }}
+                    >
                       {step.stepOrder + 1}
                     </div>
                   )}
                   <span className="font-medium">{label}</span>
                 </div>
 
-                {!isLocked && (
-                  isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />
-                )}
+                {!isLocked && (isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />)}
               </button>
 
               {/* Step body */}
@@ -190,56 +213,56 @@ function renderStepContent(
   getAuthToken?: () => string | null
 ): React.ReactNode {
   switch (step.stepType) {
-  case 'welcome':
-  case 'custom_message':
-    return (
-      <CustomMessageStep
-        title={step.customTitle || 'Welcome'}
-        content={step.customContent || ''}
-        onComplete={onComplete}
-      />
-    );
+    case 'welcome':
+    case 'custom_message':
+      return (
+        <CustomMessageStep
+          title={step.customTitle || 'Welcome'}
+          content={step.customContent || ''}
+          onComplete={onComplete}
+        />
+      );
 
-  case 'proposal_review':
-    return step.entityId ? (
-      <ProposalReviewStep
-        entityId={step.entityId}
-        entityData={step.entityData}
-        onComplete={onComplete}
-        getAuthToken={getAuthToken}
-      />
-    ) : null;
+    case 'proposal_review':
+      return step.entityId ? (
+        <ProposalReviewStep
+          entityId={step.entityId}
+          entityData={step.entityData}
+          onComplete={onComplete}
+          getAuthToken={getAuthToken}
+        />
+      ) : null;
 
-  case 'contract_sign':
-    return step.entityId ? (
-      <ContractSignStep
-        entityId={step.entityId}
-        entityData={step.entityData}
-        onComplete={onComplete}
-        getAuthToken={getAuthToken}
-      />
-    ) : null;
+    case 'contract_sign':
+      return step.entityId ? (
+        <ContractSignStep
+          entityId={step.entityId}
+          entityData={step.entityData}
+          onComplete={onComplete}
+          getAuthToken={getAuthToken}
+        />
+      ) : null;
 
-  case 'deposit_payment':
-    return step.entityId ? (
-      <DepositPaymentStep
-        entityId={step.entityId}
-        entityData={step.entityData}
-        onComplete={onComplete}
-        getAuthToken={getAuthToken}
-      />
-    ) : null;
+    case 'deposit_payment':
+      return step.entityId ? (
+        <DepositPaymentStep
+          entityId={step.entityId}
+          entityData={step.entityData}
+          onComplete={onComplete}
+          getAuthToken={getAuthToken}
+        />
+      ) : null;
 
-  case 'questionnaire':
-    return (
-      <QuestionnaireStep
-        entityId={step.entityId || 0}
-        entityData={step.entityData}
-        onComplete={onComplete}
-      />
-    );
+    case 'questionnaire':
+      return (
+        <QuestionnaireStep
+          entityId={step.entityId || 0}
+          entityData={step.entityData}
+          onComplete={onComplete}
+        />
+      );
 
-  default:
-    return <p className="text-muted">Unknown step type</p>;
+    default:
+      return <p className="text-muted">Unknown step type</p>;
   }
 }

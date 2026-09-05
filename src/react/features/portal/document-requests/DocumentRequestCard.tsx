@@ -7,7 +7,12 @@ import * as React from 'react';
 import { useRef, useState, useCallback } from 'react';
 import { Upload, Clock, CheckCircle, AlertCircle, FileText } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { formatCardDate, formatFileSize, isOverdue, getDaysUntilDue } from '@react/utils/cardFormatters';
+import {
+  formatCardDate,
+  formatFileSize,
+  isOverdue,
+  getDaysUntilDue
+} from '@react/utils/cardFormatters';
 import { IconButton } from '@react/factories';
 import { createLogger } from '@/utils/logger';
 import { getCsrfToken, CSRF_HEADER_NAME, apiPost } from '@/utils/api-client';
@@ -96,33 +101,42 @@ export function DocumentRequestCard({
   const isRejected = request.status === 'rejected';
 
   // Handle file selection
-  const handleFileSelect = useCallback((file: File) => {
-    const error = validateFile(file);
-    if (error) {
-      showNotification?.(error, 'error');
-      return;
-    }
-    setSelectedFile(file);
-  }, [showNotification]);
+  const handleFileSelect = useCallback(
+    (file: File) => {
+      const error = validateFile(file);
+      if (error) {
+        showNotification?.(error, 'error');
+        return;
+      }
+      setSelectedFile(file);
+    },
+    [showNotification]
+  );
 
   // Handle file input change
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileSelect(file);
-    }
-    // Reset input so same file can be selected again
-    e.target.value = '';
-  }, [handleFileSelect]);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        handleFileSelect(file);
+      }
+      // Reset input so same file can be selected again
+      e.target.value = '';
+    },
+    [handleFileSelect]
+  );
 
   // Handle drag events
-  const handleDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (isPending || isRejected) {
-      setIsDragging(true);
-    }
-  }, [isPending, isRejected]);
+  const handleDragEnter = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (isPending || isRejected) {
+        setIsDragging(true);
+      }
+    },
+    [isPending, isRejected]
+  );
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -135,18 +149,23 @@ export function DocumentRequestCard({
     e.stopPropagation();
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
 
-    if (!isPending && !isRejected) return;
+      if (!isPending && !isRejected) {
+        return;
+      }
 
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      handleFileSelect(file);
-    }
-  }, [isPending, isRejected, handleFileSelect]);
+      const file = e.dataTransfer.files?.[0];
+      if (file) {
+        handleFileSelect(file);
+      }
+    },
+    [isPending, isRejected, handleFileSelect]
+  );
 
   // Clear selected file
   const clearSelectedFile = useCallback(() => {
@@ -155,7 +174,9 @@ export function DocumentRequestCard({
 
   // Handle upload
   const handleUpload = useCallback(async () => {
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      return;
+    }
 
     setIsUploading(true);
 
@@ -167,7 +188,9 @@ export function DocumentRequestCard({
 
       const csrfToken = getCsrfToken();
       const headers: Record<string, string> = {};
-      if (csrfToken) headers[CSRF_HEADER_NAME] = csrfToken;
+      if (csrfToken) {
+        headers[CSRF_HEADER_NAME] = csrfToken;
+      }
 
       const uploadResponse = await fetch(buildEndpoint.projectUpload(request.project_id), {
         method: 'POST',
@@ -189,7 +212,9 @@ export function DocumentRequestCard({
       }
 
       // Step 2: Link uploaded file to document request
-      const linkResponse = await apiPost(buildEndpoint.documentRequestUpload(request.id), { file_id: fileId });
+      const linkResponse = await apiPost(buildEndpoint.documentRequestUpload(request.id), {
+        file_id: fileId
+      });
 
       if (!linkResponse.ok) {
         const errorData = await linkResponse.json().catch(() => ({}));
@@ -201,10 +226,7 @@ export function DocumentRequestCard({
       onUploadSuccess(request.id);
     } catch (err) {
       logger.error('[DocumentRequestCard] Upload error:', err);
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to upload document'),
-        'error'
-      );
+      showNotification?.(formatErrorMessage(err, 'Failed to upload document'), 'error');
     } finally {
       setIsUploading(false);
     }
@@ -249,9 +271,7 @@ export function DocumentRequestCard({
       </div>
 
       {/* Description */}
-      {request.description && (
-        <p className="portal-card-description">{request.description}</p>
-      )}
+      {request.description && <p className="portal-card-description">{request.description}</p>}
 
       {/* Due Date */}
       {request.due_date && (
@@ -259,7 +279,9 @@ export function DocumentRequestCard({
           <Clock className="icon-xs" />
           <span>
             Due {formatCardDate(request.due_date)}
-            {daysUntilDue !== null && daysUntilDue > 0 && ` (${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'})`}
+            {daysUntilDue !== null &&
+              daysUntilDue > 0 &&
+              ` (${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'})`}
             {overdue && ' - Overdue'}
           </span>
         </div>
@@ -269,12 +291,8 @@ export function DocumentRequestCard({
       {(isSubmitted || isApproved) && request.uploaded_file && (
         <div className="panel portal-card-meta-item">
           <FileText className="icon-xs" />
-          <span className="text-primary flex-1">
-            {request.uploaded_file.filename}
-          </span>
-          <span className="text-secondary">
-            {formatFileSize(request.uploaded_file.file_size)}
-          </span>
+          <span className="text-primary flex-1">{request.uploaded_file.filename}</span>
+          <span className="text-secondary">{formatFileSize(request.uploaded_file.file_size)}</span>
         </div>
       )}
 
@@ -286,20 +304,20 @@ export function DocumentRequestCard({
               <FileText className="icon-xs" />
               <span className="text-primary flex-1">{selectedFile.name}</span>
               <span className="text-secondary">{formatFileSize(selectedFile.size)}</span>
-              <IconButton action="close" title="Remove selected file" onClick={clearSelectedFile} disabled={isUploading} />
+              <IconButton
+                action="close"
+                title="Remove selected file"
+                onClick={clearSelectedFile}
+                disabled={isUploading}
+              />
             </div>
           ) : (
-            <div
-              className="dropzone"
-              onClick={() => fileInputRef.current?.click()}
-            >
+            <div className="dropzone" onClick={() => fileInputRef.current?.click()}>
               <Upload className="icon-xs" />
               <span className="text-secondary">
                 Drop file here or <span className="text-primary">browse</span>
               </span>
-              <span className="text-secondary dropzone-hint">
-                PDF, DOC, JPG, PNG · max 10MB
-              </span>
+              <span className="text-secondary dropzone-hint">PDF, DOC, JPG, PNG · max 10MB</span>
             </div>
           )}
 

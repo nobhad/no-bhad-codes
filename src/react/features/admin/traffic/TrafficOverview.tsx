@@ -30,7 +30,9 @@ export function TrafficOverview({ showNotification }: TrafficViewProps) {
   const { data, isLoading, error, refetch } = useDataFetch<TrafficSummaryResponse | null, number>({
     fetchFn: async (params, _headers, signal) => {
       const res = await apiFetch(`${API_ENDPOINTS.ANALYTICS_SUMMARY}?days=${params}`, { signal });
-      if (!res.ok) throw new Error('Failed to load traffic summary');
+      if (!res.ok) {
+        throw new Error('Failed to load traffic summary');
+      }
       return unwrapApiData<TrafficSummaryResponse>(await res.json());
     },
     params: days,
@@ -47,22 +49,24 @@ export function TrafficOverview({ showNotification }: TrafficViewProps) {
     let main = 0;
     let portal = 0;
     for (const page of topPages) {
-      if (isPortalUrl(page.url)) portal += page.views;
-      else main += page.views;
+      if (isPortalUrl(page.url)) {
+        portal += page.views;
+      } else {
+        main += page.views;
+      }
     }
     return { main, portal };
   }, [topPages]);
 
-  const maxDailyViews = useMemo(
-    () => Math.max(1, ...daily.map((d) => d.page_views)),
-    [daily]
-  );
+  const maxDailyViews = useMemo(() => Math.max(1, ...daily.map((d) => d.page_views)), [daily]);
 
   const handleExport = useCallback(async () => {
     setIsExporting(true);
     try {
       const res = await apiFetch(`${API_ENDPOINTS.ANALYTICS_EXPORT}?days=${days}`);
-      if (!res.ok) throw new Error('Export failed');
+      if (!res.ok) {
+        throw new Error('Export failed');
+      }
       const blob = await res.blob();
       const objectUrl = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
@@ -105,8 +109,18 @@ export function TrafficOverview({ showNotification }: TrafficViewProps) {
           ))}
         </div>
         <div className="traffic-toolbar-actions">
-          <IconButton action="refresh" title="Refresh" onClick={() => refetch()} disabled={isLoading} />
-          <IconButton action="download" title="Export traffic data" onClick={handleExport} disabled={isExporting} />
+          <IconButton
+            action="refresh"
+            title="Refresh"
+            onClick={() => refetch()}
+            disabled={isLoading}
+          />
+          <IconButton
+            action="download"
+            title="Export traffic data"
+            onClick={handleExport}
+            disabled={isExporting}
+          />
         </div>
       </div>
 
@@ -171,7 +185,9 @@ export function TrafficOverview({ showNotification }: TrafficViewProps) {
             ) : (
               topPages.map((page) => (
                 <PortalTableRow key={page.url}>
-                  <PortalTableCell className="traffic-cell-path">{urlPath(page.url)}</PortalTableCell>
+                  <PortalTableCell className="traffic-cell-path">
+                    {urlPath(page.url)}
+                  </PortalTableCell>
                   <PortalTableCell>
                     <span
                       className={`traffic-source-badge ${isPortalUrl(page.url) ? 'is-portal' : 'is-main'}`}

@@ -27,7 +27,13 @@ import {
   PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
 import { StatCard, StatsRow } from '@react/components/portal/StatCard';
-import type { Client, ClientHealth, ClientDetailStats, ClientTag, ClientDetailTab } from '../../types';
+import type {
+  Client,
+  ClientHealth,
+  ClientDetailStats,
+  ClientTag,
+  ClientDetailTab
+} from '../../types';
 import { formatCurrency as formatCurrencyUtil, formatDate } from '@/utils/format-utils';
 import { HEALTH_SCORE } from '@/constants/thresholds';
 
@@ -56,8 +62,12 @@ function formatCurrency(amount: number | undefined): string {
  * Get health status label
  */
 function getHealthStatusLabel(score: number): string {
-  if (score >= HEALTH_SCORE.HEALTHY) return 'Healthy';
-  if (score >= HEALTH_SCORE.AT_RISK) return 'At Risk';
+  if (score >= HEALTH_SCORE.HEALTHY) {
+    return 'Healthy';
+  }
+  if (score >= HEALTH_SCORE.AT_RISK) {
+    return 'At Risk';
+  }
   return 'Critical';
 }
 
@@ -78,9 +88,7 @@ export function OverviewTab({
   showNotification
 }: OverviewTabProps) {
   // Filter out already added tags
-  const unassignedTags = availableTags.filter(
-    (t) => !tags.some((ct) => ct.id === t.id)
-  );
+  const unassignedTags = availableTags.filter((t) => !tags.some((ct) => ct.id === t.id));
 
   // Handle add tag
   const handleAddTag = useCallback(
@@ -121,12 +129,8 @@ export function OverviewTab({
                 <span className="title-full">Health Score</span>
               </h3>
               <div className="stat-card-header">
-                <span className="stat-value">
-                  {health.score}
-                </span>
-                <span>
-                  {getHealthStatusLabel(health.score)}
-                </span>
+                <span className="stat-value">{health.score}</span>
+                <span>{getHealthStatusLabel(health.score)}</span>
               </div>
             </div>
 
@@ -204,21 +208,12 @@ export function OverviewTab({
 
           <div className="layout-row-wrap">
             {tags.length === 0 ? (
-              <span className="text-italic">
-                No tags assigned
-              </span>
+              <span className="text-italic">No tags assigned</span>
             ) : (
               tags.map((tag) => (
-                <span
-                  key={tag.id}
-                  className="tag-badge"
-                  style={{ backgroundColor: tag.color }}
-                >
+                <span key={tag.id} className="tag-badge" style={{ backgroundColor: tag.color }}>
                   {tag.name}
-                  <button
-                    onClick={() => handleRemoveTag(tag.id)}
-                    className="tag-remove-btn"
-                  >
+                  <button onClick={() => handleRemoveTag(tag.id)} className="tag-remove-btn">
                     <X className="icon-xs" />
                   </button>
                 </span>
@@ -233,12 +228,12 @@ export function OverviewTab({
         {/* Contact Info */}
         <div className="panel">
           <div className="data-table-header">
-            <h3><ContactRound className="icon-sm" /><span className="title-full">Contact Information</span></h3>
+            <h3>
+              <ContactRound className="icon-sm" />
+              <span className="title-full">Contact Information</span>
+            </h3>
             {onSwitchTab && (
-              <button
-                className="panel-action"
-                onClick={() => onSwitchTab('contacts')}
-              >
+              <button className="panel-action" onClick={() => onSwitchTab('contacts')}>
                 View All <ArrowRight className="panel-icon" />
               </button>
             )}
@@ -248,18 +243,14 @@ export function OverviewTab({
             {client.contact_name && (
               <div className="layout-row">
                 <User className="icon-md" />
-                <span>
-                  {client.contact_name}
-                </span>
+                <span>{client.contact_name}</span>
               </div>
             )}
 
             {client.company_name && (
               <div className="layout-row">
                 <Building2 className="icon-md" />
-                <span>
-                  {client.company_name}
-                </span>
+                <span>{client.company_name}</span>
               </div>
             )}
 
@@ -267,10 +258,7 @@ export function OverviewTab({
               <div className="layout-row">
                 <Mail className="icon-md" />
                 <span className="meta-value meta-value-with-copy">
-                  <a
-                    href={`mailto:${client.email}`}
-                    className="link-btn"
-                  >
+                  <a href={`mailto:${client.email}`} className="link-btn">
                     {client.email}
                   </a>
                   <CopyEmailButton email={client.email} showNotification={showNotification} />
@@ -281,11 +269,7 @@ export function OverviewTab({
             {client.phone && (
               <div className="layout-row">
                 <Phone className="icon-md" />
-                <a
-                  href={`tel:${client.phone}`}
-                >
-                  {client.phone}
-                </a>
+                <a href={`tel:${client.phone}`}>{client.phone}</a>
               </div>
             )}
           </div>
@@ -294,31 +278,28 @@ export function OverviewTab({
         {/* Account Details */}
         <div className="panel">
           <div className="data-table-header">
-            <h3><ShieldCheck className="icon-sm" /><span className="title-full">Account Details</span></h3>
+            <h3>
+              <ShieldCheck className="icon-sm" />
+              <span className="title-full">Account Details</span>
+            </h3>
           </div>
 
           <div className="layout-stack">
             <div className="layout-row-between">
               <span className="field-label">Created</span>
-              <span>
-                {formatDate(client.created_at, 'label')}
-              </span>
+              <span>{formatDate(client.created_at, 'label')}</span>
             </div>
 
             {client.invitation_sent_at && (
               <div className="layout-row-between">
                 <span className="field-label">Invited</span>
-                <span>
-                  {formatDate(client.invitation_sent_at, 'label')}
-                </span>
+                <span>{formatDate(client.invitation_sent_at, 'label')}</span>
               </div>
             )}
 
             <div className="layout-row-between">
               <span className="field-label">Portal Access</span>
-              <span>
-                {client.status === 'active' ? 'Active' : 'Inactive'}
-              </span>
+              <span>{client.status === 'active' ? 'Active' : 'Inactive'}</span>
             </div>
           </div>
         </div>
@@ -341,7 +322,7 @@ export function OverviewTab({
 
             return (
               <div className="layout-stack">
-                {(billingName || billingPhone || billingEmail || hasAddress) ? (
+                {billingName || billingPhone || billingEmail || hasAddress ? (
                   <>
                     {client.billing_company && (
                       <div className="layout-row">
@@ -371,16 +352,25 @@ export function OverviewTab({
                           <a href={`mailto:${billingEmail}`} className="link-btn">
                             {billingEmail}
                           </a>
-                          <CopyEmailButton email={billingEmail} showNotification={showNotification} />
+                          <CopyEmailButton
+                            email={billingEmail}
+                            showNotification={showNotification}
+                          />
                         </span>
                       </div>
                     )}
 
                     {hasAddress && (
                       <div className="layout-row">
-                        <MapPin className="icon-md" style={{ alignSelf: 'flex-start', marginTop: '2px' }} />
+                        <MapPin
+                          className="icon-md"
+                          style={{ alignSelf: 'flex-start', marginTop: '2px' }}
+                        />
                         <div>
-                          <div>{client.billing_address}{client.billing_address2 && ` ${client.billing_address2}`}</div>
+                          <div>
+                            {client.billing_address}
+                            {client.billing_address2 && ` ${client.billing_address2}`}
+                          </div>
                           {(client.billing_city || client.billing_state || client.billing_zip) && (
                             <div>
                               {client.billing_city}

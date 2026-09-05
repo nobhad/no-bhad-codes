@@ -7,13 +7,7 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  X,
-  Check,
-  Pin,
-  Trash2,
-  Rocket
-} from 'lucide-react';
+import { X, Check, Pin, Trash2, Rocket } from 'lucide-react';
 import { CopyEmailButton } from '@react/components/portal';
 import { DetailHeader } from '@react/components/portal/DetailHeader';
 import { cn } from '@react/lib/utils';
@@ -134,35 +128,48 @@ export function LeadDetailPanel({
 
   // Close on Escape key
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === KEYS.ESCAPE) onClose();
+      if (e.key === KEYS.ESCAPE) {
+        onClose();
+      }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
   // Complete a task
-  const handleCompleteTask = useCallback(async (taskId: number) => {
-    if (!lead) return;
-    try {
-      const response = await apiPost(`${API_ENDPOINTS.ADMIN.LEADS}/tasks/${taskId}/complete`);
-      if (response.ok) {
-        setTasks((prev) => prev.map((t) => t.id === taskId ? { ...t, status: 'completed' } : t));
-        showNotification?.('Task completed', 'success');
+  const handleCompleteTask = useCallback(
+    async (taskId: number) => {
+      if (!lead) {
+        return;
       }
-    } catch (err) {
-      logger.error('Failed to complete task:', err);
-      showNotification?.('Failed to complete task', 'error');
-    }
-  }, [lead, showNotification]);
+      try {
+        const response = await apiPost(`${API_ENDPOINTS.ADMIN.LEADS}/tasks/${taskId}/complete`);
+        if (response.ok) {
+          setTasks((prev) =>
+            prev.map((t) => (t.id === taskId ? { ...t, status: 'completed' } : t))
+          );
+          showNotification?.('Task completed', 'success');
+        }
+      } catch (err) {
+        logger.error('Failed to complete task:', err);
+        showNotification?.('Failed to complete task', 'error');
+      }
+    },
+    [lead, showNotification]
+  );
 
   // Toggle note pin
   const handleTogglePin = useCallback(async (noteId: number) => {
     try {
       const response = await apiPost(`${API_ENDPOINTS.ADMIN.LEADS}/notes/${noteId}/toggle-pin`);
       if (response.ok) {
-        setNotes((prev) => prev.map((n) => n.id === noteId ? { ...n, is_pinned: !n.is_pinned } : n));
+        setNotes((prev) =>
+          prev.map((n) => (n.id === noteId ? { ...n, is_pinned: !n.is_pinned } : n))
+        );
       }
     } catch (err) {
       logger.error('Failed to toggle pin:', err);
@@ -170,25 +177,31 @@ export function LeadDetailPanel({
   }, []);
 
   // Delete a note
-  const handleDeleteNote = useCallback(async (noteId: number) => {
-    try {
-      const response = await apiDelete(`${API_ENDPOINTS.ADMIN.LEADS}/notes/${noteId}`);
-      if (response.ok) {
-        setNotes((prev) => prev.filter((n) => n.id !== noteId));
-        showNotification?.('Note deleted', 'success');
+  const handleDeleteNote = useCallback(
+    async (noteId: number) => {
+      try {
+        const response = await apiDelete(`${API_ENDPOINTS.ADMIN.LEADS}/notes/${noteId}`);
+        if (response.ok) {
+          setNotes((prev) => prev.filter((n) => n.id !== noteId));
+          showNotification?.('Note deleted', 'success');
+        }
+      } catch (err) {
+        logger.error('Failed to delete note:', err);
+        showNotification?.('Failed to delete note', 'error');
       }
-    } catch (err) {
-      logger.error('Failed to delete note:', err);
-      showNotification?.('Failed to delete note', 'error');
-    }
-  }, [showNotification]);
-
+    },
+    [showNotification]
+  );
 
   // Activate lead as project
   const handleActivate = useCallback(async () => {
-    if (!lead) return;
+    if (!lead) {
+      return;
+    }
     try {
-      const response = await apiPut(`${API_ENDPOINTS.ADMIN.LEADS}/${lead.id}/status`, { status: 'in-progress' });
+      const response = await apiPut(`${API_ENDPOINTS.ADMIN.LEADS}/${lead.id}/status`, {
+        status: 'in-progress'
+      });
       if (response.ok) {
         onStatusChange?.(lead.id, 'in-progress');
         showNotification?.('Lead activated as project', 'success');
@@ -200,7 +213,9 @@ export function LeadDetailPanel({
     }
   }, [lead, onStatusChange, showNotification, onClose]);
 
-  if (!isOpen || !lead) return null;
+  if (!isOpen || !lead) {
+    return null;
+  }
 
   const canActivate = ['new', 'contacted', 'qualified'].includes(lead.status);
   const decodedName = decodeHtmlEntities(lead.contact_name) || 'Unknown';
@@ -224,7 +239,13 @@ export function LeadDetailPanel({
       />
 
       {/* Panel */}
-      <div ref={panelRef} id="lead-details-panel" className="details-panel" role="dialog" aria-label="Lead details">
+      <div
+        ref={panelRef}
+        id="lead-details-panel"
+        className="details-panel"
+        role="dialog"
+        aria-label="Lead details"
+      >
         {/* Close button */}
         <div className="details-header">
           <h3>Lead</h3>
@@ -246,7 +267,9 @@ export function LeadDetailPanel({
           }
           subtitle={decodedCompany ? decodedName : undefined}
           meta={[
-            ...(lead.source ? [{ label: 'Source', value: LEAD_SOURCE_LABELS[lead.source] || lead.source }] : []),
+            ...(lead.source
+              ? [{ label: 'Source', value: LEAD_SOURCE_LABELS[lead.source] || lead.source }]
+              : []),
             { label: 'Created', value: formatDate(lead.created_at) }
           ]}
           actions={
@@ -264,7 +287,7 @@ export function LeadDetailPanel({
               {lead.email && (
                 <IconButton
                   action="email"
-                  onClick={() => window.location.href = `mailto:${lead.email}`}
+                  onClick={() => (window.location.href = `mailto:${lead.email}`)}
                   title="Send email"
                 />
               )}
@@ -312,11 +335,17 @@ export function LeadDetailPanel({
                   <MetaItem
                     label="Project"
                     value={decodeHtmlEntities(lead.project_name)}
-                    onClick={() => { onClose(); onNavigate?.('project-detail', String(lead.id)); }}
+                    onClick={() => {
+                      onClose();
+                      onNavigate?.('project-detail', String(lead.id));
+                    }}
                   />
                 )}
                 {lead.project_type && (
-                  <MetaItem label="Project Type" value={PROJECT_TYPE_LABELS[lead.project_type] || lead.project_type} />
+                  <MetaItem
+                    label="Project Type"
+                    value={PROJECT_TYPE_LABELS[lead.project_type] || lead.project_type}
+                  />
                 )}
                 {lead.budget_range && <MetaItem label="Budget" value={lead.budget_range} />}
                 {lead.timeline && <MetaItem label="Timeline" value={lead.timeline} />}
@@ -335,7 +364,9 @@ export function LeadDetailPanel({
                 <div className="project-description-row">
                   <div className="meta-item description-item">
                     <span className="field-label">Features</span>
-                    <span className="meta-value">{decodeHtmlEntities(lead.features.replace(/,/g, ', '))}</span>
+                    <span className="meta-value">
+                      {decodeHtmlEntities(lead.features.replace(/,/g, ', '))}
+                    </span>
                   </div>
                 </div>
               )}
@@ -346,15 +377,26 @@ export function LeadDetailPanel({
           {activeTab === 'tasks' && (
             <div className="lead-tab-content is-active">
               {isLoadingTasks ? (
-                <div className="loading-state"><div className="loading-spinner" /></div>
+                <div className="loading-state">
+                  <div className="loading-spinner" />
+                </div>
               ) : tasks.length === 0 ? (
                 <EmptyState message="No tasks yet" />
               ) : (
                 <ul className="activity-feed">
                   {tasks.map((task) => (
-                    <li key={task.id} className={cn('lead-task-item activity-feed-item', task.status === 'completed' && 'task-completed')}>
+                    <li
+                      key={task.id}
+                      className={cn(
+                        'lead-task-item activity-feed-item',
+                        task.status === 'completed' && 'task-completed'
+                      )}
+                    >
                       <button
-                        className={cn('icon-btn', task.status === 'completed' && 'icon-btn-success')}
+                        className={cn(
+                          'icon-btn',
+                          task.status === 'completed' && 'icon-btn-success'
+                        )}
                         onClick={() => task.status !== 'completed' && handleCompleteTask(task.id)}
                         title={task.status === 'completed' ? 'Completed' : 'Mark complete'}
                         aria-label={task.status === 'completed' ? 'Completed' : 'Mark complete'}
@@ -363,9 +405,7 @@ export function LeadDetailPanel({
                         <Check className="icon-sm" />
                       </button>
                       <div className="activity-body">
-                        <span className="activity-text">
-                          {task.title}
-                        </span>
+                        <span className="activity-text">{task.title}</span>
                         {task.due_date && (
                           <span className="activity-time">{formatDate(task.due_date)}</span>
                         )}
@@ -381,40 +421,44 @@ export function LeadDetailPanel({
           {activeTab === 'notes' && (
             <div className="lead-tab-content is-active">
               {isLoadingNotes ? (
-                <div className="loading-state"><div className="loading-spinner" /></div>
+                <div className="loading-state">
+                  <div className="loading-spinner" />
+                </div>
               ) : notes.length === 0 ? (
                 <EmptyState message="No notes yet" />
               ) : (
                 <ul className="activity-feed">
-                  {[...notes].sort((a, b) => (b.is_pinned ? 1 : 0) - (a.is_pinned ? 1 : 0)).map((note) => (
-                    <li key={note.id} className="lead-note-item activity-feed-item">
-                      <div className="activity-body">
-                        <span className="activity-text">{note.content}</span>
-                        <span className="activity-time">
-                          {note.author && `${note.author} · `}
-                          {formatDate(note.created_at)}
-                        </span>
-                      </div>
-                      <div className="button-group">
-                        <button
-                          className={cn('icon-btn', note.is_pinned && 'is-active')}
-                          onClick={() => handleTogglePin(note.id)}
-                          title={note.is_pinned ? 'Unpin' : 'Pin'}
-                          aria-label={note.is_pinned ? 'Unpin note' : 'Pin note'}
-                        >
-                          <Pin className="icon-xs" />
-                        </button>
-                        <button
-                          className="icon-btn"
-                          onClick={() => handleDeleteNote(note.id)}
-                          title="Delete note"
-                          aria-label="Delete note"
-                        >
-                          <Trash2 className="icon-xs" />
-                        </button>
-                      </div>
-                    </li>
-                  ))}
+                  {[...notes]
+                    .sort((a, b) => (b.is_pinned ? 1 : 0) - (a.is_pinned ? 1 : 0))
+                    .map((note) => (
+                      <li key={note.id} className="lead-note-item activity-feed-item">
+                        <div className="activity-body">
+                          <span className="activity-text">{note.content}</span>
+                          <span className="activity-time">
+                            {note.author && `${note.author} · `}
+                            {formatDate(note.created_at)}
+                          </span>
+                        </div>
+                        <div className="button-group">
+                          <button
+                            className={cn('icon-btn', note.is_pinned && 'is-active')}
+                            onClick={() => handleTogglePin(note.id)}
+                            title={note.is_pinned ? 'Unpin' : 'Pin'}
+                            aria-label={note.is_pinned ? 'Unpin note' : 'Pin note'}
+                          >
+                            <Pin className="icon-xs" />
+                          </button>
+                          <button
+                            className="icon-btn"
+                            onClick={() => handleDeleteNote(note.id)}
+                            title="Delete note"
+                            aria-label="Delete note"
+                          >
+                            <Trash2 className="icon-xs" />
+                          </button>
+                        </div>
+                      </li>
+                    ))}
                 </ul>
               )}
             </div>
@@ -454,15 +498,21 @@ function MetaItem({
   return (
     <div className="meta-item">
       <span className="field-label">{label}</span>
-      {children || (
-        onClick ? (
-          <a href="#" className="meta-value panel-link" onClick={(e) => { e.preventDefault(); onClick(); }}>
+      {children ||
+        (onClick ? (
+          <a
+            href="#"
+            className="meta-value panel-link"
+            onClick={(e) => {
+              e.preventDefault();
+              onClick();
+            }}
+          >
             {value}
           </a>
         ) : (
           <span className="meta-value">{value}</span>
-        )
-      )}
+        ))}
     </div>
   );
 }

@@ -51,7 +51,9 @@ export const ActionItems = React.memo(({ counts, onNavigate }: ActionItemsProps)
   // Only show items with counts > 0
   const activeItems = ACTION_ITEMS.filter((item) => (counts[item.key] ?? 0) > 0);
 
-  if (activeItems.length === 0) return null;
+  if (activeItems.length === 0) {
+    return null;
+  }
 
   // Returns fragment of StatCards — placed directly inside dashboard-stats-grid
   return (

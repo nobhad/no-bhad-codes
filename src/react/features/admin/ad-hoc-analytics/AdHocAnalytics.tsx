@@ -15,22 +15,23 @@ import {
   Legend,
   Filler
 } from 'chart.js';
-import {
-  Play,
-  Save,
-  Download,
-  BarChart3,
-  Table,
-  Code,
-  Trash2,
-  TrendingUp
-} from 'lucide-react';
+import { Play, Save, Download, BarChart3, Table, Code, Trash2, TrendingUp } from 'lucide-react';
 import { PageHeader } from '@react/factories/createSection';
 
 // Register Chart.js components
 ChartJS.register(
-  CategoryScale, LinearScale, PointElement, LineElement, LineController,
-  BarElement, BarController, ArcElement, PieController, Tooltip, Legend, Filler
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  LineController,
+  BarElement,
+  BarController,
+  ArcElement,
+  PieController,
+  Tooltip,
+  Legend,
+  Filler
 );
 import { cn } from '@react/lib/utils';
 import { EmptyState } from '@react/factories';
@@ -64,7 +65,10 @@ interface AdHocAnalyticsProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: _showNotification }: AdHocAnalyticsProps) {
+export function AdHocAnalytics({
+  getAuthToken: _getAuthToken,
+  showNotification: _showNotification
+}: AdHocAnalyticsProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +82,9 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
   const loadSavedQueries = useCallback(async () => {
     try {
       const response = await apiFetch(API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_QUERIES);
-      if (!response.ok) throw new Error('Failed to load saved queries');
+      if (!response.ok) {
+        throw new Error('Failed to load saved queries');
+      }
       const payload = unwrapApiData<Record<string, unknown>>(await response.json());
       setSavedQueries((payload.queries as SavedQuery[]) || []);
     } catch (err) {
@@ -91,13 +97,18 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
   }, [loadSavedQueries]);
 
   async function runQuery() {
-    if (!query.trim()) return;
+    if (!query.trim()) {
+      return;
+    }
     setIsLoading(true);
     setError(null);
     setResult(null);
 
     try {
-      const response = await apiPost(API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_RUN, { query, dateRange });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_RUN, {
+        query,
+        dateRange
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -114,7 +125,9 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
   }
 
   async function saveQuery() {
-    if (!query.trim() || !queryName.trim()) return;
+    if (!query.trim() || !queryName.trim()) {
+      return;
+    }
 
     await executeCreateWithToast(
       'query',
@@ -127,7 +140,9 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
   }
 
   async function deleteQuery(queryId: number) {
-    if (!confirm('Are you sure you want to delete this saved query?')) return;
+    if (!confirm('Are you sure you want to delete this saved query?')) {
+      return;
+    }
 
     await executeDeleteWithToast(
       'query',
@@ -142,11 +157,15 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
   }
 
   function exportResults() {
-    if (!result) return;
+    if (!result) {
+      return;
+    }
 
     const csv = [
       result.columns.join(','),
-      ...result.rows.map((row) => result.columns.map((col) => JSON.stringify(row[col] ?? '')).join(','))
+      ...result.rows.map((row) =>
+        result.columns.map((col) => JSON.stringify(row[col] ?? '')).join(',')
+      )
     ].join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -180,7 +199,13 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
                 onClick={() => setDateRange(range)}
                 className={dateRange === range ? 'tab-active' : 'tab'}
               >
-                {range === '7d' ? '7 Days' : range === '30d' ? '30 Days' : range === '90d' ? '90 Days' : 'Custom'}
+                {range === '7d'
+                  ? '7 Days'
+                  : range === '30d'
+                    ? '30 Days'
+                    : range === '90d'
+                      ? '90 Days'
+                      : 'Custom'}
               </button>
             ))}
           </div>
@@ -191,7 +216,11 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
         {/* Saved Queries Sidebar */}
         <div>
           <div className="panel">
-            <div className="data-table-header"><h3><span className="title-full">Saved Queries</span></h3></div>
+            <div className="data-table-header">
+              <h3>
+                <span className="title-full">Saved Queries</span>
+              </h3>
+            </div>
             {savedQueries.length === 0 ? (
               <p className="analytics-empty-text">No saved queries yet</p>
             ) : (
@@ -247,7 +276,11 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
                   className="input analytics-name-input"
                   aria-label="Query name"
                 />
-                <button className="btn-secondary" onClick={saveQuery} disabled={!query || !queryName}>
+                <button
+                  className="btn-secondary"
+                  onClick={saveQuery}
+                  disabled={!query || !queryName}
+                >
                   <Save className="analytics-action-icon" />
                   Save
                 </button>
@@ -262,11 +295,14 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
               aria-label="Analytics query"
             />
             <div className="analytics-editor-footer">
-              <span className="analytics-hint">
-                Use SQL-like syntax to query your data
-              </span>
+              <span className="analytics-hint">Use SQL-like syntax to query your data</span>
               <button className="btn-primary" onClick={runQuery} disabled={isLoading || !query}>
-                <Play className={cn('analytics-action-icon', isLoading && 'status-panel-refresh-icon-spin')} />
+                <Play
+                  className={cn(
+                    'analytics-action-icon',
+                    isLoading && 'status-panel-refresh-icon-spin'
+                  )}
+                />
                 {isLoading ? 'Running...' : 'Run Query'}
               </button>
             </div>
@@ -320,15 +356,22 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
                     <thead>
                       <tr>
                         {result.columns.map((col) => (
-                          <th key={col} className="table-header">{col}</th>
+                          <th key={col} className="table-header">
+                            {col}
+                          </th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {result.rows.slice(0, 100).map((row, i) => (
-                        <tr key={`row-${i}-${String(row[result.columns[0]] ?? i)}`} className="table-row">
+                        <tr
+                          key={`row-${i}-${String(row[result.columns[0]] ?? i)}`}
+                          className="table-row"
+                        >
                           {result.columns.map((col) => (
-                            <td key={col} className="table-cell">{row[col] != null ? String(row[col]) : ''}</td>
+                            <td key={col} className="table-cell">
+                              {row[col] != null ? String(row[col]) : ''}
+                            </td>
                           ))}
                         </tr>
                       ))}
@@ -367,7 +410,7 @@ const CHART_COLOR_VARS = [
 function getChartColors(): string[] {
   const style = getComputedStyle(document.documentElement);
 
-  return CHART_COLOR_VARS.map(varName => {
+  return CHART_COLOR_VARS.map((varName) => {
     const color = style.getPropertyValue(varName).trim();
     if (color.startsWith('#')) {
       const r = parseInt(color.slice(1, 3), 16);
@@ -382,14 +425,14 @@ function getChartColors(): string[] {
 /** Detect which columns are numeric */
 function getNumericColumns(result: QueryResult): string[] {
   return result.columns.filter((col) => {
-    const sample = result.rows.slice(0, 10).map(r => r[col]);
-    return sample.some(v => v !== null && v !== undefined && !isNaN(Number(v)));
+    const sample = result.rows.slice(0, 10).map((r) => r[col]);
+    return sample.some((v) => v !== null && v !== undefined && !isNaN(Number(v)));
   });
 }
 
 /** Get best label column (first non-numeric string column) */
 function getLabelColumn(result: QueryResult, numericCols: string[]): string | null {
-  return result.columns.find(c => !numericCols.includes(c)) || null;
+  return result.columns.find((c) => !numericCols.includes(c)) || null;
 }
 
 /** Chart component for query results */
@@ -402,7 +445,9 @@ function QueryChart({ result }: { result: QueryResult }) {
   const labelCol = getLabelColumn(result, numericCols);
 
   useEffect(() => {
-    if (!canvasRef.current || numericCols.length === 0) return;
+    if (!canvasRef.current || numericCols.length === 0) {
+      return;
+    }
 
     if (chartRef.current) {
       chartRef.current.destroy();
@@ -413,18 +458,17 @@ function QueryChart({ result }: { result: QueryResult }) {
     const maxRows = chartType === 'pie' ? 20 : 50;
     const rows = result.rows.slice(0, maxRows);
     const labels = labelCol
-      ? rows.map(r => String(r[labelCol] ?? ''))
+      ? rows.map((r) => String(r[labelCol] ?? ''))
       : rows.map((_, i) => String(i + 1));
 
     const datasets = numericCols.slice(0, 5).map((col, idx) => ({
       label: col,
-      data: rows.map(r => Number(r[col]) || 0),
-      backgroundColor: chartType === 'pie'
-        ? rows.map((_, i) => chartColors[i % chartColors.length])
-        : chartColors[idx % chartColors.length],
-      borderColor: chartType === 'line'
-        ? chartColors[idx % chartColors.length]
-        : 'transparent',
+      data: rows.map((r) => Number(r[col]) || 0),
+      backgroundColor:
+        chartType === 'pie'
+          ? rows.map((_, i) => chartColors[i % chartColors.length])
+          : chartColors[idx % chartColors.length],
+      borderColor: chartType === 'line' ? chartColors[idx % chartColors.length] : 'transparent',
       borderWidth: chartType === 'line' ? 2 : 0,
       tension: 0.3,
       fill: chartType === 'line'
@@ -434,8 +478,12 @@ function QueryChart({ result }: { result: QueryResult }) {
     const pieDatasets = chartType === 'pie' ? [datasets[0]] : datasets;
 
     const computedStyle = getComputedStyle(document.documentElement);
-    const textColor = computedStyle.getPropertyValue('--color-text-secondary').trim() || computedStyle.getPropertyValue('--color-text-secondary').trim();
-    const gridColor = computedStyle.getPropertyValue('--color-border-primary').trim() || computedStyle.getPropertyValue('--color-border').trim();
+    const textColor =
+      computedStyle.getPropertyValue('--color-text-secondary').trim() ||
+      computedStyle.getPropertyValue('--color-text-secondary').trim();
+    const gridColor =
+      computedStyle.getPropertyValue('--color-border-primary').trim() ||
+      computedStyle.getPropertyValue('--color-border').trim();
 
     chartRef.current = new ChartJS(canvasRef.current, {
       type: chartType,

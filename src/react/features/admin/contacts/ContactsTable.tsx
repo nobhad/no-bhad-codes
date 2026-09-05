@@ -1,11 +1,7 @@
 import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Inbox,
-  Star,
-  StarOff
-} from 'lucide-react';
+import { Inbox, Star, StarOff } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { InlineEdit } from '@react/components/portal/InlineEdit';
 import { useListFetch } from '@react/factories/useDataFetch';
@@ -103,12 +99,16 @@ function filterContact(
       contact.email.toLowerCase().includes(searchLower) ||
       contact.company?.toLowerCase().includes(searchLower) ||
       contact.phone?.includes(searchLower);
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(contact.status)) return false;
+    if (!statusFilter.includes(contact.status)) {
+      return false;
+    }
   }
 
   return true;
@@ -120,20 +120,28 @@ function sortContacts(a: Contact, b: Contact, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'name':
-    return multiplier * `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
-  case 'email':
-    return multiplier * a.email.localeCompare(b.email);
-  case 'company':
-    return multiplier * (a.company || '').localeCompare(b.company || '');
-  case 'createdAt':
-    return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-  default:
-    return 0;
+    case 'name':
+      return (
+        multiplier * `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)
+      );
+    case 'email':
+      return multiplier * a.email.localeCompare(b.email);
+    case 'company':
+      return multiplier * (a.company || '').localeCompare(b.company || '');
+    case 'createdAt':
+      return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    default:
+      return 0;
   }
 }
 
-export function ContactsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ContactsTableProps) {
+export function ContactsTable({
+  getAuthToken,
+  showNotification,
+  onNavigate,
+  defaultPageSize = 25,
+  overviewMode = false
+}: ContactsTableProps) {
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -197,96 +205,127 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
   });
 
   // Status change handler
-  const handleStatusChange = useCallback(async (contactId: number, newStatus: string) => {
-    try {
-      const response = await apiFetch(buildEndpoint.adminContact(contactId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
+  const handleStatusChange = useCallback(
+    async (contactId: number, newStatus: string) => {
+      try {
+        const response = await apiFetch(buildEndpoint.adminContact(contactId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
 
-      if (!response.ok) throw new Error('Failed to update contact');
+        if (!response.ok) {
+          throw new Error('Failed to update contact');
+        }
 
-      setData((prev) => prev ? {
-        ...prev,
-        items: prev.items.map((contact) =>
-          contact.id === contactId
-            ? { ...contact, status: newStatus as Contact['status'] }
-            : contact
-        )
-      } : prev);
-      showNotification?.('Contact status updated', 'success');
-    } catch (err) {
-      logger.error('Failed to update contact status:', err);
-      showNotification?.('Failed to update contact status', 'error');
-    }
-  }, [showNotification, setData]);
+        setData((prev) =>
+          prev
+            ? {
+                ...prev,
+                items: prev.items.map((contact) =>
+                  contact.id === contactId
+                    ? { ...contact, status: newStatus as Contact['status'] }
+                    : contact
+                )
+              }
+            : prev
+        );
+        showNotification?.('Contact status updated', 'success');
+      } catch (err) {
+        logger.error('Failed to update contact status:', err);
+        showNotification?.('Failed to update contact status', 'error');
+      }
+    },
+    [showNotification, setData]
+  );
 
   // Generic field update handler for inline editing
-  const handleFieldUpdate = useCallback(async (
-    contactId: number,
-    updates: Partial<Record<string, unknown>>
-  ): Promise<boolean> => {
-    try {
-      const response = await apiFetch(buildEndpoint.adminContact(contactId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      });
+  const handleFieldUpdate = useCallback(
+    async (contactId: number, updates: Partial<Record<string, unknown>>): Promise<boolean> => {
+      try {
+        const response = await apiFetch(buildEndpoint.adminContact(contactId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates)
+        });
 
-      if (!response.ok) throw new Error('Failed to update contact');
+        if (!response.ok) {
+          throw new Error('Failed to update contact');
+        }
 
-      setData((prev) => prev ? {
-        ...prev,
-        items: prev.items.map((contact) =>
-          contact.id === contactId
-            ? { ...contact, ...updates }
-            : contact
-        )
-      } : prev);
-      showNotification?.('Contact updated', 'success');
-      return true;
-    } catch (err) {
-      logger.error('Failed to update contact:', err);
-      showNotification?.('Failed to update contact', 'error');
-      return false;
-    }
-  }, [showNotification, setData]);
+        setData((prev) =>
+          prev
+            ? {
+                ...prev,
+                items: prev.items.map((contact) =>
+                  contact.id === contactId ? { ...contact, ...updates } : contact
+                )
+              }
+            : prev
+        );
+        showNotification?.('Contact updated', 'success');
+        return true;
+      } catch (err) {
+        logger.error('Failed to update contact:', err);
+        showNotification?.('Failed to update contact', 'error');
+        return false;
+      }
+    },
+    [showNotification, setData]
+  );
 
-  const togglePrimary = useCallback(async (contactId: number, isPrimary: boolean) => {
-    try {
-      const response = await apiFetch(buildEndpoint.adminContact(contactId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isPrimary: !isPrimary })
-      });
+  const togglePrimary = useCallback(
+    async (contactId: number, isPrimary: boolean) => {
+      try {
+        const response = await apiFetch(buildEndpoint.adminContact(contactId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isPrimary: !isPrimary })
+        });
 
-      if (!response.ok) throw new Error('Failed to update contact');
+        if (!response.ok) {
+          throw new Error('Failed to update contact');
+        }
 
-      setData((prev) => prev ? {
-        ...prev,
-        items: prev.items.map((contact) =>
-          contact.id === contactId ? { ...contact, isPrimary: !isPrimary } : contact
-        )
-      } : prev);
-      showNotification?.(isPrimary ? 'Removed primary status' : 'Set as primary contact', 'success');
-    } catch (err) {
-      logger.error('Failed to update contact:', err);
-      showNotification?.('Failed to update contact', 'error');
-    }
-  }, [showNotification, setData]);
+        setData((prev) =>
+          prev
+            ? {
+                ...prev,
+                items: prev.items.map((contact) =>
+                  contact.id === contactId ? { ...contact, isPrimary: !isPrimary } : contact
+                )
+              }
+            : prev
+        );
+        showNotification?.(
+          isPrimary ? 'Removed primary status' : 'Set as primary contact',
+          'success'
+        );
+      } catch (err) {
+        logger.error('Failed to update contact:', err);
+        showNotification?.('Failed to update contact', 'error');
+      }
+    },
+    [showNotification, setData]
+  );
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
     const ids = selection.selectedItems.map((c) => c.id);
     try {
       const response = await apiPost(API_ENDPOINTS.ADMIN.CONTACTS_BULK_DELETE, { contactIds: ids });
 
-      if (!response.ok) throw new Error('Failed to delete contacts');
+      if (!response.ok) {
+        throw new Error('Failed to delete contacts');
+      }
 
-      setData((prev) => prev ? { ...prev, items: prev.items.filter((c) => !ids.includes(c.id)) } : prev);
+      setData((prev) =>
+        prev ? { ...prev, items: prev.items.filter((c) => !ids.includes(c.id)) } : prev
+      );
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} contact${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
@@ -309,7 +348,9 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
   // Handle bulk status change
   const handleBulkStatusChange = useCallback(
     async (newStatus: string) => {
-      if (selection.selectedCount === 0) return;
+      if (selection.selectedCount === 0) {
+        return;
+      }
 
       for (const contact of selection.selectedItems) {
         await handleStatusChange(contact.id, newStatus);
@@ -342,31 +383,32 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
     async (contactId: number, newStatus: string) => {
       await handleStatusChange(contactId, newStatus);
       setSelectedContact((prev) =>
-        prev && prev.id === contactId
-          ? { ...prev, status: newStatus as Contact['status'] }
-          : prev
+        prev && prev.id === contactId ? { ...prev, status: newStatus as Contact['status'] } : prev
       );
     },
     [handleStatusChange]
   );
 
-  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
-    setCreateLoading(true);
-    try {
-      const res = await apiPost(API_ENDPOINTS.ADMIN.CONTACTS, formData);
-      if (res.ok) {
-        showNotification?.('Contact created successfully', 'success');
-        setCreateOpen(false);
-        refetch();
-      } else {
+  const handleCreate = useCallback(
+    async (formData: Record<string, unknown>) => {
+      setCreateLoading(true);
+      try {
+        const res = await apiPost(API_ENDPOINTS.ADMIN.CONTACTS, formData);
+        if (res.ok) {
+          showNotification?.('Contact created successfully', 'success');
+          setCreateOpen(false);
+          refetch();
+        } else {
+          showNotification?.('Failed to create contact', 'error');
+        }
+      } catch {
         showNotification?.('Failed to create contact', 'error');
+      } finally {
+        setCreateLoading(false);
       }
-    } catch {
-      showNotification?.('Failed to create contact', 'error');
-    } finally {
-      setCreateLoading(false);
-    }
-  }, [showNotification, refetch]);
+    },
+    [showNotification, refetch]
+  );
 
   return (
     <>
@@ -385,11 +427,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
         }
         actions={
           <>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search contacts..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search contacts..." />
             <FilterDropdown
               sections={CONTACTS_FILTER_CONFIG}
               values={filterValues}
@@ -410,7 +448,9 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
             totalCount={filteredContacts.length}
             onClearSelection={selection.clearSelection}
             onSelectAll={() => selection.selectMany(filteredContacts)}
-            allSelected={selection.allSelected && selection.selectedCount === filteredContacts.length}
+            allSelected={
+              selection.allSelected && selection.selectedCount === filteredContacts.length
+            }
             statusOptions={bulkStatusOptions}
             onStatusChange={handleBulkStatusChange}
             onDelete={handleBulkDelete}
@@ -451,7 +491,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                 sortDirection={sort?.column === 'name' ? sort.direction : null}
                 onClick={() => toggleSort('name')}
               >
-              Contact
+                Contact
               </PortalTableHead>
               <PortalTableHead className="status-col">Status</PortalTableHead>
               <PortalTableHead className="col-actions">Actions</PortalTableHead>
@@ -487,10 +527,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                   <PortalTableCell className="star-cell" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => togglePrimary(contact.id, contact.isPrimary)}
-                      className={cn(
-                        'icon-btn icon-btn-star',
-                        contact.isPrimary && 'is-primary'
-                      )}
+                      className={cn('icon-btn icon-btn-star', contact.isPrimary && 'is-primary')}
                       title={contact.isPrimary ? 'Primary contact' : 'Mark as primary'}
                     >
                       {contact.isPrimary ? (
@@ -512,7 +549,8 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                           onSave={async (value) => {
                             const trimmed = value.trim();
                             const spaceIndex = trimmed.indexOf(' ');
-                            const firstName = spaceIndex > -1 ? trimmed.slice(0, spaceIndex) : trimmed;
+                            const firstName =
+                              spaceIndex > -1 ? trimmed.slice(0, spaceIndex) : trimmed;
                             const lastName = spaceIndex > -1 ? trimmed.slice(spaceIndex + 1) : '';
                             return handleFieldUpdate(contact.id, { firstName, lastName });
                           }}
@@ -567,7 +605,11 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                   />
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
-                      <IconButton action="view" title="View" onClick={() => setSelectedContact(contact)} />
+                      <IconButton
+                        action="view"
+                        title="View"
+                        onClick={() => setSelectedContact(contact)}
+                      />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>

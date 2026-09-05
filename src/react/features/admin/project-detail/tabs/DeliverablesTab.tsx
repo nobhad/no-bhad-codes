@@ -68,10 +68,12 @@ export function DeliverablesTab({
     const ids = new Set<number>();
     for (const m of milestones) {
       // Check if all tasks for this milestone are completed
-      const mTasks = tasks.filter(t => t.milestone_id === m.id);
-      const allDone = mTasks.length > 0 && mTasks.every(t => t.status === 'completed');
+      const mTasks = tasks.filter((t) => t.milestone_id === m.id);
+      const allDone = mTasks.length > 0 && mTasks.every((t) => t.status === 'completed');
       // Only expand if milestone is not fully completed
-      if (!m.is_completed && !allDone) ids.add(m.id);
+      if (!m.is_completed && !allDone) {
+        ids.add(m.id);
+      }
     }
     return ids;
   });
@@ -129,7 +131,9 @@ export function DeliverablesTab({
   const handleAssignTask = useCallback(
     async (taskId: number, milestoneId: string) => {
       const id = parseInt(milestoneId);
-      if (isNaN(id)) return;
+      if (isNaN(id)) {
+        return;
+      }
       const success = await onAssignTaskToMilestone(taskId, id);
       if (success) {
         showNotification?.('Task assigned to milestone', 'success');
@@ -160,7 +164,9 @@ export function DeliverablesTab({
   );
 
   const handleConfirmDelete = useCallback(async () => {
-    if (deletingId === null) return;
+    if (deletingId === null) {
+      return;
+    }
     const success = await onDeleteMilestone(deletingId);
     if (success) {
       showNotification?.(NOTIFICATIONS.milestone.DELETED, 'success');
@@ -175,7 +181,9 @@ export function DeliverablesTab({
       {/* Progress header */}
       <div className="panel">
         <div className="data-table-header">
-          <h3><span className="title-full">Deliverables</span></h3>
+          <h3>
+            <span className="title-full">Deliverables</span>
+          </h3>
           <div className="data-table-actions">
             <IconButton action="add-milestone" onClick={() => setShowAddForm(true)} />
           </div>
@@ -201,7 +209,8 @@ export function DeliverablesTab({
             {milestones.map((milestone) => {
               const milestoneTasks = tasksByMilestone.get(milestone.id) ?? [];
               const completedTasks = milestoneTasks.filter((t) => t.status === 'completed').length;
-              const allCompleted = milestoneTasks.length > 0 && completedTasks === milestoneTasks.length;
+              const allCompleted =
+                milestoneTasks.length > 0 && completedTasks === milestoneTasks.length;
 
               // Edit mode
               if (editingMilestoneId === milestone.id) {
@@ -220,18 +229,22 @@ export function DeliverablesTab({
                 <>
                   <div className="flex-fill milestone-content">
                     {allCompleted ? (
-                      <CheckCircle className="icon-sm" style={{ color: 'var(--color-success)', flexShrink: 0 }} />
+                      <CheckCircle
+                        className="icon-sm"
+                        style={{ color: 'var(--color-success)', flexShrink: 0 }}
+                      />
                     ) : completedTasks > 0 ? (
-                      <Clock className="icon-sm" style={{ color: 'var(--color-text-tertiary)', flexShrink: 0 }} />
+                      <Clock
+                        className="icon-sm"
+                        style={{ color: 'var(--color-text-tertiary)', flexShrink: 0 }}
+                      />
                     ) : (
-                      <Box className="icon-sm" style={{ color: 'var(--color-text-tertiary)', flexShrink: 0 }} />
+                      <Box
+                        className="icon-sm"
+                        style={{ color: 'var(--color-text-tertiary)', flexShrink: 0 }}
+                      />
                     )}
-                    <span
-                      className={cn(
-                        'milestone-title',
-                        allCompleted && 'completed'
-                      )}
-                    >
+                    <span className={cn('milestone-title', allCompleted && 'completed')}>
                       {decodeHtmlEntities(milestone.title)}
                     </span>
                     {allCompleted && milestone.completed_date ? (
@@ -281,11 +294,7 @@ export function DeliverablesTab({
                             onClick={(e: React.MouseEvent) => e.stopPropagation()}
                             aria-label={`Mark "${task.title}" as ${task.status === 'completed' ? 'incomplete' : 'complete'}`}
                           />
-                          <span
-                            className={cn(
-                              task.status === 'completed' && 'text-secondary'
-                            )}
-                          >
+                          <span className={cn(task.status === 'completed' && 'text-secondary')}>
                             {task.title}
                           </span>
                           {task.due_date && (
@@ -295,9 +304,7 @@ export function DeliverablesTab({
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-secondary">
-                      No tasks assigned to this milestone yet.
-                    </p>
+                    <p className="text-secondary">No tasks assigned to this milestone yet.</p>
                   )}
 
                   {/* Auto-complete indicator */}
@@ -365,10 +372,7 @@ export function DeliverablesTab({
                         aria-label={`Mark "${task.title}" as ${task.status === 'completed' ? 'incomplete' : 'complete'}`}
                       />
                       <span
-                        className={cn(
-                          'flex-fill',
-                          task.status === 'completed' && 'text-secondary'
-                        )}
+                        className={cn('flex-fill', task.status === 'completed' && 'text-secondary')}
                       >
                         {task.title}
                       </span>

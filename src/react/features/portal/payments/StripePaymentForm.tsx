@@ -45,11 +45,12 @@ function FeeBreakdown({ baseAmount, processingFee, totalAmount, currency }: FeeB
         <span>Processing fee</span>
         <span>{formatCentsAsDollars(processingFee, currency)}</span>
       </div>
-      <div className="layout-row-between border-top font-semibold" style={{ paddingTop: 'var(--space-1)', marginTop: 'var(--space-0-5)' }}>
+      <div
+        className="layout-row-between border-top font-semibold"
+        style={{ paddingTop: 'var(--space-1)', marginTop: 'var(--space-0-5)' }}
+      >
         <span>Total</span>
-        <span className="text-accent">
-          {formatCentsAsDollars(totalAmount, currency)}
-        </span>
+        <span className="text-accent">{formatCentsAsDollars(totalAmount, currency)}</span>
       </div>
     </div>
   );
@@ -61,11 +62,18 @@ function FeeBreakdown({ baseAmount, processingFee, totalAmount, currency }: FeeB
 
 function ProcessingFeeNotice() {
   return (
-    <div className="layout-row-top text-xs text-muted mb-2" style={{ padding: 'var(--space-1) var(--space-1-5)', backgroundColor: 'var(--color-bg-raised)', lineHeight: 1.45 }}>
+    <div
+      className="layout-row-top text-xs text-muted mb-2"
+      style={{
+        padding: 'var(--space-1) var(--space-1-5)',
+        backgroundColor: 'var(--color-bg-raised)',
+        lineHeight: 1.45
+      }}
+    >
       <Info size={14} className="shrink-0" style={{ marginTop: 'var(--space-0-25)' }} />
       <span>
-        A processing fee is added to cover card payment costs. This fee is
-        non-refundable and is the responsibility of the client.
+        A processing fee is added to cover card payment costs. This fee is non-refundable and is the
+        responsibility of the client.
       </span>
     </div>
   );
@@ -95,37 +103,46 @@ function PaymentFormInner({
   const [state, setState] = useState<PaymentState>('ready');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (!stripe || !elements) return;
+      if (!stripe || !elements) {
+        return;
+      }
 
-    setState('processing');
-    setErrorMessage(null);
+      setState('processing');
+      setErrorMessage(null);
 
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: window.location.href
-      },
-      redirect: 'if_required'
-    });
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: window.location.href
+        },
+        redirect: 'if_required'
+      });
 
-    if (error) {
-      const message = error.message || 'Payment failed. Please try again.';
-      setErrorMessage(message);
-      setState('error');
-      onError?.(message);
-    } else {
-      setState('success');
-      onSuccess?.();
-    }
-  }, [stripe, elements, onSuccess, onError]);
+      if (error) {
+        const message = error.message || 'Payment failed. Please try again.';
+        setErrorMessage(message);
+        setState('error');
+        onError?.(message);
+      } else {
+        setState('success');
+        onSuccess?.();
+      }
+    },
+    [stripe, elements, onSuccess, onError]
+  );
 
   if (state === 'success') {
     return (
       <div className="portal-card text-center p-4">
-        <CheckCircle size={48} className="text-success" style={{ margin: '0 auto var(--space-2)' }} />
+        <CheckCircle
+          size={48}
+          className="text-success"
+          style={{ margin: '0 auto var(--space-2)' }}
+        />
         <h3>Payment Successful</h3>
         <p className="text-muted">
           Your payment of {formatCentsAsDollars(totalCents, currency)} has been processed.
@@ -237,14 +254,12 @@ export function StripePaymentForm({
         if (!cancelled) {
           const message = isHttpApiError(err)
             ? err.toFriendly({
-              unavailable:
-                  'Payments are temporarily unavailable. Please try again in a moment.',
-              rateLimited:
-                  'Too many payment attempts — please wait a moment and try again.',
-              conflict:
+                unavailable: 'Payments are temporarily unavailable. Please try again in a moment.',
+                rateLimited: 'Too many payment attempts — please wait a moment and try again.',
+                conflict:
                   "I'm still processing your last attempt. Hang tight and try again shortly.",
-              fallback: 'Failed to initialize payment'
-            })
+                fallback: 'Failed to initialize payment'
+              })
             : err instanceof Error
               ? err.message
               : 'Failed to initialize payment';
@@ -256,7 +271,9 @@ export function StripePaymentForm({
     }
 
     createIntent();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [invoiceId, installmentId, portalFetch, onError]);
 
   if (loading) {
@@ -272,9 +289,7 @@ export function StripePaymentForm({
     return (
       <div className="portal-card text-center p-4">
         <AlertCircle size={24} className="text-danger" style={{ margin: '0 auto' }} />
-        <p className="form-error-message mt-1">
-          {error || 'Unable to initialize payment'}
-        </p>
+        <p className="form-error-message mt-1">{error || 'Unable to initialize payment'}</p>
       </div>
     );
   }

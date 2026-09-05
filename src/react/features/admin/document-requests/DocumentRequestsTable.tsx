@@ -1,10 +1,6 @@
 import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
-import {
-  FileUp,
-  FileCheck,
-  Inbox
-} from 'lucide-react';
+import { FileUp, FileCheck, Inbox } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -97,7 +93,9 @@ const DOCUMENT_REQUEST_STATUS_CONFIG: Record<string, { label: string }> = {
 
 // Capitalize status label (fallback for unknown statuses)
 function getStatusLabel(status: string | undefined | null): string {
-  if (!status) return 'Unknown';
+  if (!status) {
+    return 'Unknown';
+  }
   if (DOCUMENT_REQUEST_STATUS_CONFIG[status]) {
     return DOCUMENT_REQUEST_STATUS_CONFIG[status].label;
   }
@@ -116,12 +114,16 @@ function filterDocumentRequest(
       request.title.toLowerCase().includes(searchLower) ||
       request.clientName.toLowerCase().includes(searchLower) ||
       request.projectName?.toLowerCase().includes(searchLower);
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(request.status)) return false;
+    if (!statusFilter.includes(request.status)) {
+      return false;
+    }
   }
 
   return true;
@@ -133,27 +135,37 @@ function sortDocumentRequests(a: DocumentRequest, b: DocumentRequest, sort: Sort
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'title':
-    return multiplier * a.title.localeCompare(b.title);
-  case 'client':
-    return multiplier * a.clientName.localeCompare(b.clientName);
-  case 'dueDate':
-    return multiplier * ((a.dueDate || '').localeCompare(b.dueDate || ''));
-  case 'createdAt':
-    return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-  default:
-    return 0;
+    case 'title':
+      return multiplier * a.title.localeCompare(b.title);
+    case 'client':
+      return multiplier * a.clientName.localeCompare(b.clientName);
+    case 'dueDate':
+      return multiplier * (a.dueDate || '').localeCompare(b.dueDate || '');
+    case 'createdAt':
+      return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    default:
+      return 0;
   }
 }
 
-export function DocumentRequestsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: DocumentRequestsTableProps) {
+export function DocumentRequestsTable({
+  getAuthToken,
+  showNotification,
+  onNavigate,
+  defaultPageSize = 25,
+  overviewMode = false
+}: DocumentRequestsTableProps) {
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
-  const { clientOptions: entityClients, projectOptions: entityProjects } = useEntityOptions(createOpen);
+  const { clientOptions: entityClients, projectOptions: entityProjects } =
+    useEntityOptions(createOpen);
 
   // Data fetching via useListFetch
-  const { data, isLoading, error, refetch, setData } = useListFetch<DocumentRequest, DocumentRequestStats>({
+  const { data, isLoading, error, refetch, setData } = useListFetch<
+    DocumentRequest,
+    DocumentRequestStats
+  >({
     endpoint: API_ENDPOINTS.DOCUMENT_REQUESTS,
     getAuthToken,
     defaultStats: DEFAULT_DOCUMENT_REQUEST_STATS,
@@ -210,56 +222,82 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
   });
 
   // Single delete handler
-  const handleDeleteRequest = useCallback(async (requestId: number) => {
-    if (!window.confirm('Are you sure you want to delete this document request?')) return;
-    try {
-      const response = await apiFetch(buildEndpoint.documentRequest(requestId), { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete request');
-      setData((prev) => prev ? { ...prev, items: prev.items.filter((r) => r.id !== requestId) } : prev);
-      showNotification?.('Document request deleted', 'success');
-    } catch (err) {
-      logger.error('Failed to delete document request:', err);
-      showNotification?.('Failed to delete document request', 'error');
-    }
-  }, [setData, showNotification]);
+  const handleDeleteRequest = useCallback(
+    async (requestId: number) => {
+      if (!window.confirm('Are you sure you want to delete this document request?')) {
+        return;
+      }
+      try {
+        const response = await apiFetch(buildEndpoint.documentRequest(requestId), {
+          method: 'DELETE'
+        });
+        if (!response.ok) {
+          throw new Error('Failed to delete request');
+        }
+        setData((prev) =>
+          prev ? { ...prev, items: prev.items.filter((r) => r.id !== requestId) } : prev
+        );
+        showNotification?.('Document request deleted', 'success');
+      } catch (err) {
+        logger.error('Failed to delete document request:', err);
+        showNotification?.('Failed to delete document request', 'error');
+      }
+    },
+    [setData, showNotification]
+  );
 
   // Status change handler
-  const handleStatusChange = useCallback(async (requestId: number, newStatus: string) => {
-    try {
-      const response = await apiFetch(buildEndpoint.documentRequest(requestId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
+  const handleStatusChange = useCallback(
+    async (requestId: number, newStatus: string) => {
+      try {
+        const response = await apiFetch(buildEndpoint.documentRequest(requestId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
 
-      if (!response.ok) throw new Error('Failed to update request');
+        if (!response.ok) {
+          throw new Error('Failed to update request');
+        }
 
-      setData((prev) => prev ? {
-        ...prev,
-        items: prev.items.map((request) =>
-          request.id === requestId
-            ? { ...request, status: newStatus as DocumentRequest['status'] }
-            : request
-        )
-      } : prev);
-      showNotification?.('Request status updated', 'success');
-    } catch (err) {
-      logger.error('Failed to update request status:', err);
-      showNotification?.('Failed to update request status', 'error');
-    }
-  }, [setData, showNotification]);
+        setData((prev) =>
+          prev
+            ? {
+                ...prev,
+                items: prev.items.map((request) =>
+                  request.id === requestId
+                    ? { ...request, status: newStatus as DocumentRequest['status'] }
+                    : request
+                )
+              }
+            : prev
+        );
+        showNotification?.('Request status updated', 'success');
+      } catch (err) {
+        logger.error('Failed to update request status:', err);
+        showNotification?.('Failed to update request status', 'error');
+      }
+    },
+    [setData, showNotification]
+  );
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
-    if (selection.selectedCount === 0) return;
+    if (selection.selectedCount === 0) {
+      return;
+    }
 
     const ids = selection.selectedItems.map((r) => r.id);
     try {
       const response = await apiPost(API_ENDPOINTS.DOCUMENT_REQUESTS_BULK_DELETE, { ids });
 
-      if (!response.ok) throw new Error('Failed to delete requests');
+      if (!response.ok) {
+        throw new Error('Failed to delete requests');
+      }
 
-      setData((prev) => prev ? { ...prev, items: prev.items.filter((r) => !ids.includes(r.id)) } : prev);
+      setData((prev) =>
+        prev ? { ...prev, items: prev.items.filter((r) => !ids.includes(r.id)) } : prev
+      );
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} request${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
@@ -282,7 +320,9 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
   // Handle bulk status change
   const handleBulkStatusChange = useCallback(
     async (newStatus: string) => {
-      if (selection.selectedCount === 0) return;
+      if (selection.selectedCount === 0) {
+        return;
+      }
 
       for (const request of selection.selectedItems) {
         await handleStatusChange(request.id, newStatus);
@@ -304,38 +344,51 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
   const clientOptions = useMemo(() => {
     const map = new Map<string, string>();
     entityClients.forEach((o) => map.set(o.value, o.label));
-    requests.forEach((r) => { if (r.clientId && r.clientName) map.set(String(r.clientId), r.clientName); });
+    requests.forEach((r) => {
+      if (r.clientId && r.clientName) {
+        map.set(String(r.clientId), r.clientName);
+      }
+    });
     return Array.from(map, ([value, label]) => ({ value, label }));
   }, [requests, entityClients]);
 
   const projectOptions = useMemo(() => {
     const map = new Map<string, string>();
     entityProjects.forEach((o) => map.set(o.value, o.label));
-    requests.forEach((r) => { if (r.projectId && r.projectName) map.set(String(r.projectId), r.projectName); });
+    requests.forEach((r) => {
+      if (r.projectId && r.projectName) {
+        map.set(String(r.projectId), r.projectName);
+      }
+    });
     return Array.from(map, ([value, label]) => ({ value, label }));
   }, [requests, entityProjects]);
 
   // Create handler
-  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
-    setCreateLoading(true);
-    try {
-      const res = await apiPost(API_ENDPOINTS.DOCUMENT_REQUESTS, formData);
-      if (res.ok) {
-        showNotification?.('Document request created successfully', 'success');
-        setCreateOpen(false);
-        refetch();
-      } else {
+  const handleCreate = useCallback(
+    async (formData: Record<string, unknown>) => {
+      setCreateLoading(true);
+      try {
+        const res = await apiPost(API_ENDPOINTS.DOCUMENT_REQUESTS, formData);
+        if (res.ok) {
+          showNotification?.('Document request created successfully', 'success');
+          setCreateOpen(false);
+          refetch();
+        } else {
+          showNotification?.('Failed to create document request', 'error');
+        }
+      } catch {
         showNotification?.('Failed to create document request', 'error');
+      } finally {
+        setCreateLoading(false);
       }
-    } catch {
-      showNotification?.('Failed to create document request', 'error');
-    } finally {
-      setCreateLoading(false);
-    }
-  }, [showNotification, refetch]);
+    },
+    [showNotification, refetch]
+  );
 
   function isOverdue(dueDate?: string): boolean {
-    if (!dueDate) return false;
+    if (!dueDate) {
+      return false;
+    }
     return new Date(dueDate) < new Date();
   }
 
@@ -381,11 +434,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
         }
         actions={
           <>
-            <SearchFilter
-              value={search}
-              onChange={setSearch}
-              placeholder="Search requests..."
-            />
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search requests..." />
             <FilterDropdown
               sections={DOCUMENT_REQUESTS_FILTER_CONFIG}
               values={filterValues}
@@ -406,7 +455,9 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
             totalCount={filteredRequests.length}
             onClearSelection={selection.clearSelection}
             onSelectAll={() => selection.selectMany(filteredRequests)}
-            allSelected={selection.allSelected && selection.selectedCount === filteredRequests.length}
+            allSelected={
+              selection.allSelected && selection.selectedCount === filteredRequests.length
+            }
             statusOptions={bulkStatusOptions}
             onStatusChange={handleBulkStatusChange}
             onDelete={handleBulkDelete}
@@ -446,7 +497,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
                 sortDirection={sort?.column === 'title' ? sort.direction : null}
                 onClick={() => toggleSort('title')}
               >
-              Request
+                Request
               </PortalTableHead>
               <PortalTableHead className="client-col">Client</PortalTableHead>
               <PortalTableHead className="status-col">Status</PortalTableHead>
@@ -456,7 +507,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
                 sortDirection={sort?.column === 'dueDate' ? sort.direction : null}
                 onClick={() => toggleSort('dueDate')}
               >
-              Due Date
+                Due Date
               </PortalTableHead>
               <PortalTableHead className="docs-col">Docs</PortalTableHead>
               <PortalTableHead className="col-actions">Actions</PortalTableHead>
@@ -472,7 +523,9 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
               <PortalTableEmpty
                 colSpan={7}
                 icon={<Inbox />}
-                message={hasActiveFilters ? 'No requests match your filters' : 'No document requests yet'}
+                message={
+                  hasActiveFilters ? 'No requests match your filters' : 'No document requests yet'
+                }
               />
             ) : (
               paginatedRequests.map((request) => (
@@ -550,14 +603,22 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
                   </PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
-                      <IconButton action="view" title="View" onClick={() => setSelectedRequest(request)} />
+                      <IconButton
+                        action="view"
+                        title="View"
+                        onClick={() => setSelectedRequest(request)}
+                      />
                       {request.status === 'pending' && (
                         <IconButton action="remind" title="Send Reminder" />
                       )}
                       {request.documents > 0 && (
                         <IconButton action="download" title="Download All" />
                       )}
-                      <IconButton action="delete" title="Delete" onClick={() => handleDeleteRequest(request.id)} />
+                      <IconButton
+                        action="delete"
+                        title="Delete"
+                        onClick={() => handleDeleteRequest(request.id)}
+                      />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>

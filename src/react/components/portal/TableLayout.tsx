@@ -56,11 +56,7 @@ export function TableLayout({
               <span className="title-mobile">{title}</span>
             </h3>
             {stats}
-            {actions && (
-              <div className="data-table-actions">
-                {actions}
-              </div>
-            )}
+            {actions && <div className="data-table-actions">{actions}</div>}
           </div>
 
           {/* Bulk Actions */}
@@ -68,9 +64,7 @@ export function TableLayout({
 
           {/* Table Container */}
           <div className="data-table-container">
-            <div className="data-table-scroll-wrapper">
-              {children}
-            </div>
+            <div className="data-table-scroll-wrapper">{children}</div>
           </div>
 
           {/* Pagination */}
@@ -99,8 +93,10 @@ export interface TableStatsProps {
 }
 
 export const TableStats = React.memo(({ items, tooltip }: TableStatsProps) => {
-  const visibleItems = items.filter(item => {
-    if (!item.variant || item.variant === 'default') return true;
+  const visibleItems = items.filter((item) => {
+    if (!item.variant || item.variant === 'default') {
+      return true;
+    }
     return typeof item.value === 'number' ? item.value > 0 : item.value !== '0';
   });
 
@@ -109,10 +105,7 @@ export const TableStats = React.memo(({ items, tooltip }: TableStatsProps) => {
       {visibleItems.map((item) => (
         <span
           key={`${item.value}-${item.label ?? ''}`}
-          className={cn(
-            'stats-summary-item',
-            item.variant && `stats-${item.variant}`
-          )}
+          className={cn('stats-summary-item', item.variant && `stats-${item.variant}`)}
         >
           {item.value}
           {item.label && ` ${item.label}`}

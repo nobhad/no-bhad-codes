@@ -78,9 +78,7 @@ export function DateCell({
 
   return (
     <TableCellWrapper className={cn('date-col', className)}>
-      <span title={new Date(value).toLocaleString()}>
-        {formatted}
-      </span>
+      <span title={new Date(value).toLocaleString()}>{formatted}</span>
     </TableCellWrapper>
   );
 }
@@ -127,9 +125,7 @@ export function CurrencyCell({
   const formatted = formatCurrency(value, { currency, compact, fallback });
 
   return (
-    <TableCellWrapper className={cn('currency-cell', className)}>
-      {formatted}
-    </TableCellWrapper>
+    <TableCellWrapper className={cn('currency-cell', className)}>{formatted}</TableCellWrapper>
   );
 }
 
@@ -152,11 +148,7 @@ export interface FileSizeCellProps {
  * @example
  * <FileSizeCell value={file.size} />
  */
-export function FileSizeCell({
-  value,
-  fallback = '',
-  className
-}: FileSizeCellProps) {
+export function FileSizeCell({ value, fallback = '', className }: FileSizeCellProps) {
   if (value === null || value === undefined) {
     return (
       <TableCellWrapper className={cn('file-size-cell', className)}>
@@ -168,9 +160,7 @@ export function FileSizeCell({
   const formatted = formatFileSize(value, fallback);
 
   return (
-    <TableCellWrapper className={cn('file-size-cell', className)}>
-      {formatted}
-    </TableCellWrapper>
+    <TableCellWrapper className={cn('file-size-cell', className)}>{formatted}</TableCellWrapper>
   );
 }
 
@@ -260,12 +250,7 @@ export interface PhoneCellProps {
  * @example
  * <PhoneCell value={contact.phone} callLink />
  */
-export function PhoneCell({
-  value,
-  callLink = false,
-  fallback = '',
-  className
-}: PhoneCellProps) {
+export function PhoneCell({ value, callLink = false, fallback = '', className }: PhoneCellProps) {
   if (!value) {
     return (
       <TableCellWrapper className={cn('phone-cell', className)}>
@@ -504,7 +489,9 @@ export function CopyCell({
 
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
     };
   }, []);
 
@@ -514,7 +501,9 @@ export function CopyCell({
       if (value) {
         navigator.clipboard.writeText(value);
         setCopied(true);
-        if (timerRef.current) clearTimeout(timerRef.current);
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+        }
         timerRef.current = setTimeout(() => setCopied(false), COPY_FEEDBACK_DELAY_MS);
       }
     },
@@ -596,9 +585,7 @@ export function TextCell({
   const needsTooltip = maxLength && value.length > maxLength;
 
   return (
-    <TableCellWrapper
-      className={cn('text-cell', primary && 'primary-cell', className)}
-    >
+    <TableCellWrapper className={cn('text-cell', primary && 'primary-cell', className)}>
       <span title={needsTooltip ? value : undefined}>{display}</span>
     </TableCellWrapper>
   );

@@ -32,10 +32,7 @@ export function SearchFilter({ value, onChange, placeholder = 'Search...' }: Sea
   }, [isOpen]);
 
   return (
-    <div
-      ref={ref}
-      className={cn('filter-search-wrapper', isOpen && 'open', value && 'has-value')}
-    >
+    <div ref={ref} className={cn('filter-search-wrapper', isOpen && 'open', value && 'has-value')}>
       {!isOpen && (
         <button
           type="button"
@@ -60,7 +57,9 @@ export function SearchFilter({ value, onChange, placeholder = 'Search...' }: Sea
             data-shortcut="search"
             aria-label={placeholder || 'Search'}
             onKeyDown={(e) => {
-              if (e.key === KEYS.ESCAPE) setIsOpen(false);
+              if (e.key === KEYS.ESCAPE) {
+                setIsOpen(false);
+              }
             }}
           />
           {value && (
@@ -110,11 +109,15 @@ export function FilterDropdown({ sections, values, onChange }: FilterDropdownPro
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
 
   // Count sections with at least one active filter
-  const activeCount = Object.values(values).filter(arr => Array.isArray(arr) && arr.length > 0).length;
+  const activeCount = Object.values(values).filter(
+    (arr) => Array.isArray(arr) && arr.length > 0
+  ).length;
 
   // Position the portal menu below the trigger button
   const updatePosition = useCallback(() => {
-    if (!triggerRef.current) return;
+    if (!triggerRef.current) {
+      return;
+    }
     const rect = triggerRef.current.getBoundingClientRect();
     setMenuStyle({
       position: 'fixed',
@@ -129,7 +132,9 @@ export function FilterDropdown({ sections, values, onChange }: FilterDropdownPro
 
   // Reposition on scroll/resize while open
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
     updatePosition();
     window.addEventListener('scroll', updatePosition, true);
     window.addEventListener('resize', updatePosition);
@@ -150,40 +155,39 @@ export function FilterDropdown({ sections, values, onChange }: FilterDropdownPro
         aria-label="Filter options"
       >
         <Filter />
-        {activeCount > 0 && (
-          <span className="filter-count-badge visible">{activeCount}</span>
-        )}
+        {activeCount > 0 && <span className="filter-count-badge visible">{activeCount}</span>}
       </button>
-      {isOpen && createPortal(
-        <div ref={menuRef} className="filter-dropdown-menu portal-mounted" style={menuStyle}>
-          {sections.map((section) => {
-            const selected = values[section.key] ?? [];
-            const noneSelected = selected.length === 0;
-            return (
-              <div key={section.key} className="filter-section">
-                <div className="filter-section-label field-label">{section.label}</div>
-                <div className="filter-options">
-                  {section.options.map((option) => {
-                    const isAll = option.value === 'all';
-                    const isActive = isAll ? noneSelected : selected.includes(option.value);
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        className={cn('filter-option', isActive && 'is-active')}
-                        onClick={() => onChange(section.key, option.value)}
-                      >
-                        {option.label}
-                      </button>
-                    );
-                  })}
+      {isOpen &&
+        createPortal(
+          <div ref={menuRef} className="filter-dropdown-menu portal-mounted" style={menuStyle}>
+            {sections.map((section) => {
+              const selected = values[section.key] ?? [];
+              const noneSelected = selected.length === 0;
+              return (
+                <div key={section.key} className="filter-section">
+                  <div className="filter-section-label field-label">{section.label}</div>
+                  <div className="filter-options">
+                    {section.options.map((option) => {
+                      const isAll = option.value === 'all';
+                      const isActive = isAll ? noneSelected : selected.includes(option.value);
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          className={cn('filter-option', isActive && 'is-active')}
+                          onClick={() => onChange(section.key, option.value)}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>,
-        document.body
-      )}
+              );
+            })}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

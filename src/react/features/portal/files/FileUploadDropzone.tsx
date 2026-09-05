@@ -9,11 +9,7 @@ import { Upload, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { UI_LIMITS } from '@react/config/portal-constants';
 import { KEYS } from '@/constants/keyboard';
-import {
-  ALLOWED_EXTENSIONS,
-  ALLOWED_MIME_TYPES,
-  MAX_FILE_SIZE
-} from '@/utils/file-validation';
+import { ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from '@/utils/file-validation';
 import { formatErrorMessage } from '@/utils/error-utils';
 
 const MAX_FILES = 5;
@@ -113,7 +109,9 @@ export function FileUploadDropzone({
 
   const handleFiles = useCallback(
     async (files: File[]) => {
-      if (disabled || files.length === 0) return;
+      if (disabled || files.length === 0) {
+        return;
+      }
 
       const { valid, errors } = validateFiles(files);
 
@@ -181,7 +179,9 @@ export function FileUploadDropzone({
     (e: React.DragEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      if (disabled || isUploading) return;
+      if (disabled || isUploading) {
+        return;
+      }
 
       setState('idle');
       const files = e.dataTransfer?.files;
@@ -234,18 +234,19 @@ export function FileUploadDropzone({
   // Render error state
   if (state === 'error' && error) {
     return (
-      <div
-        className={cn('dropzone is-error', className)}
-        role="alert"
-      >
+      <div className={cn('dropzone is-error', className)} role="alert">
         <div className="dropzone-content">
           <AlertCircle className="icon-lg" />
           <p className="dropzone-text">{error.message}</p>
           <div className="dropzone-actions">
             {error.files && error.files.length > 0 && (
-              <button className="btn-secondary" onClick={handleRetry}>Try Again</button>
+              <button className="btn-secondary" onClick={handleRetry}>
+                Try Again
+              </button>
             )}
-            <button className="btn-ghost" onClick={handleDismiss}>Dismiss</button>
+            <button className="btn-ghost" onClick={handleDismiss}>
+              Dismiss
+            </button>
           </div>
         </div>
       </div>
@@ -300,9 +301,7 @@ export function FileUploadDropzone({
       aria-disabled={disabled}
     >
       <div className="dropzone-content">
-        <p className="dropzone-text text-primary">
-          Drag and drop files here or
-        </p>
+        <p className="dropzone-text text-primary">Drag and drop files here or</p>
         <button
           className="btn-secondary"
           onClick={(e) => {
@@ -314,9 +313,7 @@ export function FileUploadDropzone({
           <Upload className="icon-sm" />
           Browse Files
         </button>
-        <p className="dropzone-hint">
-          Max 5 files, 10MB each. Images, PDF, Word, ZIP accepted.
-        </p>
+        <p className="dropzone-hint">Max 5 files, 10MB each. Images, PDF, Word, ZIP accepted.</p>
       </div>
       <input
         ref={fileInputRef}
