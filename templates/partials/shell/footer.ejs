@@ -4,25 +4,30 @@
            reveal with GSAP, scrubbed against the last stretch of scroll. -->
       <div class="footer-curtain" data-footer-curtain aria-hidden="true">
         <div class="footer-curtain__inner" data-footer-curtain-inner>
-          <a class="footer-curtain__brand" href="/" aria-label="No Bhad Codes home">
-            <img
-              class="footer-curtain__avatar"
-              src="/images/avatar.svg"
-              alt=""
-              width="288"
-              height="356"
-              loading="lazy"
-              decoding="async"
-            />
-            <p class="footer-curtain__wordmark">no bhad codes</p>
-          </a>
+          <div class="footer-curtain__mark">
+            <a class="footer-curtain__brand" href="/" aria-label="No Bhad Codes home">
+              <img
+                class="footer-curtain__avatar"
+                src="/images/avatar.svg"
+                alt=""
+                width="288"
+                height="356"
+                loading="lazy"
+                decoding="async"
+              />
+              <p class="footer-curtain__wordmark">no bhad codes</p>
+            </a>
+            <!-- Beside the link, not inside it. Visually it sits under the
+                 wordmark either way, but inside the <a> it would join the
+                 link's visible label while the aria-label stayed "No Bhad
+                 Codes home" — a WCAG 2.5.3 mismatch, and the year would never
+                 be announced, since aria-label replaces the content it wraps.
+                 It is also just not a link to the homepage. -->
+            <p class="footer-curtain__copy">
+              &copy; <span class="js-copyright-year"></span> Made &amp; Designed by
+            </p>
+          </div>
 
-          <!-- Ends on "by" deliberately. The wordmark sits directly above this
-               line, so the credit reads into the mark rather than repeating
-               the name underneath it. -->
-          <p class="footer-curtain__copy">
-            &copy; <span class="js-copyright-year"></span> Made &amp; Designed by
-          </p>
         </div>
       </div>
     </footer>

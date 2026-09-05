@@ -175,14 +175,25 @@ body[data-page="design-system"] .footer-curtain {
 /* Wordmark centred against the avatar rather than sharing its baseline —
    bottom-aligning the three short lines to a tall silhouette reads as the
    type sinking. */
+/* Holds the lockup and the credit together, and is exactly as tall as the
+   lockup — which is what keeps the band's air even.
+   Stacking the credit as a flex row underneath made this block 153px against
+   a 128px avatar, so it outgrew the 128px the band holds open and the air came
+   out 48 above and 23 below. The wordmark is three short lines centred against
+   a much taller silhouette, so there is ~28px of slack below it inside the
+   lockup already; the credit goes THERE, out of flow, and costs no height. */
+.footer-curtain__mark {
+  align-self: center;
+  justify-self: end;
+  position: relative;
+  min-width: 0;
+}
+
 .footer-curtain__brand {
   /* --curtain-avatar-height now lives on :root — see CURTAIN DIMENSIONS. The
      band's height is computed from it, so it cannot be declared down here. */
-  /* Centred in the slack the copyright row leaves it, and pushed to the
-     right-hand edge of the band — the grid row is full-width, so without
-     justify-self the mark would sit hard against the left. */
-  align-self: center;
-  justify-self: end;
+  /* Placement now belongs to .footer-curtain__mark, which carries the credit
+     line with it. */
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -245,17 +256,16 @@ body[data-page="design-system"] .footer-curtain {
 }
 
 .footer-curtain__copy {
-  /* Absolute so it costs the band no height. It reads along the bottom edge,
-     inside the lower inset the mark is already holding open, rather than
-     pushing the band taller to sit in a row of its own. */
+  /* Bottom-right of the lockup: under the wordmark, right edge flush with it,
+     sitting in the slack the wordmark leaves against the taller avatar. */
   position: absolute;
-  left: var(--curtain-inset);
-  right: var(--curtain-inset);
-  bottom: var(--space-1-5);
+  right: 0;
+  bottom: 0;
   margin: 0;
   font-size: var(--font-size-xs);
   line-height: 1.4;
-  text-align: center;
+  text-align: right;
+  white-space: nowrap;
   color: var(--footer-curtain-text-muted);
 }
 
