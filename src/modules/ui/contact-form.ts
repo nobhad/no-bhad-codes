@@ -96,6 +96,24 @@ export class ContactFormModule extends BaseModule {
     }
     this.arrow = initArrowCallouts({ exitMs: TIMING.ARROW_EXIT_DURATION });
     this.log('Arrow callout initialized');
+
+    // She belongs to the contact tile. Every way of leaving it — wheel, arrow
+    // keys, the menu, a hash, browser history — passes through page-entering,
+    // so that is where she is put away. The callout is portaled to <body> and
+    // position: fixed, so left standing she rode along over whichever tile
+    // came next. Immediate, not the exit animation: the tile is already
+    // sliding and a second motion on top of it reads as a glitch.
+    this.addEventListener(
+      window,
+      'page-entering',
+      ((event: Event) => {
+        const to = (event as CustomEvent<{ to?: string }>).detail?.to;
+        if (to && to !== 'contact') {
+          this.arrow?.close('contact-feedback', { immediate: true });
+        }
+      }) as EventListener,
+      'window-page-entering-arrow'
+    );
   }
 
   /** True at widths where Arrow has no gutter to stand in and must be brief. */
@@ -246,7 +264,9 @@ export class ContactFormModule extends BaseModule {
       if (this.arrowEl) {
         this.arrowEl.dataset.arrowPeek = filledFieldCount() >= 2 ? 'high' : 'low';
       }
-      if (this.arrow?.isOpen('contact-feedback')) {return;}
+      if (this.arrow?.isOpen('contact-feedback')) {
+        return;
+      }
       this.arrowSummon();
     };
 

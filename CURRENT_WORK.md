@@ -66,6 +66,13 @@ with client PII tracked in the public repository.
       robots, sitemap). Sitemap lists the two real documents.
 - [x] Portal sidebar footer reserves the consent banner's height — the
       banner sat over Sign Out on a first visit.
+- [x] **Arrow stayed on screen after leaving Contact.** She is portaled to
+      `<body>` and fixed, and nothing closed her when the tile changed, so
+      after typing in the form she rode along over whichever tile came next.
+      `contact-form.ts` now closes her on `page-entering` to any other tile.
+- [x] A project with no media opens its case study on its title card (the
+      composed image, or the rotation background with the same text layer
+      the TV draws) instead of the grey placeholder.
 - [x] `admin-flow` / `portal-flow` e2e rewritten for the React portal (they
       targeted the vanilla portal's ids); they sign in through the portal
       page, which is the only path that seeds the session the app restores.
