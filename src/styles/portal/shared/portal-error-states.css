@@ -56,6 +56,7 @@
 
 .error-boundary-details {
   width: 100%;
+  padding: var(--space-2) var(--space-3);
   background: var(--color-bg-primary);
   border: var(--portal-border);
   font-family: var(--font-family-mono, monospace);
@@ -81,6 +82,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--icon-gap-sm);
+  padding: var(--space-1) var(--space-3);
   border: var(--border-width) solid var(--color-text-primary);
   color: var(--color-text-primary);
   font-family: var(--font-family-sans);

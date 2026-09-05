@@ -620,17 +620,6 @@ export function InvoicesTable({
                           />
                         )}
 
-                        {!isDraft && (
-                          <button
-                            className="icon-btn"
-                            onClick={() => setPreviewInvoice(invoice)}
-                            title="Preview PDF"
-                            aria-label="Preview invoice PDF"
-                          >
-                            <Eye className="icon-sm" />
-                          </button>
-                        )}
-
                         {canMarkPaid && (
                           <button
                             className="icon-btn"
@@ -639,6 +628,17 @@ export function InvoicesTable({
                             aria-label="Record payment"
                           >
                             <Check className="icon-sm" />
+                          </button>
+                        )}
+
+                        {!isDraft && (
+                          <button
+                            className="icon-btn"
+                            onClick={() => setPreviewInvoice(invoice)}
+                            title="Preview PDF"
+                            aria-label="Preview invoice PDF"
+                          >
+                            <Eye className="icon-sm" />
                           </button>
                         )}
 
