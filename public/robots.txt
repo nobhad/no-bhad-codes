@@ -14,4 +14,4 @@ Allow: /images/
 Allow: /fonts/
 
 # Sitemap
-Sitemap: https://nobhad.codes/sitemap.xml
+Sitemap: https://www.nobhad.codes/sitemap.xml
