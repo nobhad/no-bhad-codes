@@ -1,79 +1,80 @@
 # Deployment Guide
 
-This is a summary of deployment steps. Full details are in the
-[Ops Runbook](../OPS_RUNBOOK.md) and [Configuration](../CONFIGURATION.md) guides.
+Two hosts, deployed independently from the same repository. The
+[Ops Runbook](../OPS_RUNBOOK.md) covers what to do once it is running;
+[Configuration](../CONFIGURATION.md) lists every environment variable.
 
-## Build
+## Topology
 
-```bash
-npm run build
-```
+| Host | Serves | Built by |
+|---|---|---|
+| **Vercel** | The static site: `index.html`, `design-system.html`, `404.html`, `public/` (including `data/portfolio.json`, `sw.js`, `sitemap.xml`) | `npm run build` → `dist/` (`vercel.json`) |
+| **Railway** | The Express API and the server-rendered portal shells: `/api`, `/portal`, `/admin`, `/client`, `/intake`, `/dashboard`, `/set-password`, `/forgot-password`, `/reset-password` | `npm run build && npm run build:server`, start `npm run start:server` (`railway.json`) |
 
-This produces a production-ready bundle in the `dist/` directory.
+`vercel.json` rewrites every Railway path to
+`https://no-bhad-codes-production.up.railway.app`, so visitors only ever see
+`www.nobhad.codes`. The apex redirects to `www`; canonical URLs, Open Graph
+tags, `robots.txt` and the sitemap all use `www`.
 
-## Start the production server
+Railway runs the health check at `/health/live` and mounts a volume at
+`/app/data` for the SQLite database, backups and uploads.
 
-```bash
-npm start
-```
+## What triggers a deploy
 
-## Production environment variables
+- **Vercel** builds on every push to `main`.
+- **Railway** builds only when a pushed file matches `build.watchPatterns`
+  in `railway.json` (`server/**`, `shared/**`, the migration and asset-copy
+  scripts, `package.json`, `package-lock.json`, `tsconfig.json`,
+  `railway.json`). A front-end-only push does not rebuild the API.
 
-Set these in your server environment (not in a committed `.env` file):
+Before pushing, `npm run railway:will-deploy` tells you which of the two
+will happen for the commits you are about to push.
+
+## Production environment (Railway)
+
+Set these in the Railway service, never in a committed file. Required with
+no default:
 
 ```bash
 NODE_ENV=production
-PORT=3001
-FRONTEND_URL=https://yourdomain.com
-DATABASE_PATH=/app/data/production.db
-
-# Security — use a strong random secret
-JWT_SECRET=your-production-secret
-
-# Email
-SMTP_HOST=your-smtp-server
-SMTP_PORT=587
-SMTP_USER=your-email@domain.com
-SMTP_PASS=your-email-password
-SMTP_FROM=noreply@yourdomain.com
-
-# Error tracking (optional)
-SENTRY_DSN=
+JWT_SECRET=                  # 32+ random characters
+ADMIN_EMAIL=
+ADMIN_PASSWORD_HASH=         # bcrypt hash; ADMIN_PASSWORD is for development
+BUSINESS_NAME=
+BUSINESS_EMAIL=
+DATABASE_PATH=/app/data/client_portal.db
+FRONTEND_URL=https://www.nobhad.codes
+WEBSITE_URL=https://www.nobhad.codes
 ```
 
-## Server requirements
+Usually also set: `EMAIL_ENABLED=true` with the `SMTP_*` and `FROM_EMAIL`
+values, `SENTRY_DSN`, `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`,
+`ANTHROPIC_API_KEY` if the AI features are on, and the Google Drive backup
+credentials. `PORT` is supplied by Railway.
 
-- **Memory:** 512 MB minimum, 1 GB recommended
-- **Storage:** 10 GB minimum (application + file uploads)
-- **CPU:** 1 vCPU minimum, 2 vCPU recommended
-- **Network:** HTTPS enabled, firewall configured
-- **Database:** SQLite file with a backup strategy in place
+Vercel needs nothing at build time for the static site; `VITE_*` variables
+are only read if the third-party contact-form backends are enabled.
 
-## Deployment checklist
+## Deploy checklist
 
-- [ ] All environment variables configured on the server
-- [ ] Database migrations applied (`npm run migrate`)
-- [ ] File upload directories created with correct permissions
-- [ ] SSL certificate installed
-- [ ] Email service configured and tested
-- [ ] Error tracking (Sentry) configured if used
-- [ ] Backup strategy in place
-- [ ] Monitoring and logging set up
+- [ ] `npm run typecheck && npm run lint && npm run test:run && npm run build` pass locally (the `pre-push` hook runs these)
+- [ ] CI is green on `main`
+- [ ] Migrations are additive or the schema-drift check will refuse to boot (see the runbook's *Schema drift*)
+- [ ] After both hosts finish: `npm run check:deploy` — it fetches the live pages on both hosts and confirms the asset URLs they reference actually resolve, which is how a Vercel/Railway hash mismatch shows up
+- [ ] Spot-check `https://www.nobhad.codes/`, `/#/projects`, `/portal`, `/api/health`
+
+## Rollback
+
+Vercel: promote the previous deployment from the dashboard. Railway: redeploy
+the previous build from the deployments list. The database is on the volume
+and is not touched by a redeploy; if a migration has to be undone, restore
+from a backup as described in the runbook.
 
 ## Database backup
 
 ```bash
-npm run db:backup
+npm run db:backup       # local snapshot into DATABASE_BACKUP_PATH
+npm run backup:drive    # offsite copy to Google Drive (service account)
 ```
 
-Retention policy: 7 daily backups, 4 weekly backups.
-
-## Code quality before deployment
-
-Always run these checks before deploying:
-
-```bash
-npm run typecheck   # TypeScript — must have 0 errors
-npm run lint        # ESLint — must pass
-npm run build       # Confirm build succeeds
-```
+The scheduler also takes automatic backups; `/api/admin/backups` lists them.

@@ -356,7 +356,7 @@ See [API Documentation](../API_DOCUMENTATION.md#proposal-builder-endpoints) for 
 |`server/routes/proposals.ts`|API endpoints|
 |`server/database/migrations/047_proposal_requests.sql`|DB schema|
 
-> The original vanilla-TS builder (`src/features/client/proposal-builder*.ts` and `src/styles/pages/proposal-builder.css`) was removed in the React migration; proposals are now styled with Tailwind inside the React components.
+> The original vanilla-TS builder (`src/features/client/proposal-builder*.ts` and `src/styles/pages/proposal-builder.css`) was removed in the React migration; proposals are now styled by the portal stylesheets under `src/styles/portal/`.
 
 ---
 

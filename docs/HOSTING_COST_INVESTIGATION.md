@@ -79,7 +79,7 @@ a Prometheus endpoint nothing scrapes.
 
 Measured over a 90-second idle window:
 
-```
+```text
 OTel ON    0.270 vCPU
 OTel OFF   0.296 vCPU     ← no improvement; inside the noise
 ```
@@ -101,7 +101,7 @@ optimizing compiler (`Reducer::Reduce`, `GraphReducer::ReduceNode`) and
 
 Measured over a 120-second fully idle window, same code and database:
 
-```
+```text
 tsx server/app.ts              0.214 vCPU
 node dist/server/server/...    0.091 vCPU     ← 57% lower
 ```

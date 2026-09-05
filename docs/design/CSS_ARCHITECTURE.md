@@ -422,7 +422,7 @@ Light mode is handled entirely by 2–3 variable overrides directly in `src/desi
 
 - Color names in variables (e.g., `--blue-500`)
 - Hardcoded hex values in component CSS
-- Tailwind color classes
+- Utility-framework color classes (there is no Tailwind in this repo)
 
 ### Class Naming
 
@@ -552,9 +552,9 @@ Defined in `src/styles/portal/shared/portal-modal-system.css` and `src/styles/po
 
 ---
 
-## Portal Theme and Tailwind
+## Portal Theme
 
-For the portal theme system (light/dark mode, color derivation, scoping), Tailwind vs Portal CSS rules, and portal layout wrappers, see [Portal Design](./PORTAL_DESIGN.md).
+For the portal theme system (light/dark mode, color derivation, scoping) and portal layout wrappers, see [Portal Design](./PORTAL_DESIGN.md).
 
 ---
 

@@ -117,7 +117,7 @@ The Backend refers to the complete portal system with two interfaces:
 - **[API Reference Index](./api/README.md)** - Endpoint index by domain
 - **[Ops Runbook](./OPS_RUNBOOK.md)** - Operational procedures, backups, incident response
 - **[Hosting Cost Investigation](./HOSTING_COST_INVESTIGATION.md)** - Why the Railway bill was CPU-bound, what was ruled out, and the tsx-to-compiled switch
-- **[State of the Art Roadmap](./STATE_OF_THE_ART_ROADMAP.md)** - Phased feature roadmap and as-built path map
+- **[State of the Art Roadmap](./archive/STATE_OF_THE_ART_ROADMAP.md)** - Archived: the phased roadmap as it was planned; every phase shipped and the paths it names have since moved
 
 ### Development & Maintenance
 

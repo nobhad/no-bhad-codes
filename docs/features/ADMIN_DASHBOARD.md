@@ -274,7 +274,7 @@ All admin feature components live under `src/react/features/admin/`.
 
 ### Shared
 
-- `shared/filterConfigs.ts` — Reusable filter configuration objects used across table components
+- `src/react/features/admin/shared/filterConfigs.ts` (and `src/react/features/portal/shared/filterConfigs.ts`) — Reusable filter configuration objects used across table components
 
 ---
 

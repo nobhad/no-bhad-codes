@@ -12,7 +12,7 @@ npm run dev:full
 Runs both frontend (Vite, port 4000) and backend (Node.js, port 4001) concurrently.
 
 - Frontend changes hot-reload automatically via Vite HMR
-- Backend changes require a manual server restart (`npm run dev:server`)
+- Backend changes restart the API automatically (`npm run dev:server` runs `tsx watch`)
 
 ## Key npm scripts
 
@@ -36,7 +36,7 @@ npm run format:check   # Prettier (check only)
 ### Testing
 
 ```bash
-npm run test           # Unit tests (Vitest)
+npm run test:unit      # Unit tests (Vitest); npm run test:integration for the SQLite suite
 npm run test:coverage  # Coverage report
 npx playwright test    # End-to-end tests (run from project root)
 ```

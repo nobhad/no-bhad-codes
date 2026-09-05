@@ -56,7 +56,6 @@ Install these recommended extensions for optimal development experience:
     "ms-vscode.vscode-typescript-next",
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
-    "bradlc.vscode-tailwindcss",
     "ms-playwright.playwright",
     "vitest.explorer"
   ]
@@ -1039,11 +1038,11 @@ test.describe('Project Management', () => {
 ### Quick Reference - Production URLs
 
 | Service | URL |
-|---------|-----|<https://no-bhad-codes-production.up.railway.app>
-| **Backend (Railway)** | <https://nobhad.codes>s-production.up.railway.app |
-| **Frontend (Vercel)** |<https://no-bhad-codes-production.up.railway.app/health>
-| **API Health Check** | ht<https://no-bhad-codes-production.up.railway.app/api-docs>
-| **API Docs (Swagger)** | https://no-bhad-codes-production.up.railway.app/api-docs |
+|---------|-----|
+| **Site (Vercel)** | <https://www.nobhad.codes> |
+| **API (Railway)** | <https://no-bhad-codes-production.up.railway.app> (reached through `www.nobhad.codes/api` via `vercel.json` rewrites) |
+| **Liveness** | <https://no-bhad-codes-production.up.railway.app/health/live> |
+| **API Docs (Swagger)** | <https://no-bhad-codes-production.up.railway.app/api-docs> |
 
 ### Environment Variables Reference
 
@@ -1069,7 +1068,6 @@ test.describe('Project Management', () => {
 | Variable | Description |
 |----------|-------------|
 | `VITE_API_URL` | `https://no-bhad-codes-production.up.railway.app` |
-| `VITE_ADMIN_PASSWORD_HASH` | SHA256 hash for admin dashboard |
 | `SENTRY_DSN` | Sentry error tracking DSN |
 
 ### Production Build

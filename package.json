@@ -73,11 +73,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/noellebhaduri/no-bhad-codes.git"
+    "url": "git+https://github.com/nobhad/no-bhad-codes.git"
   },
-  "homepage": "https://github.com/noellebhaduri/no-bhad-codes#readme",
+  "homepage": "https://github.com/nobhad/no-bhad-codes#readme",
   "bugs": {
-    "url": "https://github.com/noellebhaduri/no-bhad-codes/issues"
+    "url": "https://github.com/nobhad/no-bhad-codes/issues"
   },
   "engines": {
     "node": "22.x",
@@ -108,7 +108,6 @@
     "husky": "^9.1.7",
     "javascript-obfuscator": "^5.0.1",
     "jsdom": "^24.0.0",
-    "lint-staged": "^16.1.5",
     "markdownlint-cli2": "^0.23.2",
     "postcss": "^8.5.6",
     "postcss-custom-media": "^11.0.6",
@@ -183,20 +182,5 @@
     "ua-parser-js": "^2.0.7",
     "zod": "^3.25.76",
     "zustand": "^5.0.11"
-  },
-  "lint-staged": {
-    "*.{js,ts}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{css,html}": [
-      "prettier --write"
-    ],
-    "*.{json,md}": [
-      "prettier --write"
-    ],
-    "src/**/*.{js,ts}": [
-      "npm run test:coverage -- --run --changed"
-    ]
   }
 }

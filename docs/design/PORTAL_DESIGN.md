@@ -21,7 +21,7 @@ Portal-specific design standards for the admin dashboard and client portal. For 
 11. [Layout Wrapper System](#layout-wrapper-system)
 12. [Page Structure](#page-structure)
 13. [Gutter System](#gutter-system)
-14. [Tailwind vs Portal CSS](#tailwind-vs-portal-css)
+14. [One CSS system](#one-css-system)
 15. [Focus States](#focus-states)
 16. [Loading and Empty States](#loading-and-empty-states)
 17. [Intentional Deviations](#intentional-deviations)
@@ -808,13 +808,12 @@ The gutter system (`portal-gutter.css`) applies horizontal padding at multiple t
 
 ---
 
-## Tailwind vs Portal CSS
+## One CSS system
 
-The codebase uses **two CSS systems** with clear boundaries.
-
-### Portal CSS Classes (Primary)
-
-Used in EJS templates and vanilla TS. All semantic styling:
+Tailwind was removed on 2026-09-05. It had been wired into the build (a `tw-`
+prefix, a shadcn `components.json`, a compile step before every Vite build)
+and not one utility class was ever written; the React portal always used the
+portal stylesheets. There is now a single system, in every context:
 
 ```css
 .form-group, .field-label, .form-input    /* Forms */
@@ -824,29 +823,11 @@ Used in EJS templates and vanilla TS. All semantic styling:
 .status-badge                              /* Status */
 ```
 
-### Tailwind (`tw-` prefix) -- React Only
-
-All Tailwind classes prefixed with `tw-` to avoid collisions. Used **only inside React components** for layout utilities:
-
-```tsx
-// Correct: tw- prefix in React components
-<div className="tw-flex tw-items-center tw-gap-2">
-
-// WRONG: Unprefixed Tailwind
-<div className="flex items-center gap-2">
-
-// WRONG: Tailwind in EJS or vanilla TS
-```
-
-### When to Use Which
-
 | Context | System |
 |---------|--------|
-| EJS templates | Portal CSS |
+| EJS shells | Portal CSS |
 | Vanilla TS (DOM creation) | Portal CSS |
-| React component layout | Tailwind (`tw-`) |
-| React component semantics | Portal CSS |
-| React forms | Portal CSS |
+| React components | Portal CSS (`className="btn btn-primary"`); `cn()` from `src/react/lib/utils.ts` joins conditional classes |
 
 **Rule:** Portal CSS classes take priority. Only use `tw-` for flex/grid layout, spacing, and positioning within React components.
 

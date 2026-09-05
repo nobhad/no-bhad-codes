@@ -7,956 +7,306 @@
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![GSAP](https://img.shields.io/badge/GSAP-88CE02?style=for-the-badge&logo=greensock&logoColor=white)](https://greensock.com/gsap/)
 
-> Modern TypeScript portfolio website and client management system for a solo freelance operation, built with Vite, Express, and advanced web technologies.
+> Portfolio website and client management system for a solo freelance operation. The
+> marketing site is vanilla TypeScript with GSAP; the client portal and admin dashboard
+> are a React SPA; the API is Express on SQLite.
+
+Live: [www.nobhad.codes](https://www.nobhad.codes) (static site on Vercel, API on Railway).
 
 ## Features
 
-### **Portfolio Website**
+### Portfolio Website
 
-- **Interactive Business Card**: 3D flip animations with GSAP
-- **Responsive Design**: Mobile-first approach with CSS Grid/Flexbox
-- **Dark/Light Theme**: System preference detection with manual toggle
-- **Progressive Web App**: Offline-first with service worker
-- **Performance Optimized**: Core Web Vitals monitoring, lazy loading
-- **SEO Ready**: Meta tags, structured data, sitemap generation
+- **Interactive business card**: 3D flip with GSAP, keyboard-operable
+- **Spatial navigation**: five tiles in a plus layout with wheel, arrow-key and swipe navigation, hash routing and browser back/forward
+- **Projects as a vintage TV**: channel guide, title-card tune-in, per-channel audio, case studies
+- **Dark/light theme**: system preference with a manual toggle
+- **Service worker**: cache-first for hashed assets, network-first for data, offline fallback page
+- **Measured, not claimed**: Lighthouse (mobile) on the home page is performance 95, accessibility 100, best practices 100, SEO 100; axe-core runs in CI on 22 surfaces in both themes
+- **SEO**: meta tags, Open Graph, JSON-LD structured data, sitemap
 
-### **Client Management System**
+### Client Management System ("The Backend")
 
-- **Client Portal**: Secure dashboard for project tracking
-- **Intake Forms**: Dynamic project requirement collection with automated processing
-- **Project Generator**: Automated project plans and timelines
-- **Invoice System**: Dynamic pricing with payment schedules
-- **File Management**: Secure file uploads and sharing with type validation
-- **Messaging System**: Real-time communication with thread management
-  - Project-specific message threads
-  - General inquiry and support threads
-  - File attachments up to 5MB per message
-  - Priority levels and read status tracking
-  - Email notifications for new messages
-  - Admin analytics and message management
+- **Client portal**: project status, files, invoices, messaging, agreements, payments
+- **Terminal-style intake**: conversational project intake that becomes a lead
+- **Leads and CRM**: pipeline with Kanban view, scoring, tasks, notes, duplicate detection
+- **Proposals, contracts, invoices**: generated as PDFs with pdf-lib; Stripe payments and webhooks
+- **Messaging**: threads per project or general inquiry, attachments, read state, server-sent events for live updates
+- **Files**: drag-and-drop uploads with type validation
+- **Scheduler**: in-process timers for reminders, escalations and email retries
+- **Auth**: HttpOnly-cookie JWT for the single admin and for clients, emailed set-password invitations, passwordless magic-link sign-in
+- **Operations**: health checks, circuit breakers, audit chain, schema-drift detection, backups (local and Google Drive), OpenTelemetry
 
-### **Architecture**
+### Architecture
 
-- **TypeScript**: Full type safety with strict mode
-- **Dependency Injection**: Container-based DI for testability
-- **Module Pattern**: Consistent lifecycle management
-- **Service Layer**: Clean separation of business logic
-- **Component System**: Reusable UI components
-- **State Management**: Centralized state with pub-sub pattern
-
-### **Security & Operations**
-
-- **JWT Authentication**: Admin/client role-based access (single admin operator)
-- **Rate Limiting**: Configurable request throttling
-- **Input Validation**: Comprehensive data sanitization
-- **Error Logging**: Centralized logging with correlation IDs
-- **Environment Validation**: Type-safe configuration management
-- **Database Security**: Parameterized queries, data encryption
+- **TypeScript** in strict mode across client, server and shared code
+- **Marketing site**: module pattern with a DI container (`src/core/`), vanilla modules under `src/modules/`
+- **Portal**: React 19, React Router, Zustand, Radix primitives, Lucide icons (`src/react/`)
+- **Server**: Express 5, service layer under `server/services/`, migrations under `server/database/migrations/`
+- **Design tokens**: `src/design-system/tokens/`, rendered at `/design-system`
 
 ## Quick Start
 
 ### Prerequisites
 
 - **Node.js** 22.x and **npm** 8+
-- **Git** for version control
+- **Git**
 
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/noellebhaduri/no-bhad-codes.git
+git clone https://github.com/nobhad/no-bhad-codes.git
 cd no-bhad-codes
-
-# Install dependencies
 npm install
 
-# Create environment configuration
 cp .env.example .env
-# (If .env.example is not present, see docs/CONFIGURATION.md for required variables.)
-# Edit .env with your configuration
+# Set at least JWT_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD, BUSINESS_NAME and
+# BUSINESS_EMAIL. Everything else has a default. See docs/CONFIGURATION.md.
 
-# Initialize database
-npm run db:setup
-
-# Start development servers
-npm run dev:full
+npm run db:setup      # runs every migration
+npm run dev:full      # Vite on 4000, API on 4001
 ```
 
 ### Development URLs
 
-```text
-- **Frontend**: http://<frontend-host>:4000
-- **API Server**: http://<api-host>:4001
-- **Admin Dashboard**: http://<frontend-host>:4000/admin
-- **Client Portal**: http://<frontend-host>:4000/client/portal
-```
+| What | URL |
+|---|---|
+| Marketing site | <http://localhost:4000> |
+| Client portal | <http://localhost:4000/portal> (proxied to the API host) |
+| Admin dashboard | <http://localhost:4000/admin> (proxied to the API host) |
+| API | <http://localhost:4001/api> |
+| Liveness / readiness | <http://localhost:4001/health/live>, <http://localhost:4001/health> |
+| Swagger UI | <http://localhost:4001/api-docs> |
 
 ## Available Scripts
 
-### Development
-
 ```bash
-npm run dev              # Start frontend dev server
-npm run dev:server       # Start backend server only
-npm run dev:full         # Start both frontend and backend
-npm run dev:quiet        # Start with minimal output
-```
+# Development
+npm run dev              # Vite dev server (marketing site + portal bundles)
+npm run dev:server       # API with tsx watch (restarts on change)
+npm run dev:full         # Both
 
-### Building & Testing
+# Quality
+npm run typecheck        # tsc --noEmit (client); server: npx tsc -p server/tsconfig.json
+npm run lint             # ESLint over src, server, shared
+npm run format:check     # Prettier
+npm run docs:validate    # Documentation checks
+npm run lint:md          # markdownlint
 
-```bash
-npm run build           # Build for production
-npm run build:server    # Build server only
-npm run preview         # Preview production build
-npm run typecheck       # TypeScript type checking
-npm run test            # Run tests
-npm run test:coverage   # Generate coverage report
-```
+# Tests
+npm run test:unit        # Vitest, unit
+npm run test:integration # Vitest, integration (real SQLite)
+npm run test:coverage    # Coverage report
+npm run test:e2e         # Playwright, all projects
+npm run test:e2e:a11y    # Playwright + axe-core (also runs in CI)
 
-### Code Quality
+# Build and deploy checks
+npm run build            # Static site to dist/
+npm run build:server     # Server to dist/server/
+npm run preview          # Serve dist/ locally
+npm run check:deploy     # Smoke-check the live Vercel + Railway pair
+npm run railway:will-deploy  # Will this push trigger a Railway build?
 
-```bash
-npm run lint            # Run ESLint
-npm run format          # Format code with Prettier
-npm run format:check    # Check code formatting
-npm run optimize        # Full optimization check
-```
-
-### Database
-
-```bash
-npm run db:setup        # Initialize database
-npm run migrate         # Run migrations
-npm run migrate:status  # Check migration status
+# Data
+npm run migrate          # Apply pending migrations
+npm run migrate:status   # Migration state
+npm run db:backup        # Local backup
+npm run backup:drive     # Offsite backup to Google Drive
+npm run media:dimensions # Regenerate src/generated/media-dimensions.ts after portfolio media changes
 ```
 
 ## Project Structure
 
 ```text
 no-bhad-codes/
-├── client/                    # Client portal pages
-│   ├── intake.html              # Client intake form
-│   ├── portal.html              # Client dashboard
-│   └── set-password.html        # Invitation password setup
-├── server/                    # Backend application
-│   ├── config/               # Configuration management
-│   │   └── environment.ts       # Environment validation
-│   ├── database/             # Database setup and migrations
-│   ├── middleware/           # Express middleware
-│   │   ├── auth.ts              # Authentication middleware
-│   │   ├── errorHandler.ts      # Global error handling
-│   │   ├── logger.ts            # Request logging
-│   │   ├── request-id.ts        # Request correlation IDs
-│   │   ├── sanitization.ts      # Input sanitization
-│   │   └── audit.ts             # Audit logging
-│   ├── routes/               # API routes
-│   │   ├── auth.ts              # Authentication endpoints
-│   │   ├── admin.ts             # Admin dashboard
-│   │   ├── clients.ts           # Client management
-│   │   ├── projects.ts          # Project management
-│   │   ├── messages.ts          # Messaging
-│   │   ├── invoices.ts         # Invoices
-│   │   ├── uploads.ts          # File uploads
-│   │   ├── intake.ts           # Intake form processing
-│   │   ├── proposals.ts         # Proposals
-│   │   ├── analytics.ts        # Analytics
-│   │   ├── approvals.ts        # Approval workflows
-│   │   ├── triggers.ts         # Workflow triggers
-│   │   ├── document-requests.ts # Document requests
-│   │   ├── knowledge-base.ts   # Knowledge base (kb)
-│   │   └── api.ts              # General API (contact, etc.)
-│   ├── services/             # Business logic services
-│   │   ├── email-service.ts     # Email notifications
-│   │   ├── invoice-service.ts   # Invoice CRUD and generation
-│   │   ├── invoice-generator.ts # PDF invoice generation
-│   │   ├── logger.ts            # Centralized logging
-│   │   ├── project-service.ts   # Project management
-│   │   ├── project-generator.ts # Project planning
-│   │   ├── message-service.ts   # Messaging
-│   │   ├── client-service.ts   # Client management
-│   │   ├── file-service.ts     # File uploads
-│   │   └── (approvals, document-requests, knowledge-base, etc.)
-│   └── app.ts                   # Express application
-├── src/                      # Frontend source code
-│   ├── config/               # Frontend configuration
-│   │   ├── api.ts               # API endpoint configuration
-│   │   ├── branding.ts          # Company branding constants
-│   │   ├── constants.ts         # App-wide constants
-│   │   ├── routes.ts            # Route path definitions
-│   │   └── protection.config.ts # Code protection settings
-│   ├── core/                 # Application core
-│   │   ├── app.ts               # Main application
-│   │   ├── container.ts         # Dependency injection
-│   │   └── state.ts             # State management
-│   ├── features/             # Feature modules
-│   │   ├── admin/            # Admin features
-│   │   └── client/           # Client portal features
-│   ├── modules/              # Reusable UI modules
-│   ├── services/             # Frontend services
-│   ├── styles/               # CSS architecture
-│   │   ├── base/             # Base styles (reset, typography)
-│   │   ├── components/       # Component styles
-│   │   └── pages/            # Page-specific styles
-│   ├── utils/                # Utility functions
-│   └── vite-env.d.ts            # Vite environment type definitions
-├── templates/                # EJS templates
-│   ├── pages/                # Page templates
-│   └── partials/             # Reusable template parts
-├── .env.example                 # Environment configuration template
-├── tsconfig.json                # TypeScript configuration
-├── vite.config.ts               # Vite build configuration
-└── package.json                 # Dependencies and scripts
+├── index.html                 # Marketing site (Vite MPA entry)
+├── 404.html, design-system.html
+├── public/                    # Static assets, data/portfolio.json, sw.js, sitemap.xml
+├── src/
+│   ├── main-site.ts           # Marketing site entry
+│   ├── portal.ts, admin.ts    # Portal / admin bundle entries
+│   ├── core/                  # App bootstrap, DI container, module registry
+│   ├── modules/               # Vanilla modules: animation/, audio/, ui/ (navigation, projects TV, business card, footer curtain)
+│   ├── features/              # auth/ (password flows), client/ (terminal intake), main-site/ (portal login dropdown)
+│   ├── services/              # data-service, router-service, contact-service, performance, visitor tracking
+│   ├── components/            # Small vanilla components (consent banner, icon button, status badge)
+│   ├── react/                 # Portal + admin React SPA
+│   │   ├── app/               # PortalApp, routes, layout, providers
+│   │   ├── features/admin/    # ~50 admin feature folders (leads, clients, projects, invoices, ...)
+│   │   ├── features/portal/   # ~30 client feature folders
+│   │   ├── components/, hooks/, stores/, factories/
+│   ├── styles/                # Cascade-layered CSS: base, components, pages, portal, mobile, bundles
+│   ├── design-system/tokens/  # Design tokens
+│   └── generated/             # Build outputs checked in (media dimensions)
+├── server/
+│   ├── app.ts                 # Express app, route mounts, health, static portal shells
+│   ├── config/                # environment.ts validation, business info, email styles
+│   ├── database/              # init, pool, migrations/ (141), entities/
+│   ├── middleware/            # auth, audit, cache, rate limiting, sanitization, validation
+│   ├── routes/                # ~30 route modules; larger ones are folders (admin/, clients/, invoices/, ...)
+│   ├── services/              # ~100 services (invoices, agreements, messaging, scheduler, AI, backups, ...)
+│   ├── observability/         # OpenTelemetry, Prometheus
+│   ├── templates/email/       # Email templates
+│   └── views/                 # EJS shells for portal/admin/auth pages
+├── shared/validation/         # Zod schemas shared by client and server
+├── scripts/                   # Migrations CLI, backups, portfolio capture, deploy checks
+├── tests/                     # unit/, integration/, e2e/ (Playwright)
+├── docs/                      # See docs/README.md
+├── vercel.json                # Static hosting + rewrites to the Railway API
+└── railway.json               # API build/deploy, health check, volume
 ```
 
-## Database Schema
+## Database
 
-The application uses SQLite with the following main entities:
-
-### Users
-
-This is a **solo operation** — there is no team management. The `users` table stores the single admin account and client accounts.
-
-- **id**: Primary key
-- **email**: Unique email address
-- **password**: Bcrypt hashed password
-- **role**: 'admin' | 'client'
-- **status**: 'active' | 'inactive' | 'pending'
-- **createdAt**: Timestamp
-
-### Clients
-
-- **id**: Primary key
-- **userId**: Foreign key to users
-- **company**: Company name
-- **contactName**: Primary contact
-- **phone**: Phone number
-- **address**: Business address
-- **createdAt**: Timestamp
-
-### Projects
-
-- **id**: Primary key
-- **clientId**: Foreign key to clients
-- **title**: Project title
-- **description**: Project description
-- **status**: 'planning' | 'active' | 'completed' | 'cancelled'
-- **budget**: Project budget
-- **timeline**: Estimated timeline
-- **createdAt**: Timestamp
-
-### IntakeForms
-
-- **id**: Primary key
-- **intake_id**: Unique intake identifier
-- **client_id**: Foreign key to clients
-- **company_name**: Client company name
-- **first_name**, **last_name**: Client contact information
-- **email**: Client email address
-- **phone**: Client phone number
-- **project_type**: Type of project requested
-- **budget_range**: Budget range selection
-- **timeline**: Expected timeline
-- **project_description**: Detailed project requirements
-- **status**: 'pending' | 'reviewing' | 'accepted' | 'rejected' | 'converted'
-- **created_at**: Timestamp
-
-### Messages & Communication
-
-- **messages**: Project-specific messages
-  - **id**: Primary key
-  - **project_id**: Foreign key to projects
-  - **sender_type**: 'client' | 'admin' | 'system'
-  - **sender_name**: Message sender identifier
-  - **message**: Message content
-  - **message_type**: 'text' | 'system' | 'file' | 'update'
-  - **priority**: 'low' | 'normal' | 'high' | 'urgent'
-  - **reply_to**: Reference to parent message
-  - **attachments**: JSON array of file attachments
-  - **is_read**: Read status boolean
-  - **thread_id**: Reference to message thread
-  - **created_at**: Timestamp
-
-- **message_threads**: Conversation organization
-  - **id**: Primary key
-  - **project_id**: Optional project association
-  - **client_id**: Foreign key to clients
-  - **subject**: Thread subject line
-  - **thread_type**: 'general' | 'project' | 'support' | 'quote'
-  - **status**: 'active' | 'closed' | 'archived'
-  - **priority**: Message thread priority level
-  - **last_message_at**: Last activity timestamp
-  - **last_message_by**: Last message sender
-  - **participant_count**: Number of thread participants
-  - **created_at**: Timestamp
-
-- **general_messages**: Non-project specific messages
-  - **id**: Primary key
-  - **client_id**: Foreign key to clients
-  - **sender_type**: Message sender type
-  - **subject**: Message subject
-  - **message**: Message content
-  - **message_type**: 'inquiry' | 'quote_request' | 'support' | 'feedback'
-  - **priority**: Priority level
-  - **status**: 'new' | 'read' | 'replied' | 'closed'
-  - **reply_to**: Parent message reference
-  - **attachments**: File attachments JSON
-  - **thread_id**: Thread association
-  - **created_at**: Timestamp
-
-- **notification_preferences**: Client notification settings
-  - **id**: Primary key
-  - **client_id**: Foreign key to clients (unique)
-  - **email_notifications**: Email notification enabled
-  - **project_updates**: Project update notifications
-  - **new_messages**: New message notifications
-  - **milestone_updates**: Milestone notification preferences
-  - **invoice_notifications**: Invoice-related notifications
-  - **marketing_emails**: Marketing email preferences
-  - **notification_frequency**: 'immediate' | 'daily' | 'weekly' | 'none'
-  - **created_at**: Timestamp
-
-### Project Management
-
-- **milestones**: Project milestone tracking
-  - **id**: Primary key
-  - **project_id**: Foreign key to projects
-  - **title**: Milestone title
-  - **description**: Detailed description
-  - **due_date**: Target completion date
-  - **completed_date**: Actual completion date
-  - **is_completed**: Completion status boolean
-  - **deliverables**: JSON array of deliverable items
-  - **created_at**, **updated_at**: Timestamps
-
-- **invoices**: Financial tracking
-  - **id**: Primary key
-  - **invoice_number**: Unique invoice identifier
-  - **project_id**: Associated project
-  - **client_id**: Foreign key to clients
-  - **amount_total**: Total invoice amount
-  - **amount_paid**: Amount paid to date
-  - **currency**: Currency code (default: USD)
-  - **status**: 'draft' | 'sent' | 'viewed' | 'partial' | 'paid' | 'overdue' | 'cancelled'
-  - **due_date**: Payment due date
-  - **issued_date**: Invoice issue date
-  - **paid_date**: Payment completion date
-  - **payment_method**: Payment method used
-  - **payment_reference**: Payment reference number
-  - **line_items**: JSON array of invoice line items
-  - **notes**: Additional invoice notes
-  - **terms**: Payment terms and conditions
-  - **created_at**, **updated_at**: Timestamps
+SQLite at `DATABASE_PATH` (default `./data/client_portal.db`), WAL mode, a small
+connection pool with a busy timeout. The schema is defined only by the migrations in
+`server/database/migrations/` (141 today, 169 tables). The `users` table holds the admin
+and system accounts; client logins live on the `clients` table with their own password
+hash. Full reference: [docs/architecture/DATABASE_SCHEMA.md](docs/architecture/DATABASE_SCHEMA.md).
 
 ## Configuration
 
-### Environment Variables
+Copy `.env.example` to `.env`. The server validates its configuration on boot
+(`server/config/environment.ts`) and logs what is missing.
 
-The application uses comprehensive environment configuration. Copy `.env.example` to `.env` and configure:
-
-#### Required Variables
-
-```env
-NODE_ENV=development|production
-PORT=4001
-FRONTEND_URL=http://<frontend-host>:4000
-JWT_SECRET=your-secret-key-change-in-production-min-32-chars
-JWT_EXPIRES_IN=7d
-ADMIN_EMAIL=admin@yourdomain.com
-ADMIN_PASSWORD=secure-password
-```
-
-#### Optional Variables
+Required, no default:
 
 ```env
-# Database
-DATABASE_PATH=./data/client_portal.db
-
-# Client Portal URLs
-CLIENT_PORTAL_URL=http://<frontend-host>:4000/client/portal
-WEBSITE_URL=http://<frontend-host>:4000
-
-# Email Configuration
-EMAIL_ENABLED=false
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
-SMTP_FROM="No Bhad Codes <nobhaduri@gmail.com>"
-SMTP_REPLY_TO=nobhaduri@gmail.com
-SUPPORT_EMAIL=nobhaduri@gmail.com
-
-# Third-Party Services (Contact Forms)
-VITE_FORMSPREE_FORM_ID=your-formspree-form-id
-VITE_EMAILJS_SERVICE_ID=your-emailjs-service-id
-VITE_EMAILJS_TEMPLATE_ID=your-emailjs-template-id
-VITE_EMAILJS_PUBLIC_KEY=your-emailjs-public-key
-
-# Error Tracking
-SENTRY_DSN=
-SENTRY_ENVIRONMENT=development
-
-# Redis Cache (optional)
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=
-REDIS_DB=0
-
-# File Storage
-UPLOAD_DIR=./uploads
-MAX_FILE_SIZE=10485760
+JWT_SECRET=            # at least 32 characters
+ADMIN_EMAIL=
+ADMIN_PASSWORD=        # or ADMIN_PASSWORD_HASH in production
+BUSINESS_NAME=
+BUSINESS_EMAIL=
 ```
 
-### TypeScript Configuration
+Everything else (ports, database path, email, Redis, Stripe, AI, scheduler, backups,
+observability) is optional with a default. The complete list, with defaults and where
+each variable is read, is in [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 
-The project uses strict TypeScript configuration with:
+## API
 
-- **Target**: ES2020
-- **Module**: ES2020
-- **Strict Mode**: Enabled
-- **Path Mapping**: `@/*` → `src/*`
+All routes are mounted at `/api` and mirrored at `/api/v1`; admin-only routes sit under
+`/api/admin`. Swagger UI is served at `/api-docs`. The contract lives in the route files'
+OpenAPI comments; the summary below is only the entry points.
 
-## API Documentation
+### Authentication (`/api/auth`)
 
-### Authentication Endpoints
+| Route | Purpose |
+|---|---|
+| `POST /portal-login` | Unified login: the server routes admin and client by email |
+| `POST /login`, `POST /admin/login` | Role-specific logins kept for compatibility |
+| `POST /magic-link`, `POST /verify-magic-link` | Passwordless sign-in |
+| `POST /set-password`, `POST /verify-invitation` | Invitation flow (invites email a one-time set-password link) |
+| `POST /forgot-password`, `POST /reset-password` | Password reset |
+| `POST /refresh`, `POST /logout`, `GET /validate` | Session lifecycle |
+| `GET /profile`, `POST /resend-verification`, `GET /verify-email/:token` | Account |
 
-#### POST `/api/auth/portal-login` (recommended)
+The JWT is set in an HttpOnly `auth_token` cookie; response bodies never carry the token.
 
-Unified login endpoint. The server inspects the submitted email and routes
-to the admin or client authentication path internally, so callers don't
-branch. This is the canonical endpoint for new integrations.
+### Messaging (`/api/messages`)
 
-The role-specific endpoints `POST /api/auth/login` (client) and
-`POST /api/auth/admin/login` (admin, password-only) are kept for backward
-compatibility.
+`GET/POST /threads`, `GET /threads/archived`, `POST /inquiry`, `GET/PUT /preferences`,
+`GET /unread-count`, `GET /search`, `GET /mentions/me`, `PUT /messages/read-bulk`,
+`GET /attachments/:filename/download`, and `GET /analytics` (admin). Live updates reach
+the portal over server-sent events.
 
-**Request Body:**
-
-```json
-{
-  "email": "client@example.com",
-  "password": "password123"
-}
-```
-
-**Response:** JWT is set in an HttpOnly `auth_token` cookie; the body does not
-include the token. Cookie lifetime is 1 day for clients and 1 hour for admin.
-
-```json
-{
-  "success": true,
-  "message": "Login successful",
-  "data": {
-    "user": {
-      "id": 1,
-      "email": "client@example.com",
-      "name": "John Doe",
-      "companyName": "Example Corp",
-      "contactName": "John Doe",
-      "status": "active",
-      "isAdmin": false,
-      "role": "client"
-    },
-    "expiresIn": "1d"
-  }
-}
-```
-
-#### POST `/api/intake`
-
-Submit client intake form data.
-
-**Request Body:**
-
-```json
-{
-  "projectType": "business-site",
-  "company": "Example Corp",
-  "contactName": "John Doe",
-  "email": "john@example.com",
-  "phone": "+1234567890",
-  "projectDescription": "Need a professional website",
-  "timeline": "1-3-months",
-  "budget": "5000-10000",
-  "features": ["contact-form", "blog", "cms"],
-  "pages": "6-10"
-}
-```
-
-### Client Management Endpoints
-
-#### GET `/api/clients`
-
-Get all clients (admin only)
-
-#### GET `/api/clients/:id`
-
-Get specific client details
-
-#### PUT `/api/clients/:id`
-
-Update client information
-
-### Project Management Endpoints
-
-#### GET `/api/projects`
-
-Get projects for authenticated user
-
-#### POST `/api/projects`
-
-Create new project
-
-#### PUT `/api/projects/:id`
-
-Update project status/details
-
-### Messaging System Endpoints
-
-#### GET `/api/messages/threads`
-
-Get all message threads for authenticated user.
-
-**Response:**
-
-```json
-{
-  "threads": [
-    {
-      "id": 1,
-      "subject": "Website Development Inquiry",
-      "thread_type": "general",
-      "status": "active",
-      "priority": "normal",
-      "last_message_at": "2025-01-02T10:30:00Z",
-      "last_message_by": "John Doe",
-      "message_count": 5,
-      "unread_count": 2,
-      "project_name": "E-commerce Site"
-    }
-  ]
-}
-```
-
-#### POST `/api/messages/threads`
-
-Create a new message thread.
-
-**Request Body:**
-
-```json
-{
-  "subject": "New Project Discussion",
-  "thread_type": "project",
-  "priority": "normal",
-  "project_id": 123
-}
-```
-
-#### GET `/api/messages/threads/:id/messages`
-
-Get all messages in a specific thread.
-
-**Response:**
-
-```json
-{
-  "thread": {
-    "id": 1,
-    "subject": "Website Development",
-    "status": "active"
-  },
-  "messages": [
-    {
-      "id": 1,
-      "sender_type": "client",
-      "sender_name": "John Doe",
-      "message": "I need help with my website project",
-      "priority": "normal",
-      "attachments": [],
-      "is_read": true,
-      "created_at": "2025-01-02T10:00:00Z"
-    }
-  ]
-}
-```
-
-#### POST `/api/messages/threads/:id/messages`
-
-Send a new message in a thread (supports file attachments).
-
-**Request Body (multipart/form-data):**
-
-```text
-message: "Here's my response to your question"
-priority: "normal"
-reply_to: 5
-attachments: [File objects]
-```
-
-#### PUT `/api/messages/threads/:id/read`
-
-Mark all messages in a thread as read.
-
-#### POST `/api/messages/inquiry`
-
-Send a quick inquiry (creates thread automatically).
-
-**Request Body (multipart/form-data):**
-
-```text
-subject: "New Project Inquiry"
-message: "I'm interested in developing a new website"
-message_type: "inquiry"
-priority: "normal"
-attachments: [File objects]
-```
-
-#### GET `/api/messages/preferences`
-
-Get client notification preferences.
-
-#### PUT `/api/messages/preferences`
-
-Update client notification preferences.
-
-**Request Body:**
-
-```json
-{
-  "email_notifications": true,
-  "project_updates": true,
-  "new_messages": true,
-  "milestone_updates": false,
-  "invoice_notifications": true,
-  "marketing_emails": false,
-  "notification_frequency": "immediate"
-}
-```
-
-#### GET `/api/messages/analytics` *(Admin Only)*
-
-Get messaging system analytics and statistics.
-
-**Response:**
-
-```json
-{
-  "analytics": {
-    "total_threads": 45,
-    "active_threads": 32,
-    "total_messages": 234,
-    "unread_messages": 12,
-    "client_messages": 156,
-    "admin_messages": 78,
-    "inquiries": 23,
-    "urgent_messages": 3
-  },
-  "recentActivity": [
-    {
-      "subject": "Website Updates",
-      "thread_type": "project",
-      "priority": "normal",
-      "last_message_at": "2025-01-02T15:30:00Z",
-      "last_message_by": "Admin",
-      "company_name": "Example Corp",
-      "contact_name": "John Doe"
-    }
-  ]
-}
-```
+Other route groups: clients, projects, invoices, proposals, contracts, agreements,
+deliverables, document requests, questionnaires, retainers, expenses, payments and
+Stripe webhooks, integrations, knowledge base, analytics, data quality, health.
 
 ## Frontend Architecture
 
-### Module System
+### Marketing site (vanilla modules)
 
-All frontend modules extend the `BaseModule` class:
+Modules extend `BaseModule` (`src/modules/core/base.ts`) and are registered in
+`src/core/modules-config.ts`; heavy ones load lazily. Key modules:
 
-```typescript
-import { BaseModule } from './base.js';
+- `modules/animation/intro-animation.ts`: the coyote-paw intro (skipped for deep links)
+- `modules/animation/page-transition.ts`: the spatial map and its camera
+- `modules/ui/navigation.ts`, `modules/ui/submenu.ts`: header, menu, compass cues
+- `modules/ui/business-card-*.ts`: card rendering and interactions
+- `modules/ui/projects.ts`: the TV, channel guide, tune-in sequence, case-study pages
+- `modules/ui/footer-curtain.ts`: the footer band revealed behind the page
+- `modules/audio/tv-sfx.ts`: channel audio
 
-export class MyModule extends BaseModule {
-  constructor(container: HTMLElement) {
-    super('my-module', container);
-  }
+Services registered with the container: `RouterService`, `DataService` (reads
+`public/data/portfolio.json`), `ContactService` (submits to the API by default; Formspree,
+EmailJS and Netlify Forms are selectable backends), `PerformanceService`,
+`VisitorTrackingService` (consent-gated), `CodeProtectionService`.
 
-  protected override async onInit(): Promise<void> {
-    // Module initialization
-  }
+### Portal and admin (React)
 
-  protected override async onDestroy(): Promise<void> {
-    // Cleanup logic
-  }
-}
-```
+`src/react/portal-entry.tsx` mounts `PortalApp`; routes are lazy per tab
+(`src/react/app/PortalRoutes.tsx`). State is Zustand; API access goes through
+`src/utils/api-client.ts` with CSRF headers. See
+[docs/features/PORTAL_ARCHITECTURE.md](docs/features/PORTAL_ARCHITECTURE.md).
 
-### State Management
+## Security
 
-Centralized state management with pub-sub pattern:
-
-```typescript
-import { StateManager } from '@/core/state/state-manager.js';
-
-import { createLogger } from '../utils/logger';
-
-const logger = createLogger('MyModule');
-
-// Subscribe to state changes
-StateManager.subscribe('user', (user) => {
-  logger.log('User updated:', user); // Debug logs only in development
-});
-
-// Update state
-StateManager.setState('user', { id: 1, name: 'John' });
-```
-
-### Key Frontend Modules
-
-#### Communication & Messaging
-
-- **Messaging** (`src/react/features/portal/messages/`, `src/react/features/admin/messaging/`): Complete messaging system
-  - Thread management with project association (`src/react/factories/MessageThread.tsx`)
-  - Message sending and receiving
-  - File attachment handling up to 5MB
-  - Priority levels and read status tracking
-  - Email notification triggers
-  - Responsive design with mobile support
-
-#### Client Portal Features
-
-- **PortalApp** (`src/react/app/PortalApp.tsx`, mounted by `src/react/app/mount-portal.tsx`): Main portal interface
-  - Secure authentication and session management
-  - Project dashboard with progress tracking
-  - Interactive project timeline and milestones
-  - File management and downloads
-
-> The client portal and admin dashboard are React SPAs under `src/react/`. The vanilla-TS
-> modules that preceded them were removed during the React migration:
-> `src/features/client/client-portal.ts` and `src/modules/messaging.ts` no longer exist.
-
-#### Core UI Components (vanilla modules — marketing site)
-
-- **ThemeModule** (`src/modules/utilities/theme.ts`): Dark/light theme switching with localStorage persistence
-- **IntroAnimationModule** (`src/modules/animation/intro-animation.ts`): CLS-safe intro animations using GSAP
-- **BusinessCardRenderer** (`src/modules/ui/business-card-renderer.ts`): Manages business card animations and interactions
-- **NavigationModule** (`src/modules/ui/navigation.ts`): Navigation with router service integration
-- **ContactFormModule** (`src/modules/ui/contact-form.ts`): Form handling with backend service integration
-- **FooterModule** (`src/modules/ui/footer.ts`): Footer interactions and visibility management
-
-### Service Layer
-
-Services are registered with the DI container:
-
-```typescript
-import { container } from '@/core/container.js';
-import { ApiService } from '@/services/api.js';
-
-// Register service
-container.register('apiService', ApiService);
-
-// Use service in modules
-const apiService = container.get<ApiService>('apiService');
-```
-
-#### Available Services (Singleton Pattern)
-
-- **RouterService**: Client-side routing with smooth scrolling
-- **DataService**: Centralized data management with caching
-- **ContactService**: Form submission handling (Netlify integration)
-- **PerformanceService**: Core Web Vitals monitoring and reporting
-- **BundleAnalyzerService**: Bundle size analysis and optimization
-- **VisitorTrackingService**: Privacy-respecting analytics with consent
-- **CodeProtectionService**: Security and code protection features
-
-## Security Features
-
-### Authentication & Authorization
-
-- **JWT Tokens**: Secure token-based authentication
-- **Role-Based Access**: Admin (single operator) and client role separation
-- **Token Refresh**: Automatic token renewal
-- **Session Management**: Secure session handling
-
-### Input Validation & Sanitization
-
-- **Schema Validation**: Comprehensive input validation
-- **XSS Prevention**: HTML sanitization
-- **SQL Injection Protection**: Parameterized queries
-- **CSRF Protection**: Token-based CSRF prevention
-
-### Security Headers & Middleware
-
-- **Helmet.js**: Security headers configuration
-- **CORS**: Cross-origin resource sharing
-- **Rate Limiting**: Request throttling
-- **File Upload Security**: Type and size validation
-
-## Monitoring & Logging
-
-### Centralized Logging
-
-- **Structured Logging**: JSON-formatted log entries
-- **Log Levels**: ERROR, WARN, INFO, DEBUG
-- **Request Correlation**: Unique request IDs
-- **Performance Monitoring**: Request timing and metrics
-- **Security Events**: Authentication and authorization logging
-
-### Error Handling
-
-- **Global Error Handler**: Centralized error processing
-- **Error Categorization**: Structured error codes
-- **Context Preservation**: Full request context in errors
-- **Production Safety**: Sensitive data filtering
+- JWT in HttpOnly cookies, CSRF token header, rate limiting per route group
+- Input validation with Zod (`shared/validation/`), HTML sanitization, parameterized queries
+- Helmet, CORS, file type and size validation on uploads
+- Audit log with a tamper-evident hash chain; idempotency keys on payment routes
+- Structured logging with request correlation IDs; Sentry in production
 
 ## Testing
 
-### Test Structure
-
-```bash
+```text
 tests/
-├── unit/           # Unit tests (Vitest)
-├── e2e/            # End-to-end tests (Playwright)
-├── mocks/          # Test data and mocks
-└── setup/          # Test setup and utilities
+├── unit/           # Vitest (services, routes, middleware, utils, hooks)
+├── integration/    # Vitest against a real SQLite file
+├── e2e/            # Playwright: navigation, business card, contact form, accessibility, portal and admin flows
+├── mocks/ setup/
 ```
 
-### Running Tests
-
-```bash
-# Unit tests
-npm run test
-
-# With UI
-npm run test:ui
-
-# Coverage report
-npm run test:coverage
-
-# E2E tests
-npx playwright test
-```
+Unit and integration suites, the accessibility sweep and the build all run in CI on
+every push (`.github/workflows/ci.yml`). The portal and admin e2e flows need a running
+API and credentials (`E2E_ADMIN_PASSWORD`, `E2E_CLIENT_EMAIL`, `E2E_CLIENT_PASSWORD`).
 
 ## Deployment
 
-### Production Build
+Two hosts, deployed independently:
 
-```bash
-# Build the application
-npm run build
+- **Vercel** builds `npm run build` and serves `dist/` (the marketing site, the design
+  system page, `404.html`). `vercel.json` rewrites `/api`, `/portal`, `/admin`, `/client`,
+  `/intake`, `/dashboard` and the password pages to the Railway host.
+- **Railway** builds `npm run build && npm run build:server` with Nixpacks, starts
+  `node dist/server/server/app.js`, health-checks `/health/live`, and mounts a volume at
+  `/app/data` for the SQLite file and uploads.
 
-# Preview production build locally
-npm run preview
-
-# Run production server
-NODE_ENV=production tsx server/app.ts
-```
-
-### Environment Setup
-
-1. Set `NODE_ENV=production`
-2. Configure production database
-3. Set secure JWT secrets
-4. Configure email service
-5. Set up SSL/TLS certificates
-6. Configure reverse proxy (nginx/apache)
-
-### Docker Deployment (Optional)
-
-```dockerfile
-FROM node:22-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --omit=dev
-COPY dist/ ./dist/
-COPY public/ ./public/
-EXPOSE 4001
-CMD ["node", "dist/server/app.js"]
-```
+After a deploy, `npm run check:deploy` fetches both hosts and confirms the served HTML
+resolves to assets that exist. Details: [docs/guides/DEPLOYMENT.md](docs/guides/DEPLOYMENT.md)
+and [docs/OPS_RUNBOOK.md](docs/OPS_RUNBOOK.md).
 
 ## Contributing
 
-### Development Workflow
-
-1. **Fork** the repository
-2. **Create** feature branch: `git checkout -b feature/amazing-feature`
-3. **Commit** changes: `git commit -m 'Add amazing feature'`
-4. **Push** to branch: `git push origin feature/amazing-feature`
-5. **Open** Pull Request
-
-### Code Standards
-
-- **TypeScript**: Strict mode with comprehensive typing
-- **ESLint**: Enforced code quality rules
-- **Prettier**: Consistent code formatting
-- **Conventional Commits**: Semantic commit messages
-- **Husky**: Pre-commit hooks for quality checks
-
-### Pull Request Guidelines
-
-- Follow existing code patterns
-- Add tests for new features
-- Update documentation
-- Ensure all checks pass
-- Provide clear description
+Conventional Commits, enforced by commitlint in the `commit-msg` hook; `pre-commit` runs
+ESLint (with fixes) and the client typecheck; `pre-push` runs lint, typecheck, the unit
+suite and a build. See [CONTRIBUTING.md](CONTRIBUTING.md) and
+[.husky/README.md](.husky/README.md).
 
 ## Troubleshooting
 
-### Common Issues
-
-#### Port Already in Use
-
 ```bash
-# Kill processes on ports 4000/4001
-lsof -ti:4000 | xargs kill -9
-lsof -ti:4001 | xargs kill -9
+# Ports 4000/4001 in use
+lsof -ti:4000 | xargs kill -9; lsof -ti:4001 | xargs kill -9
+
+# Reset the local database
+rm data/client_portal.db && npm run db:setup
+
+# Stale build
+rm -rf dist && npm run build
 ```
-
-#### Database Issues
-
-```bash
-# Reset database
-rm data/client_portal.db
-npm run db:setup
-```
-
-#### TypeScript Errors
-
-```bash
-# Clear cache and reinstall
-rm -rf node_modules package-lock.json
-npm install
-npm run typecheck
-```
-
-#### Build Issues
-
-```bash
-# Clear build cache
-rm -rf dist
-npm run build
-```
-
-### Getting Help
-
-- **Issues**: [GitHub Issues](https://github.com/noellebhaduri/no-bhad-codes/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/noellebhaduri/no-bhad-codes/discussions)
-- **Email**: <nobhaduri@gmail.com>
 
 ## License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+MIT. See [LICENSE](LICENSE).
 
 ## Author
 
-### Noelle Bhaduri
+Noelle Bhaduri
 
-- Website: [nobhad.codes](https://nobhad.codes)
+- Website: [www.nobhad.codes](https://www.nobhad.codes)
 - Email: <nobhaduri@gmail.com>
-- GitHub: [@noellebhaduri](https://github.com/noellebhaduri)
-- LinkedIn: [Noelle Bhaduri](https://linkedin.com/in/noellebhaduri)
-
----
-
-### Built with ❤️ using modern web technologies
-
-[TypeScript](https://www.typescriptlang.org/) • [Node.js](https://nodejs.org/) • [Express](https://expressjs.com/) • [Vite](https://vitejs.dev/) • [GSAP](https://greensock.com/gsap/)
+- GitHub: [@nobhad](https://github.com/nobhad)
+- LinkedIn: [Noelle Bhaduri](https://www.linkedin.com/in/noelle-b-676286106/)

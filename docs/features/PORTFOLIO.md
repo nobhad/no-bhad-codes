@@ -1,7 +1,7 @@
 # Portfolio Projects
 
 **Status:** Complete
-**Last Updated:** 2026-06-25
+**Last Updated:** 2026-09-05
 
 The portfolio is a single feature with two halves: the **data side**
 (how a project is described in `portfolio.json`, what fields render
@@ -32,46 +32,58 @@ Copy this template and fill in all fields:
   "tagline": "Short tagline (shown under title)",
   "description": "Full description paragraph for the overview section.",
   "category": "websites",
-  "role": "Full Stack Developer",
+  "role": "Full Stack Developer & Designer",
   "tools": ["TypeScript", "Node.js", "Express.js"],
-  "year": 2026,
   "technologies": ["TypeScript", "Node.js", "Express.js"],
+  "year": 2026,
+  "yearDisplay": "2025–2026",
   "date": "2026-01-01",
   "status": "in-progress",
   "featured": true,
-  "heroImage": "/projects/project-slug-hero.png",
-  "screenshots": [
-    "/projects/project-slug-screen1.png",
-    "/projects/project-slug-screen2.png"
-  ],
-  "liveUrl": "https://example.com",
-  "repoUrl": "https://github.com/user/repo",
   "isDocumented": true,
+  "heroImage": "/portfolio/project-slug/hero-{theme}.png",
+  "screenshots": ["/portfolio/project-slug/screen-1.png"],
+  "videos": ["/portfolio/project-slug/videos/walkthrough-{theme}.webm"],
+  "liveUrl": "https://example.com",
+  "testUrl": "https://example.netlify.app",
+  "repoUrl": "https://github.com/user/repo",
+  "docsUrl": "/design-system",
+  "docsLabel": "Design System",
+  "launchDate": "2026-09",
+  "duration": "3 months",
   "titleCard": {
     "composed": "/images/tv/title-cards/project-slug.webp",
     "bg": "/images/tv/title-cards/project-slug_bg.webp",
     "color": "#ffffff",
-    "primary": "Primary text",
-    "primaryPt": 72,
-    "secondary": "Secondary text",
-    "secondaryPt": 24
+    "primary": ["PRIMARY", "TEXT"],
+    "primaryPt": 90,
+    "secondary": ["SECONDARY TEXT"],
+    "secondaryPt": 38
   },
-  "duration": "3 months",
-  "challenge": "Description of the problem being solved, user pain points, or business requirements that led to this project.",
-  "approach": "Description of the methodology, key technical decisions, and how you solved the challenge.",
-  "results": [
-    "Specific outcome or metric #1",
-    "Specific outcome or metric #2",
-    "Specific outcome or metric #3"
-  ],
-  "keyFeatures": [
-    "Feature highlight #1",
-    "Feature highlight #2",
-    "Feature highlight #3",
-    "Feature highlight #4"
-  ]
+  "challenge": "The problem, user pain points, or business requirements that led to this project.",
+  "approach": "The methodology, key technical decisions, and how the challenge was solved.",
+  "results": ["Measured outcome #1", "Measured outcome #2", "Measured outcome #3"],
+  "keyFeatures": ["Feature #1", "Feature #2", "Feature #3", "Feature #4"],
+  "deepDive": {
+    "heading": "Inside the CMS",
+    "body": ["Paragraph one.", "Paragraph two."],
+    "bullets": ["Detail", "Detail"],
+    "media": "/portfolio/project-slug/videos/admin.webm"
+  },
+  "tv": {
+    "description": "Shorter intro for the TV.",
+    "challenge": "One or two sentences.",
+    "approach": "One or two sentences.",
+    "keyFeatures": ["Top 3 features"],
+    "results": ["Top 2–3 outcomes"]
+  }
 }
 ```
+
+Every claim in `results`, `keyFeatures`, `challenge` and `approach` must be
+something the project's repository, its live site or a measurement backs up.
+The 2026-09-05 sweep checked all five entries against their repositories and
+rewrote what did not hold; do the same for a new one before it ships.
 
 ### Field reference
 
@@ -88,8 +100,8 @@ Copy this template and fill in all fields:
 | `role` | string | Your role (e.g., "Full Stack Developer") |
 | `tools` | string[] | Technologies used (displayed as tags) |
 | `year` | number | Year of project |
-| `status` | string | One of: `in-progress`, `completed`, `planned` |
-| `isDocumented` | boolean | Set to `true` to show on the projects page |
+| `status` | string | One of: `live`, `completed`, `in-progress`, `planned`. `live`/`completed` are the launched states — see "Links" below |
+| `isDocumented` | boolean | `true` gives the project a TV channel and a case-study page. `false` keeps it in the data only: it is not a channel and a deep link to `#/projects/<slug>` is a 404 |
 
 #### Optional fields
 
@@ -100,9 +112,15 @@ Copy this template and fill in all fields:
 | `featured` | boolean | Featured project flag |
 | `heroImage` | string | Path to hero image (empty string if none) |
 | `screenshots` | string[] | Array of screenshot paths |
-| `liveUrl` | string | URL to live project |
+| `liveUrl` | string | The project's own address. Rendered as a link only once `status` is `live` or `completed`; before that it is shown greyed and inert everywhere it appears (see "Links") |
+| `testUrl` | string | A preview build (e.g. Netlify). Linked when there is no `liveUrl` |
 | `repoUrl` | string | URL to source code |
-| `titleCard` | object | TV title-card data — see "Title card structure" below |
+| `docsUrl`, `docsLabel` | string | Long-form documentation link; the label defaults to "Documentation" |
+| `launchDate` | string | `YYYY-MM`; shown in the detail meta and in the greyed live link's tooltip |
+| `videos` | string[] | Walkthrough videos; `{theme}` in any media path is swapped for `light`/`dark` |
+| `yearDisplay` | string | Overrides `year` in the meta list (e.g. a range) |
+| `deepDive` | object | Optional second write-up under the case study: `heading`, `body[]`, `bullets[]`, `media` |
+| `titleCard` | object or string | TV title-card data — see "Title card structure" below. A bare string is a placeholder for a card not yet made (the runtime ignores it) |
 
 #### Title card structure
 
@@ -111,10 +129,10 @@ Copy this template and fill in all fields:
   "composed": "/images/tv/title-cards/<name>.webp",
   "bg":       "/images/tv/title-cards/<name>_bg.webp",
   "color":    "#ffffff",
-  "primary":  "Primary text",
-  "primaryPt": 72,
-  "secondary": "Secondary text",
-  "secondaryPt": 24
+  "primary":  ["PRIMARY", "TEXT"],
+  "primaryPt": 90,
+  "secondary": ["SECONDARY TEXT"],
+  "secondaryPt": 38
 }
 ```
 
@@ -166,6 +184,16 @@ curated TV copy still render.
 | `tv.keyFeatures` | string[] | TV-specific feature list (falls back to full `keyFeatures`) |
 | `tv.results` | string[] | TV-specific results list (falls back to full `results`) |
 
+### Links
+
+Three places show a project's address: the detail page's links row, the
+detail page title, and the TV's outro panel. They all use the same rule
+(`isLaunched()` in `projects.ts`): `liveUrl` is a link only when `status` is
+`live` or `completed`. Otherwise it is rendered greyed and not clickable, with
+"Launching" plus the launch date in its tooltip — a domain that is not serving the
+work yet must not be a click target. A project with only a `testUrl` links to
+that instead.
+
 ### Category options
 
 | Category | Description |
@@ -179,32 +207,36 @@ curated TV copy still render.
 
 | Status | Badge color | Description |
 |---|---|---|
-| `in-progress` | Yellow | Currently being developed |
+| `live` | Green | Launched and still evolving (the portfolio itself) |
 | `completed` | Green | Finished and deployed |
+| `in-progress` | Yellow | Being built; its live address is not a link yet |
 | `planned` | Purple | Future project |
 
-### Image requirements
+### Media requirements
+
+All project media lives under `public/portfolio/<slug>/`. After adding or
+replacing any image, run `npm run media:dimensions`: it reads the intrinsic
+size of every image `portfolio.json` points at into
+`src/generated/media-dimensions.ts`, which the renderer uses for
+`width`/`height` attributes so nothing shifts while a file loads.
 
 #### Hero image
 
-- Size: 1200×630px recommended (16:9 or 12:7 aspect ratio)
-- Format: PNG or JPG
-- Location: `/public/projects/`
-- Naming: `{slug}-hero.png`
+- Location: `/public/portfolio/<slug>/`
+- Format: WebP, PNG or GIF; a `{theme}` token in the path selects a light/dark pair
+- Landscape; the detail layout is built for roughly 16:10
 
-#### Title card (CRT preview)
+#### Title card (TV)
 
-- Size: 1426×1093 (full chassis canvas, transparent surroundings)
-- Format: WebP
 - Location: `/public/images/tv/title-cards/`
-- Naming: `<name>.webp` (composed) and `<name>_bg.webp` (bg-only, underscore). The `<name>` comes from the JSON `composed`/`bg` fields and doesn't always equal the slug (e.g. slug `nobhad-codes` → `no-bhad-codes`)
+- Desktop: `<name>.webp` (composed, text baked in) and `<name>_bg.webp` (background only), 2850×2186, full chassis canvas
+- Mobile: the same two files with a `-mobile` suffix, 1200×1229 (exported from the 2481×2541 mobile artboard and downsized — the mobile TV renders at ~380px wide, so the full export was 96 KB where 42 KB does the same job)
+- The `<name>` comes from the JSON `composed`/`bg` fields and doesn't always equal the slug (slug `nobhad-codes` → `no-bhad-codes`)
 
-#### Screenshots
+#### Videos and screenshots
 
-- Size: Varies, maintain consistent aspect ratio
-- Format: PNG or JPG
-- Location: `/public/projects/`
-- Naming: `{slug}-screen1.png`, `{slug}-screen2.png`, etc.
+- Location: `/public/portfolio/<slug>/videos/`, `/public/portfolio/<slug>/`
+- Videos: WebM; screenshots: PNG or WebP
 
 ### Visibility rules
 

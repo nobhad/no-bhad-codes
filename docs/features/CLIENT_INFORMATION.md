@@ -297,7 +297,7 @@ CREATE TABLE document_template_categories (
 | `src/react/features/portal/questionnaires/` | Client questionnaire UI |
 | `src/styles/portal/admin/questionnaires.css` | Admin questionnaire styles |
 
-> Client-side onboarding and questionnaire UI is styled with Tailwind inside the React components; the former `onboarding.css` / client `questionnaires.css` stylesheets no longer exist.
+> Client-side onboarding and questionnaire UI is styled by the portal stylesheets under `src/styles/portal/`; the former `onboarding.css` / client `questionnaires.css` stylesheets no longer exist.
 
 ---
 

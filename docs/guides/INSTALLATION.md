@@ -33,32 +33,19 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env` with your configuration. Required variables:
+Edit `.env`. These have no default and the server refuses to start without them:
 
 ```bash
-# Application
-NODE_ENV=development
-PORT=4001
-FRONTEND_URL=http://localhost:4000
-
-# Security — use a random string of at least 32 characters
-JWT_SECRET="your-development-jwt-secret-min-32-chars"
-JWT_EXPIRES_IN="7d"
-
-# Database
-DATABASE_PATH=./data/client_portal.db
-
-# Admin accounts
+JWT_SECRET="a-random-string-of-at-least-32-characters"
 ADMIN_EMAIL="your-admin@email.com"
-SUPPORT_EMAIL="your-support@email.com"
-
-# Email (optional for development)
-EMAIL_ENABLED=false
-
-# Feature flags
-ENABLE_FILE_UPLOAD=true
-MAINTENANCE_MODE=false
+ADMIN_PASSWORD="at-least-8-characters"
+BUSINESS_NAME="Your Business"
+BUSINESS_EMAIL="hello@yourbusiness.com"
 ```
+
+Everything else has a working default for development (`PORT=4001`,
+`FRONTEND_URL=http://localhost:4000`, `DATABASE_PATH=./data/client_portal.db`,
+`EMAIL_ENABLED=false`). The full list is in [CONFIGURATION.md](../CONFIGURATION.md).
 
 ### 4. Set up the database
 
@@ -85,7 +72,7 @@ Once the server is running:
 
 - Main site: `http://localhost:4000`
 - Admin portal: `http://localhost:4000/admin/`
-- Client portal: `http://localhost:4000/client/portal`
+- Client portal: `http://localhost:4000/portal`
 - API health: `http://localhost:4001/api/health`
 
 ## Troubleshooting

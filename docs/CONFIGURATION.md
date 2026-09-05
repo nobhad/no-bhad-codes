@@ -14,73 +14,163 @@ This document provides comprehensive documentation for all configuration files a
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` (or create `.env` from the variables below if no template exists) and configure the following variables:
+Copy `.env.example` to `.env`. The server validates its configuration on boot in
+`server/config/environment.ts` and logs what is missing or malformed. Everything in the
+tables below was checked against the code on 2026-09-05: the "Read by" column is where
+the value is consumed. Variables that appear in no code path are not listed.
 
-### Server Configuration
+### Required (no default)
 
-|Variable|Required|Default|Description|
-|----------|----------|---------|-------------|
-|`NODE_ENV`|Yes|`development`|Environment mode (`development`, `staging`, `production`, `test`)|
-|`PORT`|Yes|`4001`|Backend API server port|
-|`FRONTEND_URL`|Yes|`http://<frontend-host>:4000`|Frontend Vite dev server URL|
+|Variable|Rule|Read by|
+|---|---|---|
+|`JWT_SECRET`|32+ characters|`environment.ts`, auth middleware|
+|`ADMIN_EMAIL`|valid email|`environment.ts`, auth routes, notifications|
+|`ADMIN_PASSWORD`|8+ characters; development. In production set `ADMIN_PASSWORD_HASH` (bcrypt) instead|`environment.ts`, admin login|
+|`BUSINESS_NAME`|—|`server/config/business.ts` (invoices, PDFs, email)|
+|`BUSINESS_EMAIL`|valid email|`server/config/business.ts`|
 
-#### Environments:
+### Server
 
-- `development` — Local dev, verbose logging, relaxed security
-- `staging` — Pre-production testing; use production-like config with test data
-- `production` — Live environment; ensure `ADMIN_PASSWORD_HASH`, strong `JWT_SECRET`, `EMAIL_ENABLED=true`
-- `test` — Vitest/Playwright; typically uses in-memory or test DB
+|Variable|Default|Read by|
+|---|---|---|
+|`NODE_ENV`|`development`|everywhere (`development`, `production`, `test`)|
+|`PORT`|`4001`|`app.ts` (Railway injects its own)|
+|`FRONTEND_URL`|`http://localhost:4000`|CORS, links in email|
+|`API_BASE_URL`|`http://localhost:4001`|`environment.ts`|
+|`WEBSITE_URL` / `BASE_URL`|falls back to `FRONTEND_URL`|`getBaseUrl()` — public site URL used in email links|
+|`ADMIN_URL`|`<base>/admin`|`getAdminUrl()`|
+|`CLIENT_PORTAL_URL`|`<base>/client/portal`|`getPortalUrl()`|
+|`PRODUCTION_API_URL`|`https://api.<BUSINESS_WEBSITE>`|Swagger server list|
+|`TRUST_PROXY`|`false`|`app.ts` (set `true` behind Railway/Vercel)|
+|`PORTAL_MODE`|`solo`|portal feature gating|
+|`PUBLIC_ASSET_ORIGIN`|—|server-rendered shells: where hashed assets are served from|
 
-### Database Configuration
+### Database
 
-|Variable|Required|Default|Description|
-|----------|----------|---------|-------------|
-|`DATABASE_PATH`|No|`./data/client_portal.db`|SQLite database file path|
+|Variable|Default|Read by|
+|---|---|---|
+|`DATABASE_PATH`|`./data/client_portal.db`|`server/database/init.ts`|
+|`DB_MAX_CONNECTIONS`|`5`|connection pool size|
+|`DB_BUSY_TIMEOUT_MS`|`5000`|`PRAGMA busy_timeout` on every pooled connection|
+|`SLOW_QUERY_THRESHOLD_MS`|`100`|slow-query logging|
+|`ACCEPT_SCHEMA_DRIFT`|`false`|boot: accept a schema that differs from the migrations (see the runbook)|
 
 ### Authentication
 
-|Variable|Required|Default|Description|
-|----------|----------|---------|-------------|
-|`JWT_SECRET`|Yes|-|Secret key for JWT signing (min 32 characters)|
-|`JWT_EXPIRES_IN`|No|`7d`|JWT token expiration time|
-|`ADMIN_EMAIL`|Yes|-|Admin account email address|
-|`ADMIN_PASSWORD`|Yes|-|Admin account password (development only)|
-|`ADMIN_PASSWORD_HASH`|No|-|Bcrypt hashed password (production)|
+|Variable|Default|Read by|
+|---|---|---|
+|`JWT_EXPIRES_IN`|`7d`|token issue|
+|`BCRYPT_ROUNDS`|`10` (8–15)|password hashing|
+|`ADMIN_PASSWORD_HASH`|—|admin login (preferred over `ADMIN_PASSWORD` in production)|
+|`RATE_LIMIT_LOGIN_MAX`|`5`|login limiter|
+|`RATE_LIMIT_CONTACT_MAX`|`3`|contact-form limiter|
+|`API_RATE_WINDOW_MS` / `API_RATE_MAX_REQUESTS`|`900000` / `100`|general API limiter (`server/middleware/rate-limiter.ts`)|
+|`ANALYTICS_ADMIN_RATE_WINDOW_MS` / `ANALYTICS_ADMIN_MAX_REQUESTS`|`60000` / `30`|admin analytics limiter|
 
-### Business Information (Invoices)
+### Business information (invoices, PDFs, email)
 
-|Variable|Required|Default|Description|
-|----------|----------|---------|-------------|
-|`BUSINESS_NAME`|No|-|Business name displayed on invoices|
-|`BUSINESS_CONTACT`|No|-|Business contact name displayed on invoices|
-|`BUSINESS_EMAIL`|No|-|Business email displayed on invoices|
-|`BUSINESS_WEBSITE`|No|-|Business website URL displayed on invoices|
-|`VENMO_HANDLE`|No|-|Venmo payment handle displayed on invoices|
-|`PAYPAL_EMAIL`|No|-|PayPal payment email displayed on invoices|
+|Variable|Default|Notes|
+|---|---|---|
+|`BUSINESS_OWNER`|falls back to `BUSINESS_CONTACT`|owner name|
+|`BUSINESS_CONTACT`|—|contact name|
+|`BUSINESS_TAGLINE`|—||
+|`BUSINESS_WEBSITE`|—||
+|`SUPPORT_EMAIL`|`BUSINESS_EMAIL`|support address in templates|
+|`VENMO_HANDLE`, `ZELLE_EMAIL`, `PAYPAL_EMAIL`|—|payment methods printed on invoices|
+|`CONTRACT_TERMS`|built-in list|newline-separated override of contract terms|
+|`BRAND_COLOR`, `DARK_BG_COLOR`, `META_THEME_COLOR`|`#00ff41`, `#1a1a1a`, `#e0e0e0`|server-rendered shells|
+|`EMAIL_HEADER_BG`, `EMAIL_HEADER_TEXT`, `EMAIL_BRAND_ACCENT`, `EMAIL_BUTTON_COLOR`, `EMAIL_BUTTON_SECONDARY`|`#171717`, `#ffffff`, `#333333`, `#333333`, `#ffffff`|`server/config/email-styles.ts`|
 
-### Client Portal URLs
+### Email
 
-|Variable|Required|Default|Description|
-|----------|----------|---------|-------------|
-|`CLIENT_PORTAL_URL`|No|`http://<frontend-host>:4000/client/portal`|Client portal URL|
-|`WEBSITE_URL`|No|`http://<frontend-host>:4000`|Main website URL|
+|Variable|Default|Notes|
+|---|---|---|
+|`EMAIL_ENABLED`|`false`|when `true`, `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` and `FROM_EMAIL` are required|
+|`SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`|—, `587`, `false`, —, —||
+|`FROM_EMAIL`|`BUSINESS_EMAIL`|`SMTP_FROM` is accepted as a legacy alias|
+|`SMTP_REPLY_TO`|—||
+|`ADMIN_NOTIFICATION_EMAIL`|`ADMIN_EMAIL`|contact-form and system notifications|
 
-### Email Configuration
+### Files
 
-|Variable|Required|Default|Description|
-|----------|----------|---------|-------------|
-|`EMAIL_ENABLED`|No|`false`|Enable/disable email sending|
-|`SMTP_HOST`|No|`smtp.gmail.com`|SMTP server hostname|
-|`SMTP_PORT`|No|`587`|SMTP server port|
-|`SMTP_SECURE`|No|`false`|Use TLS for SMTP|
-|`SMTP_USER`|No|-|SMTP authentication username|
-|`SMTP_PASS`|No|-|SMTP authentication password/app password|
-|`SMTP_FROM`|No|-|Default "From" email address (used by app when sending email)|
-|`SMTP_REPLY_TO`|No|-|Reply-to email address|
-|`SUPPORT_EMAIL`|No|-|Support email recipient|
-|`FROM_EMAIL`|No|-|Used by server config validation when `EMAIL_ENABLED=true`; set this or ensure SMTP_FROM is set for sending|
+|Variable|Default|Notes|
+|---|---|---|
+|`UPLOAD_DIR`|`./uploads`|`environment.ts`|
+|`UPLOADS_DIR`|derived|`server/config/uploads.ts` override; on Railway this is under `/app/data`|
 
-### Frontend Configuration (Vite)
+### Redis (optional cache)
+
+|Variable|Default|
+|---|---|
+|`REDIS_ENABLED`|`false` — nothing else here is read until this is `true`|
+|`REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, `REDIS_DB`, `REDIS_KEY_PREFIX`|`localhost`, `6379`, —, `0`, `nbc:`|
+
+### Scheduler (in-process timers)
+
+|Variable|Default|
+|---|---|
+|`SCHEDULER_ENABLED`|`true`|
+|`SCHEDULER_REMINDERS`, `SCHEDULER_SCHEDULED`, `SCHEDULER_RECURRING`|`true` — reminders, scheduled invoices, recurring invoices|
+
+### Payments and integrations
+
+|Variable|Read by|
+|---|---|
+|`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`|`server/routes/payments/`, `server/routes/webhooks.ts`|
+|`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`|Google Calendar integration|
+|`ANTHROPIC_API_KEY`, `AI_ENABLED` (`true`), `AI_MODEL`, `AI_DAILY_REQUEST_LIMIT`, `AI_MONTHLY_BUDGET_CENTS`|`server/services/ai-service.ts`|
+
+### Backups
+
+|Variable|Default|Read by|
+|---|---|---|
+|`BACKUP_DIR`|`./data/backups`|`server/services/backup-service.ts`|
+|`BACKUP_RETENTION_DAILY`, `BACKUP_RETENTION_WEEKLY`|`7`, `4`|`scripts/backup-database.ts`|
+|`GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_SERVICE_ACCOUNT_KEY`, `GOOGLE_DRIVE_FOLDER_ID`|—|`server/services/drive-backup-service.ts` (all three required for offsite backups)|
+|`DRIVE_RETENTION_COUNT`|`30`|offsite copies kept|
+
+### Observability
+
+|Variable|Default|Read by|
+|---|---|---|
+|`SENTRY_DSN`|—|`server/instrument.ts`; active in production, or anywhere with `SENTRY_ENABLE_LOCAL=true`|
+|`OTEL_ENABLED`|`true`|`server/observability/`|
+|`OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_DEBUG`|`client`, —, `false`||
+|`METRICS_EXPORTER`, `PROMETHEUS_HOST`, `PROMETHEUS_PORT`, `PROMETHEUS_ENDPOINT`|—, `0.0.0.0`, `9464`, `/metrics`||
+|`LOG_LEVEL`, `LOG_FORMAT`, `LOG_FILE`, `LOG_ERROR_FILE`, `LOG_MAX_SIZE`, `LOG_MAX_FILES`|`info`, `text`, `./logs/app.log`, `./logs/error.log`, `10m`, `14d`|`server/services/logger.ts`|
+|`PDF_CACHE_TTL_MS`, `PDF_CACHE_MAX_ENTRIES`|`300000`, `100`|PDF render cache|
+
+### Frontend (Vite, build-time)
+
+|Variable|Read by|
+|---|---|
+|`VITE_API_URL`|`src/config/api.ts` (API origin when not same-host)|
+|`VITE_CONTACT_EMAIL`, `VITE_ADMIN_EMAIL`|displayed addresses|
+|`VITE_FORMSPREE_FORM_ID`, `VITE_FORMSPREE_BASE_URL`, `VITE_EMAILJS_SERVICE_ID`, `VITE_EMAILJS_TEMPLATE_ID`, `VITE_EMAILJS_BASE_URL`|alternative contact-form backends (the default posts to the API)|
+|`VITE_STRIPE_PUBLISHABLE_KEY`|embedded payments|
+
+### Scripts only
+
+`PORTAL_EMAIL`, `PORTAL_PASSWORD`, `CAPTURE_ORIGIN`, `CAPTURE_WORK`, `PUPPETEER_EXECUTABLE_PATH`
+(`scripts/capture-portfolio.ts`); `SAMPLE_PDF_OUT`; `TEST_USER_EMAIL`, `TEST_USER_PASSWORD`,
+`DEMO_USER_EMAIL`, `DEMO_USER_PASSWORD` (test seeding); `VERBOSE`.
+
+### Declared but not yet wired
+
+`environment.ts` validates these and nothing reads the result, so setting them changes
+nothing today: `DATABASE_BACKUP_PATH`, `DATABASE_ENABLE_WAL`, `DATABASE_BUSY_TIMEOUT`
+(the pool uses `DB_BUSY_TIMEOUT_MS`), `REFRESH_TOKEN_SECRET`, `REFRESH_TOKEN_EXPIRES_IN`,
+`SESSION_SECRET`, `MAX_FILE_SIZE`, `ALLOWED_FILE_TYPES`, `TEMP_DIR`,
+`RATE_LIMIT_WINDOW_MS`, `RATE_LIMIT_MAX_REQUESTS`, `ENABLE_REGISTRATION`,
+`ENABLE_PASSWORD_RESET`, `ENABLE_EMAIL_VERIFICATION`, `ENABLE_2FA`, `ENABLE_API_DOCS`,
+`MAINTENANCE_MODE`, `CORS_ORIGIN`, `CORS_CREDENTIALS`, `CORS_METHODS`, `CORS_HEADERS`,
+`DEV_AUTO_LOGIN`, `DEV_MOCK_DATA`, `DEV_VERBOSE_LOGGING`, `DEV_HOT_RELOAD`, `FORCE_SSL`,
+`HELMET_ENABLED`, `CLUSTER_WORKERS`. They are kept in `.env.example` under the same
+heading so nobody mistakes them for live switches.
+
+---
+
+## Frontend Configuration (Vite)
 
 |Variable|Required|Default|Description|
 |----------|----------|---------|-------------|
